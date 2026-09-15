@@ -51,18 +51,18 @@
                     @endphp
                     <div class="space-y-1">
                         <button type="button" onclick="toggleDropdown('produk')"
-                                class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-semibold text-sm transition-all
+                                class="w-full flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-xl font-semibold text-sm transition-all
                                        {{ $produkActive
-                                           ? 'bg-white/10 text-white font-bold border-l-4 border-gold-400 pl-2.5'
+                                           ? 'bg-gold-500 text-white shadow-lg shadow-gold-500/30'
                                            : 'hover:bg-white/10 text-slate-400 hover:text-white' }}">
-                            <div class="flex items-center gap-3">
-                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            <div class="flex items-center gap-3 min-w-0">
+                                <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M21 8l-9-5-9 5v8l9 5 9-5V8zM3 8l9 5 9-5M12 13v8"/>
                                 </svg>
-                                <span>Manajemen Produk</span>
+                                <span class="truncate">Manajemen Produk</span>
                             </div>
-                            <svg id="chevron-produk" class="w-4 h-4 text-slate-400 transition-transform duration-200"
+                            <svg id="chevron-produk" class="w-4 h-4 shrink-0 transition-transform duration-200 {{ $produkActive ? 'text-white' : 'text-slate-400' }}"
                                  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                  stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M6 9l6 6 6-6"/>

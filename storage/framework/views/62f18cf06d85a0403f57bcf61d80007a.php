@@ -28,7 +28,7 @@ unset($__errorArgs, $__bag); ?>
                     <label class="block text-sm font-medium text-navy-700 mb-1">Kategori</label>
                     <select name="kategori" required
                             class="w-full rounded-lg border border-navy-100 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gold-500">
-                        <?php $__currentLoopData = ['SmartPhone', 'Laptop', 'Tablet', 'SmartWatch']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $kategori): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <?php $__currentLoopData = $kategoriList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $kategori): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <option value="<?php echo e($kategori); ?>" <?php if(old('kategori') == $kategori): echo 'selected'; endif; ?>><?php echo e($kategori); ?></option>
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </select>
