@@ -44,6 +44,12 @@
                               {{ $routeName === 'landing'
                                   ? 'bg-gold-500 text-white shadow-lg shadow-gold-500/30'
                                   : 'hover:bg-white/10 text-slate-400 hover:text-white' }}">
+                        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                             stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 12l9-9 9 9M5 10v10h5v-6h4v6h5V10"/>
+                        </svg>
+                        <span class="truncate">Dashboard</span>
+                    </a>
 
                     {{-- Dropdown: Manajemen Produk --}}
                     @php
