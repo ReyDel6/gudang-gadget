@@ -4,36 +4,14 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use App\Models\User;
 
 class LoginController extends Controller
 {
-    public function showRegister()
-    {
-        return view('auth.register');
-    }
-
-    public function register(Request $request)
-    {
-        $data = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:8|confirmed',
-        ]);
-
-        $user = User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => Hash::make($data['password']),
-        ]);
-
-        Auth::login($user);
-        $request->session()->regenerate();
-
-        return redirect()->route('landing')->with('success', 'Akun berhasil dibuat, selamat datang!');
-    }
-
     public function showLogin()
     {
         return view('auth.login');
@@ -56,6 +34,70 @@ class LoginController extends Controller
         return back()
             ->withErrors(['email' => 'Email atau password salah.'])
             ->onlyInput('email');
+    }
+
+    public function showForgot()
+    {
+        return view('auth.forgot-password');
+    }
+
+    public function sendReset(Request $request)
+    {
+        $request->validate(['email' => 'required|email|exists:users,email']);
+
+        $user = User::where('email', $request->email)->firstOrFail();
+        $token = Str::random(64);
+
+        DB::table('password_reset_tokens')->updateOrInsert(
+            ['email' => $user->email],
+            ['token' => Hash::make($token), 'created_at' => now()],
+        );
+
+        $link = route('password.reset', ['token' => $token, 'email' => $user->email]);
+
+        Mail::raw(
+            "Halo {$user->name},\n\n" .
+            "Anda menerima email ini karena kami menerima permintaan reset sandi untuk akun Gudang Gadget.\n\n" .
+            "Klik tautan berikut untuk membuat sandi baru:\n{$link}\n\n" .
+            "Tautan berlaku selama 60 menit. Jika Anda tidak meminta reset sandi, abaikan email ini.",
+            fn ($m) => $m->to($user->email)->subject('Reset Sandi Akun Gudang Gadget')
+        );
+
+        return back()->with('success', 'Tautan reset sandi telah dikirim ke email Anda (bila email terdaftar).');
+    }
+
+    public function showReset(Request $request)
+    {
+        return view('auth.reset-password', [
+            'token' => $request->token,
+            'email' => $request->email,
+        ]);
+    }
+
+    public function storeReset(Request $request)
+    {
+        $data = $request->validate([
+            'email' => 'required|email',
+            'token' => 'required',
+            'password' => 'required|min:8|confirmed',
+        ]);
+
+        $record = DB::table('password_reset_tokens')->where('email', $data['email'])->first();
+
+        if (! $record || ! Hash::check($data['token'], $record->token) || \Carbon\Carbon::parse($record->created_at)->lt(now()->subMinutes(60))) {
+            return back()->withErrors(['email' => 'Tautan reset tidak valid atau sudah kedaluwarsa.']);
+        }
+
+        $user = User::where('email', $data['email'])->firstOrFail();
+        $user->password = $data['password'];
+        $user->save();
+
+        DB::table('password_reset_tokens')->where('email', $data['email'])->delete();
+
+        Auth::login($user);
+        $request->session()->regenerate();
+
+        return redirect()->route('landing')->with('success', 'Sandi berhasil diubah. Selamat datang kembali!');
     }
 
     public function logout(Request $request)

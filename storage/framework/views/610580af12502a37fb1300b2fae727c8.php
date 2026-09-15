@@ -137,11 +137,14 @@ endif;
 unset($__errorArgs, $__bag); ?>
                             </div>
 
-                            <label class="flex items-center gap-2 text-sm text-navy-600">
-                                <input type="checkbox" name="remember"
-                                       class="h-4 w-4 rounded border-navy-200 text-gold-500 focus:ring-gold-500">
-                                Ingat saya
-                            </label>
+                            <div class="flex items-center justify-between">
+                                <label class="flex items-center gap-2 text-sm text-navy-600">
+                                    <input type="checkbox" name="remember"
+                                           class="h-4 w-4 rounded border-navy-200 text-gold-500 focus:ring-gold-500">
+                                    Ingat saya
+                                </label>
+                                <a href="<?php echo e(route('password.request')); ?>" class="text-sm font-semibold text-gold-600 hover:text-gold-500">Lupa sandi?</a>
+                            </div>
 
                             <button type="submit"
                                     class="w-full bg-navy-700 hover:bg-navy-800 text-white font-semibold px-6 py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2">
@@ -153,11 +156,6 @@ unset($__errorArgs, $__bag); ?>
                             </button>
                         </div>
                     </form>
-
-                    <p class="text-sm text-navy-500 text-center mt-6">
-                        Belum punya akun?
-                        <a href="<?php echo e(route('register')); ?>" class="font-semibold text-gold-600 hover:text-gold-500">Daftar</a>
-                    </p>
                 </div>
             </div>
         </div>

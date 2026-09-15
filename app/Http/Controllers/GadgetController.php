@@ -4,10 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Gadget;
 use App\Models\GadgetFoto;
+use App\Models\StokLog;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Validator;
-
+use Illuminate\Support\Facades\DB;
 
 class GadgetController extends Controller
 {
@@ -16,11 +17,13 @@ class GadgetController extends Controller
         $totalProduk = Gadget::count();
         $totalStock = (int) Gadget::sum('stock');
         $stokRendah = Gadget::where('status', 'Habis')->count();
-        $kategori = Gadget::select('kategori')->distinct()->count();
-        $recent = Gadget::latest()->take(5)->get();
-        $perKategori = Gadget::select('kategori', \Illuminate\Support\Facades\DB::raw('COUNT(*) as jumlah'), \Illuminate\Support\Facades\DB::raw('SUM(stock) as stok'))
+        $kategori = Gadget::distinct()->count('kategori');
+        $recent = Gadget::latest('id')->take(5)->get();
+        $perKategori = Gadget::select('kategori', DB::raw('COUNT(*) as jumlah'), DB::raw('SUM(stock) as stok'))
             ->groupBy('kategori')
             ->get();
+
+        $recentLogs = StokLog::with('gadget', 'user')->latest('id')->take(8)->get();
 
         $chartData = [
             'categories' => $perKategori->map(fn ($c) => [
@@ -31,13 +34,13 @@ class GadgetController extends Controller
         ];
 
         return view('landing', compact(
-            'totalProduk', 'totalStock', 'stokRendah', 'kategori', 'recent', 'chartData'
+            'totalProduk', 'totalStock', 'stokRendah', 'kategori', 'recent', 'chartData', 'recentLogs'
         ));
     }
 
     public function create()
     {
-        return view('gadget.create');
+        return view('gadget.create', ['kategoriList' => $this->kategoriOptions()]);
     }
 
     public function store(Request $request)
@@ -46,8 +49,9 @@ class GadgetController extends Controller
             'nama_produk' => 'required',
             'kategori' => 'required',
             'deskripsi' => 'required',
-            'stock' => 'required',
+            'stock' => 'required|integer|min:0',
             'status' => 'required',
+            'tanggal_pembelian' => 'nullable|date',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
@@ -57,7 +61,18 @@ class GadgetController extends Controller
             'deskripsi',
             'stock',
             'status',
+            'tanggal_pembelian',
         ]));
+
+        // Catat stok awal
+        StokLog::create([
+            'gadget_id' => $gadget->id,
+            'perubahan' => (int) $gadget->stock,
+            'stok_sebelum' => 0,
+            'stok_sesudah' => (int) $gadget->stock,
+            'keterangan' => 'Stok awal',
+            'user_id' => Auth::id(),
+        ]);
 
         // Handle foto
         if ($request->hasFile('foto')) {
@@ -76,8 +91,8 @@ class GadgetController extends Controller
 
     public function index()
     {
-        $data = Gadget::latest()->get();
-        $kategoriList = Gadget::query()->distinct()->pluck('kategori')->sort()->values();
+        $data = Gadget::latest('id')->get();
+        $kategoriList = $this->kategoriOptions();
 
         return view('gadget.index', compact('data', 'kategoriList'));
     }
@@ -85,7 +100,7 @@ class GadgetController extends Controller
     public function edit($id)
     {
         $gadget = Gadget::where('id', $id)->first();
-        return view('gadget.edit', compact('gadget'));
+        return view('gadget.edit', compact('gadget'), ['kategoriList' => $this->kategoriOptions()]);
     }
 
     public function update(Request $request, $id)
@@ -94,19 +109,34 @@ class GadgetController extends Controller
             'nama_produk' => 'required',
             'kategori' => 'required',
             'deskripsi' => 'required',
-            'stock' => 'required',
+            'stock' => 'required|integer|min:0',
             'status' => 'required',
+            'tanggal_pembelian' => 'nullable|date',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
         $gadget = Gadget::where('id', $id)->first();
+        $stokLama = (int) $gadget->stock;
         $gadget->update($request->only([
             'nama_produk',
             'kategori',
             'deskripsi',
             'stock',
             'status',
+            'tanggal_pembelian',
         ]));
+
+        // Catat jika stok berubah lewat edit
+        if ((int) $gadget->stock !== $stokLama) {
+            StokLog::create([
+                'gadget_id' => $gadget->id,
+                'perubahan' => (int) $gadget->stock - $stokLama,
+                'stok_sebelum' => $stokLama,
+                'stok_sesudah' => (int) $gadget->stock,
+                'keterangan' => 'Perubahan data (edit)',
+                'user_id' => Auth::id(),
+            ]);
+        }
 
         // Handle foto
         if ($request->hasFile('foto')) {
@@ -132,15 +162,27 @@ class GadgetController extends Controller
     public function show($id)
     {
         $gadget = Gadget::where('id', $id)->firstOrFail();
+        $stokLogs = $gadget->stokLogs()->with('user')->latest('id')->limit(50)->get();
 
-        return view('gadget.show', compact('gadget'));
+        return view('gadget.show', compact('gadget', 'stokLogs'));
     }
 
     public function ubahStok(Request $request, $id, $arah)
     {
+        if (! in_array($arah, ['naik', 'turun'])) {
+            return back()->withErrors(['stok' => 'Aksi stok tidak valid.']);
+        }
+
         $gadget = Gadget::where('id', $id)->firstOrFail();
+        $stokSebelum = (int) $gadget->stock;
         $delta = $arah === 'naik' ? 1 : -1;
-        $gadget->stock = max(0, (int) $gadget->stock + $delta);
+        $stockBaru = max(0, $stokSebelum + $delta);
+
+        if ($stokSebelum === $stockBaru) {
+            return back()->with('success', "Stok \"{$gadget->nama_produk}\" sudah tidak bisa dikurangi (0).");
+        }
+
+        $gadget->stock = $stockBaru;
 
         if ($gadget->stock === 0 && $gadget->status === 'Tersedia') {
             $gadget->status = 'Habis';
@@ -149,6 +191,15 @@ class GadgetController extends Controller
         }
 
         $gadget->save();
+
+        StokLog::create([
+            'gadget_id' => $gadget->id,
+            'perubahan' => $delta,
+            'stok_sebelum' => $stokSebelum,
+            'stok_sesudah' => (int) $gadget->stock,
+            'keterangan' => $arah === 'naik' ? 'Stok naik' : 'Stok turun',
+            'user_id' => Auth::id(),
+        ]);
 
         return back()->with('success', "Stok \"{$gadget->nama_produk}\" diubah menjadi {$gadget->stock}.");
     }
@@ -166,5 +217,47 @@ class GadgetController extends Controller
 
         return redirect()->route('gadget.index')
             ->with('success', 'Data sudah dihapus');
+    }
+
+    public function export()
+    {
+        $data = Gadget::query()->orderBy('id')->get();
+        $filename = 'daftar-produk-' . date('Y-m-d-His') . '.csv';
+
+        $rows = [[
+            'ID', 'Nama Produk', 'Kategori', 'Stok', 'Status', 'Tanggal Pembelian',
+        ]];
+
+        foreach ($data as $g) {
+            $rows[] = [
+                $g->id,
+                $g->nama_produk,
+                $g->kategori,
+                $g->stock,
+                $g->status,
+                $g->tanggal_pembelian,
+            ];
+        }
+
+        $out = fopen('php://temp', 'w');
+        foreach ($rows as $row) {
+            fputcsv($out, $row);
+        }
+        rewind($out);
+        $csv = stream_get_contents($out);
+        fclose($out);
+
+        return response("\xEF\xBB\xBF" . $csv, 200, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
+    }
+
+    protected function kategoriOptions()
+    {
+        $defaults = ['SmartPhone', 'Laptop', 'Tablet', 'SmartWatch'];
+        $existing = Gadget::query()->distinct()->pluck('kategori')->map(fn ($k) => trim((string) $k))->filter()->all();
+
+        return collect($defaults)->concat($existing)->unique()->sort()->values()->all();
     }
 }

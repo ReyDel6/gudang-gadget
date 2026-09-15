@@ -9,6 +9,10 @@
                 class="border border-navy-100 bg-white hover:bg-navy-50 text-navy-700 text-sm font-semibold px-4 py-2 rounded-lg transition-colors">
                 Generate Report
             </button>
+            <a href="<?php echo e(route('gadget.export')); ?>?t=<?php echo e(time()); ?>"
+                class="border border-navy-100 bg-white hover:bg-navy-50 text-navy-700 text-sm font-semibold px-4 py-2 rounded-lg transition-colors">
+                Export CSV
+            </a>
             <a href="<?php echo e(route('gadget.create')); ?>"
                 class="bg-gold-500 hover:bg-gold-600 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors">
                 + Tambah Produk

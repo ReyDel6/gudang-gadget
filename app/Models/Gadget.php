@@ -25,6 +25,11 @@ class Gadget extends Model
         return $this->hasOne(GadgetFoto::class, 'id', 'id');
     }
 
+    public function stokLogs()
+    {
+        return $this->hasMany(StokLog::class, 'gadget_id', 'id');
+    }
+
     public function getFotoUrlAttribute() {
         $foto = $this->thumbnail;
         if ($foto && $foto->url && file_exists(public_path('storage/' . $foto->url))) {

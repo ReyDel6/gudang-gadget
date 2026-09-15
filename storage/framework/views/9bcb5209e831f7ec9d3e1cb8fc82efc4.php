@@ -93,6 +93,47 @@
         </div>
     </section>
 
+    
+    <section class="mt-8 print-hidden">
+        <h2 class="text-lg font-bold text-navy-800 mb-4">Aktivitas Stok Terbaru</h2>
+        <div class="bg-white rounded-2xl border border-navy-100 overflow-hidden">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="bg-navy-50 text-navy-500 text-left">
+                        <th class="px-4 py-3 font-medium">Waktu</th>
+                        <th class="px-4 py-3 font-medium">Produk</th>
+                        <th class="px-4 py-3 font-medium">Perubahan</th>
+                        <th class="px-4 py-3 font-medium">Stok Akhir</th>
+                        <th class="px-4 py-3 font-medium">Oleh</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-navy-100">
+                    <?php $__empty_1 = true; $__currentLoopData = $recentLogs; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $log): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                        <tr>
+                            <td class="px-4 py-3 text-navy-500 whitespace-nowrap"><?php echo e($log->created_at->format('d M Y H:i')); ?></td>
+                            <td class="px-4 py-3 font-semibold text-navy-800"><?php echo e($log->gadget?->nama_produk); ?></td>
+                            <td class="px-4 py-3">
+                                <?php if($log->perubahan > 0): ?>
+                                    <span class="rounded-full bg-emerald-50 px-2.5 py-0.5 text-emerald-600 text-xs font-bold">+<?php echo e($log->perubahan); ?></span>
+                                <?php elseif($log->perubahan < 0): ?>
+                                    <span class="rounded-full bg-rose-50 px-2.5 py-0.5 text-rose-600 text-xs font-bold"><?php echo e($log->perubahan); ?></span>
+                                <?php else: ?>
+                                    <span class="text-navy-400 text-xs">0</span>
+                                <?php endif; ?>
+                            </td>
+                            <td class="px-4 py-3 font-mono text-navy-700"><?php echo e($log->stok_sesudah); ?></td>
+                            <td class="px-4 py-3 text-navy-600"><?php echo e($log->user?->name ?? '—'); ?></td>
+                        </tr>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                        <tr>
+                            <td colspan="5" class="px-4 py-8 text-center text-navy-400">Belum ada aktivitas stok.</td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startPush('scripts'); ?>

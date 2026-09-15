@@ -94,6 +94,47 @@
         </div>
     </section>
 
+    {{-- Aktivitas stok terbaru --}}
+    <section class="mt-8 print-hidden">
+        <h2 class="text-lg font-bold text-navy-800 mb-4">Aktivitas Stok Terbaru</h2>
+        <div class="bg-white rounded-2xl border border-navy-100 overflow-hidden">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="bg-navy-50 text-navy-500 text-left">
+                        <th class="px-4 py-3 font-medium">Waktu</th>
+                        <th class="px-4 py-3 font-medium">Produk</th>
+                        <th class="px-4 py-3 font-medium">Perubahan</th>
+                        <th class="px-4 py-3 font-medium">Stok Akhir</th>
+                        <th class="px-4 py-3 font-medium">Oleh</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-navy-100">
+                    @forelse ($recentLogs as $log)
+                        <tr>
+                            <td class="px-4 py-3 text-navy-500 whitespace-nowrap">{{ $log->created_at->format('d M Y H:i') }}</td>
+                            <td class="px-4 py-3 font-semibold text-navy-800">{{ $log->gadget?->nama_produk }}</td>
+                            <td class="px-4 py-3">
+                                @if ($log->perubahan > 0)
+                                    <span class="rounded-full bg-emerald-50 px-2.5 py-0.5 text-emerald-600 text-xs font-bold">+{{ $log->perubahan }}</span>
+                                @elseif ($log->perubahan < 0)
+                                    <span class="rounded-full bg-rose-50 px-2.5 py-0.5 text-rose-600 text-xs font-bold">{{ $log->perubahan }}</span>
+                                @else
+                                    <span class="text-navy-400 text-xs">0</span>
+                                @endif
+                            </td>
+                            <td class="px-4 py-3 font-mono text-navy-700">{{ $log->stok_sesudah }}</td>
+                            <td class="px-4 py-3 text-navy-600">{{ $log->user?->name ?? '—' }}</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5" class="px-4 py-8 text-center text-navy-400">Belum ada aktivitas stok.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </section>
+
 @endsection
 
 @push('scripts')
