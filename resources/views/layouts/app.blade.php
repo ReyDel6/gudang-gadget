@@ -53,7 +53,10 @@
 
                     {{-- Dropdown: Manajemen Produk --}}
                     @php
-                        $produkActive = in_array($routeName, ['gadget.index', 'gadget.create']);
+                        $produkActive = in_array($routeName, [
+                            'gadget.index', 'gadget.create', 'gadget.import',
+                            'gadget.archive', 'gadget.show', 'gadget.edit', 'gadget.barcode',
+                        ]);
                     @endphp
                     <div class="space-y-1">
                         <button type="button" onclick="toggleDropdown('produk')"
@@ -78,7 +81,7 @@
                         <div id="submenu-produk" class="pl-6 space-y-1 pt-1 hidden">
                             <a href="{{ route('gadget.index') }}"
                                class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all
-                                      {{ $routeName === 'gadget.index'
+                                      {{ in_array($routeName, ['gadget.index', 'gadget.show', 'gadget.edit', 'gadget.barcode'])
                                           ? 'bg-gold-500 text-white shadow-md'
                                           : 'hover:bg-white/10 text-slate-400 hover:text-white' }}">
                                 <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -98,22 +101,77 @@
                                 </svg>
                                 Tambah Produk
                             </a>
+                            <a href="{{ route('gadget.import') }}"
+                               class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all
+                                      {{ $routeName === 'gadget.import'
+                                          ? 'bg-gold-500 text-white shadow-md'
+                                          : 'hover:bg-white/10 text-slate-400 hover:text-white' }}">
+                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 3h-5M21 3v5M21 3l-8 8M10 4H5a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h13a2 2 0 0 0 2-2v-5"/>
+                                </svg>
+                                Import CSV
+                            </a>
+                            @if (Auth::user()->isAdmin())
+                                <a href="{{ route('gadget.archive') }}"
+                                   class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all
+                                          {{ $routeName === 'gadget.archive'
+                                              ? 'bg-gold-500 text-white shadow-md'
+                                              : 'hover:bg-white/10 text-slate-400 hover:text-white' }}">
+                                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M20 7L4 7M10 11h4M6 21V7l2-4h8l2 4v14M6 21h12"/>
+                                    </svg>
+                                    Arsip Produk
+                                </a>
+                            @endif
                         </div>
                     </div>
-                {{-- Link: Manajemen Pengguna --}}
-                    <a href="{{ route('user.index') }}"
+
+                {{-- Link: Mutasi Stok --}}
+                    <a href="{{ route('mutasi.index') }}"
                        class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-semibold text-sm transition-all
-                              {{ str_starts_with($routeName, 'user.')
+                              {{ str_starts_with($routeName, 'mutasi.')
                                   ? 'bg-gold-500 text-white shadow-lg shadow-gold-500/30'
                                   : 'hover:bg-white/10 text-slate-400 hover:text-white' }}">
-                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                             stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-                            <circle cx="9" cy="7" r="4"/>
-                            <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+                        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+                            <circle cx="12" cy="12" r="2"/>
+                            <path d="M12 2v3m0 14v3M2 12h3m14 0h3"/>
                         </svg>
-                        Manajemen Pengguna
+                        <span class="truncate">Mutasi Stok</span>
                     </a>
+
+                {{-- Link: Laporan --}}
+                    <a href="{{ route('laporan.index') }}"
+                       class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-semibold text-sm transition-all
+                              {{ str_starts_with($routeName, 'laporan.')
+                                  ? 'bg-gold-500 text-white shadow-lg shadow-gold-500/30'
+                                  : 'hover:bg-white/10 text-slate-400 hover:text-white' }}">
+                        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 3H3v18h18V3zM7 17V9m5 8V5m5 12v-6"/>
+                        </svg>
+                        <span class="truncate">Laporan</span>
+                    </a>
+
+                {{-- Link: Manajemen Pengguna --}}
+                    @if (Auth::user()->isAdmin())
+                        <a href="{{ route('user.index') }}"
+                           class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-semibold text-sm transition-all
+                                  {{ str_starts_with($routeName, 'user.')
+                                      ? 'bg-gold-500 text-white shadow-lg shadow-gold-500/30'
+                                      : 'hover:bg-white/10 text-slate-400 hover:text-white' }}">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                 stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                                <circle cx="9" cy="7" r="4"/>
+                                <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+                            </svg>
+                            Manajemen Pengguna
+                        </a>
+                    @endif
                 </nav>
 
                 {{-- Footer --}}
@@ -187,6 +245,16 @@
                     @if (session('success'))
                         <div class="mb-6 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-800 text-sm">
                             {{ session('success') }}
+                        </div>
+                    @endif
+
+                    @if ($errors->any())
+                        <div class="mb-6 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-rose-700 text-sm">
+                            <ul class="list-disc pl-5 space-y-1">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
                         </div>
                     @endif
 

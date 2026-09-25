@@ -43,25 +43,29 @@ class LoginController extends Controller
 
     public function sendReset(Request $request)
     {
-        $request->validate(['email' => 'required|email|exists:users,email']);
+        $request->validate(['email' => 'required|email']);
 
-        $user = User::where('email', $request->email)->firstOrFail();
-        $token = Str::random(64);
+        $user = User::where('email', $request->email)->first();
 
-        DB::table('password_reset_tokens')->updateOrInsert(
-            ['email' => $user->email],
-            ['token' => Hash::make($token), 'created_at' => now()],
-        );
+        // Jangan membedakan email terdaftar vs tidak terdaftar (anti enumerasi akun).
+        if ($user) {
+            $token = Str::random(64);
 
-        $link = route('password.reset', ['token' => $token, 'email' => $user->email]);
+            DB::table('password_reset_tokens')->updateOrInsert(
+                ['email' => $user->email],
+                ['token' => Hash::make($token), 'created_at' => now()],
+            );
 
-        Mail::raw(
-            "Halo {$user->name},\n\n" .
-            "Anda menerima email ini karena kami menerima permintaan reset sandi untuk akun Gudang Gadget.\n\n" .
-            "Klik tautan berikut untuk membuat sandi baru:\n{$link}\n\n" .
-            "Tautan berlaku selama 60 menit. Jika Anda tidak meminta reset sandi, abaikan email ini.",
-            fn ($m) => $m->to($user->email)->subject('Reset Sandi Akun Gudang Gadget')
-        );
+            $link = route('password.reset', ['token' => $token, 'email' => $user->email]);
+
+            Mail::raw(
+                "Halo {$user->name},\n\n" .
+                "Anda menerima email ini karena kami menerima permintaan reset sandi untuk akun Gudang Gadget.\n\n" .
+                "Klik tautan berikut untuk membuat sandi baru:\n{$link}\n\n" .
+                "Tautan berlaku selama 60 menit. Jika Anda tidak meminta reset sandi, abaikan email ini.",
+                fn ($m) => $m->to($user->email)->subject('Reset Sandi Akun Gudang Gadget')
+            );
+        }
 
         return back()->with('success', 'Tautan reset sandi telah dikirim ke email Anda (bila email terdaftar).');
     }
