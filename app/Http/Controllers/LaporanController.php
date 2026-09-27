@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Gadget;
 use App\Models\Pembelian;
 use App\Models\Penjualan;
+use App\Models\PenjualanItem;
 use App\Models\StokLog;
 use App\Models\Supplier;
+use App\Support\Pembayaran;
 use Illuminate\Http\Request;
 
 class LaporanController extends Controller
@@ -44,7 +46,7 @@ class LaporanController extends Controller
         $keluar = (int) abs($logBase->where('perubahan', '<', 0)->sum('perubahan'));
         $jumlahTransaksi = $logBase->count();
 
-        $penjualanQuery = Penjualan::with('items')->periode($periode['awal'], $periode['akhir']);
+        $penjualanQuery = Penjualan::with('items')->aktif()->periode($periode['awal'], $periode['akhir']);
         $penjualanList = $penjualanQuery->get();
         $pendapatan = (float) $penjualanList->sum('total');
         $labaPeriode = (float) $penjualanList->sum(fn (Penjualan $p) => $p->laba);
@@ -125,9 +127,79 @@ class LaporanController extends Controller
         return view('laporan.per-bulan', compact('tahun', 'bulan', 'ringkasTahun', 'tahunTersedia'));
     }
 
+    public function harian(Request $request)
+    {
+        $tanggal = $request->input('tanggal') ?: today()->toDateString();
+
+        $list = Penjualan::with('items')->whereDate('tanggal', $tanggal)
+            ->orderBy('id')->get();
+        $aktif = $list->reject(fn (Penjualan $p) => $p->payment_status === 'void');
+
+        $data = [
+            'tanggal' => $tanggal,
+            'jumlah' => $aktif->count(),
+            'omzet_kotor' => round((float) $aktif->sum('subtotal'), 2),
+            'diskon' => round((float) $aktif->sum('diskon'), 2),
+            'ppn' => round((float) $aktif->sum('pajak_nominal'), 2),
+            'omzet_bersih' => round((float) $aktif->sum('total'), 2),
+            'per_metode' => $aktif->groupBy('payment_method')
+                ->mapWithKeys(fn ($g, $k) => [Pembayaran::labelMetode($k) => round((float) $g->sum('total'), 2)])
+                ->all(),
+            'void_jumlah' => $list->where('payment_status', 'void')->count(),
+        ];
+
+        $top = PenjualanItem::query()
+            ->join('penjualans', 'penjualans.id', '=', 'penjualan_items.penjualan_id')
+            ->whereDate('penjualans.tanggal', $tanggal)
+            ->where('penjualans.payment_status', '!=', 'void')
+            ->groupBy('penjualan_items.nama_produk')
+            ->selectRaw('penjualan_items.nama_produk, SUM(penjualan_items.qty) AS total_qty, SUM(penjualan_items.subtotal) AS total_subtotal')
+            ->orderByDesc('total_qty')
+            ->limit(10)
+            ->get();
+
+        return view('laporan.harian', compact('tanggal', 'data', 'list', 'top'));
+    }
+
+    public function harianCsv(Request $request)
+    {
+        $tanggal = $request->input('tanggal') ?: today()->toDateString();
+
+        $rows = Penjualan::with('items')->whereDate('tanggal', $tanggal)->orderBy('id')->get();
+
+        $out = fopen('php://temp', 'w');
+        fputcsv($out, ['No. Invoice', 'Jam', 'Kasir', 'Customer', 'Telp', 'Jumlah Item', 'Subtotal', 'Diskon', 'PPN', 'Total', 'Metode', 'Dibayar', 'Status']);
+
+        foreach ($rows as $p) {
+            fputcsv($out, [
+                $p->no_invoice,
+                $p->created_at ? $p->created_at->format('H:i') : '',
+                (string) ($p->user_name ?? ''),
+                (string) ($p->customer ?? ''),
+                (string) ($p->customer_phone ?? ''),
+                (string) $p->items->sum('qty'),
+                number_format($p->subtotal, 2, ',', '.'),
+                number_format((float) $p->diskon, 2, ',', '.'),
+                number_format($p->pajak_nominal, 2, ',', '.'),
+                number_format((float) $p->total, 2, ',', '.'),
+                $p->payment_label,
+                number_format($p->dibayar, 2, ',', '.'),
+                $p->status_label,
+            ]);
+        }
+        rewind($out);
+        $csv = stream_get_contents($out);
+        fclose($out);
+
+        return response("\xEF\xBB\xBF" . $csv, 200, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="penjualan-' . $tanggal . '.csv"',
+        ]);
+    }
+
     protected function ringkasanLabaRugi(string $awal, string $akhir): array
     {
-        $penjualanList = Penjualan::with('items')->periode($awal, $akhir)->get();
+        $penjualanList = Penjualan::with('items')->aktif()->periode($awal, $akhir)->get();
 
         $pendapatanKotor = (float) $penjualanList->sum(fn (Penjualan $p) => $p->subtotal);
         $diskon = (float) $penjualanList->sum('diskon');
@@ -228,7 +300,7 @@ class LaporanController extends Controller
         $keluar = (int) abs($logBase->where('perubahan', '<', 0)->sum('perubahan'));
         $jumlahTransaksi = $logBase->count();
 
-        $penjualanList = Penjualan::with('items')->periode($periode['awal'], $periode['akhir'])->get();
+        $penjualanList = Penjualan::with('items')->aktif()->periode($periode['awal'], $periode['akhir'])->get();
         $pendapatan = (float) $penjualanList->sum('total');
         $labaPeriode = (float) $penjualanList->sum(fn (Penjualan $p) => $p->laba);
         $jumlahPenjualan = $penjualanList->count();

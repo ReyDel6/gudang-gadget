@@ -52,6 +52,17 @@
                         <span class="truncate">Dashboard</span>
                     </a>
 
+                    {{-- Link: Layar Kasir (POS) --}}
+                    <a href="{{ route('pos.index') }}"
+                       class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-bold text-sm transition-all bg-gradient-to-r from-gold-500 to-gold-600 text-navy-900 shadow-lg shadow-gold-500/30
+                              {{ str_starts_with($routeName, 'pos.') ? 'ring-2 ring-white/60' : 'hover:from-gold-400 hover:to-gold-500' }}">
+                        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                             stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
+                        </svg>
+                        <span class="truncate">Layar Kasir</span>
+                    </a>
+
                     {{-- Dropdown: Manajemen Produk --}}
                     @php
                         $produkActive = in_array($routeName, [
@@ -131,7 +142,7 @@
 
                 {{-- Dropdown: Transaksi --}}
                     @php
-                        $transaksiActive = str_starts_with($routeName, 'penjualan.') || str_starts_with($routeName, 'pembelian.');
+                        $transaksiActive = str_starts_with($routeName, 'penjualan.') || str_starts_with($routeName, 'pembelian.') || str_starts_with($routeName, 'shift.');
                     @endphp
                     <div class="space-y-1">
                         <button type="button" onclick="toggleDropdown('transaksi')"
@@ -174,6 +185,17 @@
                                     <path d="M5 12h14M12 5l-7 7 7 7"/>
                                 </svg>
                                 Pembelian
+                            </a>
+                            <a href="{{ route('shift.index') }}"
+                               class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all
+                                      {{ str_starts_with($routeName, 'shift.')
+                                          ? 'bg-gold-500 text-white shadow-md'
+                                          : 'hover:bg-white/10 text-slate-400 hover:text-white' }}">
+                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 3l8 4.5v5C20 18 16.5 21 12 22.5 7.5 21 4 18 4 12.5v-5L12 3z"/>
+                                </svg>
+                                Shift Kasir
                             </a>
                         </div>
                     </div>

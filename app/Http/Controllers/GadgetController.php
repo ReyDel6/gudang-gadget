@@ -52,19 +52,19 @@ class GadgetController extends Controller
 
         $hariIni = now()->toDateString();
 
-        $penjualanBulan = Penjualan::with('items')
+        $penjualanBulan = Penjualan::with('items')->aktif()
             ->whereDate('tanggal', '>=', now()->startOfMonth()->toDateString())
             ->get();
         $pembelianBulan = Pembelian::whereDate('tanggal', '>=', now()->startOfMonth()->toDateString())
             ->latest('id')
             ->get();
 
-        $penjualanTahun = Penjualan::with('items')
+        $penjualanTahun = Penjualan::with('items')->aktif()
             ->whereDate('tanggal', '>=', now()->startOfYear()->toDateString())
             ->whereDate('tanggal', '<=', now()->toDateString())
             ->get();
 
-        $penjualanHariIni = Penjualan::whereDate('tanggal', $hariIni);
+        $penjualanHariIni = Penjualan::aktif()->whereDate('tanggal', $hariIni);
         $pembelianHariIni = Pembelian::whereDate('tanggal', $hariIni);
 
         $ringkasanTransaksi = [
@@ -90,7 +90,7 @@ class GadgetController extends Controller
             $akhir = now()->copy()->subMonths($i)->endOfMonth()->toDateString();
             $trenPenjualan[] = [
                 'label' => $namaBulan[now()->copy()->subMonths($i)->month - 1],
-                'total' => (float) Penjualan::whereDate('tanggal', '>=', $awal)->whereDate('tanggal', '<=', $akhir)->sum('total'),
+                'total' => (float) Penjualan::aktif()->whereDate('tanggal', '>=', $awal)->whereDate('tanggal', '<=', $akhir)->sum('total'),
             ];
         }
 

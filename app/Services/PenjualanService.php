@@ -1,0 +1,169 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\AuditLog;
+use App\Models\Gadget;
+use App\Models\Penjualan;
+use App\Models\StokLog;
+use App\Models\User;
+use App\Support\Pembayaran;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
+
+class PenjualanService
+{
+    public static function aturan(): array
+    {
+        return [
+            'tanggal' => ['nullable', 'date'],
+            'customer' => ['nullable', 'string', 'max:150'],
+            'customer_phone' => ['nullable', 'string', 'max:30'],
+            'keterangan' => ['nullable', 'string', 'max:255'],
+            'items' => ['required', 'array', 'min:1'],
+            'items.*.gadget_id' => ['required', 'integer', 'exists:products,id'],
+            'items.*.qty' => ['required', 'integer', 'min:1'],
+            'items.*.harga_jual' => ['nullable', 'numeric', 'min:0'],
+            'diskon' => ['nullable', 'numeric', 'min:0'],
+            'pajak' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'payment_method' => ['nullable', 'string', Rule::in(array_keys(Pembayaran::METODE))],
+            'paid_amount' => ['nullable', 'numeric', 'min:0'],
+            'payment_ref' => ['nullable', 'string', 'max:100'],
+        ];
+    }
+
+    public static function pesan(): array
+    {
+        return [
+            'items.required' => 'Minimal satu item penjualan.',
+            'items.*.qty.min' => 'Jumlah item harus minimal 1.',
+            'items.*.gadget_id.exists' => 'Produk yang dipilih tidak valid.',
+            'payment_method.in' => 'Metode pembayaran tidak valid.',
+        ];
+    }
+
+    /**
+     * Proses transaksi penjualan secara atomik dengan row-lock,
+     * setoran otomatis dari stok, log retur/history, dan pencatatan audit.
+     */
+    public static function buat(array $data, ?User $user, ?string $ip, ?int $shiftId = null): Penjualan
+    {
+        $diskon = (float) ($data['diskon'] ?? 0);
+        $pajakPersen = (float) ($data['pajak'] ?? 0);
+        $metode = $data['payment_method'] ?? Pembayaran::CASH;
+        $tanggal = $data['tanggal'] ?? now()->toDateString();
+
+        return DB::transaction(function () use ($data, $user, $ip, $shiftId, $diskon, $pajakPersen, $metode, $tanggal) {
+            $no = InvoiceService::buat('PJ', 'penjualans');
+
+            $penjualan = Penjualan::create([
+                'no_invoice' => $no,
+                'tanggal' => $tanggal,
+                'user_id' => $user?->id,
+                'user_name' => $user?->name,
+                'customer' => $data['customer'] ?? null,
+                'customer_phone' => $data['customer_phone'] ?? null,
+                'keterangan' => $data['keterangan'] ?? null,
+                'total' => 0,
+                'diskon' => $diskon,
+                'pajak' => $pajakPersen,
+                'payment_method' => $metode,
+                'payment_ref' => $data['payment_ref'] ?? null,
+                'payment_status' => 'paid',
+                'cashier_shift_id' => $shiftId,
+            ]);
+
+            $total = 0;
+            foreach ($data['items'] as $item) {
+                $gadget = StokService::adjust(
+                    Gadget::findOrFail($item['gadget_id']),
+                    StokLog::TIPE_PENGELUARAN,
+                    -((int) $item['qty']),
+                    "Penjualan {$no}"
+                );
+
+                $hargaJual = (float) ($item['harga_jual'] ?? $gadget->harga_jual ?: $gadget->harga_beli);
+                $subtotal = round($hargaJual * (int) $item['qty'], 2);
+                $total += $subtotal;
+
+                $penjualan->items()->create([
+                    'gadget_id' => $gadget->id,
+                    'nama_produk' => $gadget->nama_produk,
+                    'harga_beli' => $gadget->harga_beli,
+                    'harga_jual' => $hargaJual,
+                    'qty' => (int) $item['qty'],
+                    'subtotal' => $subtotal,
+                ]);
+            }
+
+            $dasarPajak = $total - $diskon;
+            $totalAkhir = round($dasarPajak + ($dasarPajak * $pajakPersen / 100), 2);
+
+            $dibayar = ($data['paid_amount'] !== null && $data['paid_amount'] !== '')
+                ? (float) $data['paid_amount']
+                : $totalAkhir;
+
+            if ($metode === Pembayaran::CASH && ($dibayar + 0.001) < $totalAkhir) {
+                throw ValidationException::withMessages([
+                    'paid_amount' => 'Uang yang dibayarkan kurang dari total tagihan.',
+                ]);
+            }
+
+            $kembalian = round(max(0, $dibayar - $totalAkhir), 2);
+
+            $penjualan->update([
+                'total' => $totalAkhir,
+                'paid_amount' => $dibayar,
+                'change_amount' => $kembalian,
+            ]);
+
+            AuditLog::catat($user, 'tambah penjualan', $penjualan, [
+                'no_invoice' => $no,
+                'total' => $totalAkhir,
+                'diskon' => $diskon,
+                'ppn_percent' => $pajakPersen,
+                'metode_bayar' => $metode,
+                'dibayar' => $dibayar,
+                'jumlah_item' => count($data['items']),
+            ], $ip);
+
+            return $penjualan->fresh();
+        });
+    }
+
+    /**
+     * Void / retur: kembalikan stok dan tandai status tanpa menghapus catatan.
+     */
+    public static function void(Penjualan $penjualan, ?User $user, ?string $ip, ?string $alasan = null): void
+    {
+        DB::transaction(function () use ($penjualan, $user, $ip, $alasan) {
+            if ($penjualan->payment_status === 'void') {
+                return;
+            }
+
+            foreach ($penjualan->items as $item) {
+                StokService::adjust(
+                    Gadget::findOrFail($item->gadget_id),
+                    StokLog::TIPE_RETUR,
+                    (int) $item->qty,
+                    "Retur penjualan {$penjualan->no_invoice}"
+                );
+            }
+
+            $penjualan->update([
+                'payment_status' => 'void',
+                'voided_at' => now(),
+                'voided_by' => $user?->name ?: 'Sistem',
+                'void_reason' => $alasan ?: 'Retur / batal penjualan',
+            ]);
+
+            AuditLog::catat($user, 'batal penjualan', $penjualan, [
+                'no_invoice' => $penjualan->no_invoice,
+                'total' => (float) $penjualan->total,
+                'alasan' => $alasan ?: 'Retur / batal penjualan',
+                'stok_dikembalikan' => true,
+            ], $ip);
+        });
+    }
+}

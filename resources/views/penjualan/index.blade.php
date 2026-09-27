@@ -6,14 +6,20 @@
 
     <div class="flex items-center justify-between mb-6">
         <h1 class="text-xl font-bold text-navy-800">Transaksi Penjualan</h1>
-        <a href="{{ route('penjualan.create') }}"
-           class="bg-gold-500 hover:bg-gold-600 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors">
-            + Catat Penjualan
-        </a>
+        <div class="flex items-center gap-3">
+            <a href="{{ route('pos.index') }}"
+               class="bg-gold-500 hover:bg-gold-600 text-navy-900 text-sm font-bold px-4 py-2 rounded-lg transition-colors shadow-lg shadow-gold-500/30">
+                Layar Kasir
+            </a>
+            <a href="{{ route('penjualan.create') }}"
+               class="bg-gold-500 hover:bg-gold-600 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors">
+                + Catat Penjualan
+            </a>
+        </div>
     </div>
 
     <form method="GET" action="{{ route('penjualan.index') }}" class="flex flex-wrap gap-3 mb-5">
-        <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari no invoice / customer..."
+        <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari no invoice / customer / no. HP..."
                class="rounded-lg border border-navy-100 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gold-500 bg-white text-navy-700">
         <input type="date" name="tanggal_awal" value="{{ request('tanggal_awal') }}"
                class="rounded-lg border border-navy-100 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gold-500 text-navy-700">
@@ -40,6 +46,7 @@
                         <th class="px-4 py-3 font-medium">Tanggal</th>
                         <th class="px-4 py-3 font-medium">Customer</th>
                         <th class="px-4 py-3 font-medium">Item</th>
+                        <th class="px-4 py-3 font-medium">Bayar</th>
                         <th class="px-4 py-3 font-medium text-right">Total</th>
                         <th class="px-4 py-3 font-medium">Oleh</th>
                         <th class="px-4 py-3 font-medium text-right">Aksi</th>
@@ -48,22 +55,31 @@
                 <tbody class="divide-y divide-navy-100">
                     @forelse ($penjualans as $p)
                         @php $jumlahItem = $p->items->sum('qty'); @endphp
-                        <tr>
-                            <td class="px-4 py-3 font-mono font-semibold text-navy-800">{{ $p->no_invoice }}</td>
+                        <tr class="{{ $p->is_void ? 'opacity-50' : '' }}">
+                            <td class="px-4 py-3 font-mono font-semibold text-navy-800">{{ $p->no_invoice }}
+                                @if ($p->is_void)
+                                    <span class="ml-1 text-[10px] font-bold bg-rose-100 text-rose-700 rounded px-1.5 py-0.5">VOID</span>
+                                @endif
+                            </td>
                             <td class="px-4 py-3 text-navy-600">{{ $p->tanggal->format('d M Y') }}</td>
                             <td class="px-4 py-3 text-navy-600">{{ $p->customer ?: '—' }}</td>
                             <td class="px-4 py-3 font-mono text-navy-700">{{ $jumlahItem }}</td>
+                            <td class="px-4 py-3">
+                                <span class="text-[11px] font-bold rounded-full px-2 py-0.5 bg-navy-100 text-navy-700">{{ $p->payment_label }}</span>
+                            </td>
                             <td class="px-4 py-3 text-right font-mono font-bold text-navy-800">Rp {{ number_format($p->total, 0, ',', '.') }}</td>
                             <td class="px-4 py-3 text-navy-600">{{ $p->user_name ?: '—' }}</td>
                             <td class="px-4 py-3 text-right whitespace-nowrap">
                                 <a href="{{ route('penjualan.show', $p->id) }}"
                                    class="text-navy-600 hover:text-gold-600 font-medium">Detail</a>
-                                <a href="{{ route('penjualan.cetak', $p->id) }}" target="_blank"
-                                   class="ml-3 text-navy-600 hover:text-gold-600 font-medium">Struk</a>
+                                @if (!$p->is_void)
+                                    <a href="{{ route('penjualan.cetak', $p->id) }}" target="_blank"
+                                       class="ml-3 text-navy-600 hover:text-gold-600 font-medium">Struk</a>
+                                @endif
                             </td>
                         </tr>
                     @empty
-                        <x-empty-state colspan="7" icon="receipt" message="Belum ada transaksi penjualan." />
+                        <x-empty-state colspan="8" icon="receipt" message="Belum ada transaksi penjualan." />
                     @endforelse
                 </tbody>
             </table>

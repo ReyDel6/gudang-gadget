@@ -8,7 +8,9 @@ use App\Http\Controllers\MasterController;
 use App\Http\Controllers\MutasiController;
 use App\Http\Controllers\PembelianController;
 use App\Http\Controllers\PenjualanController;
+use App\Http\Controllers\PosController;
 use App\Http\Controllers\ProfilController;
+use App\Http\Controllers\ShiftController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -36,6 +38,17 @@ Route::middleware('auth')->group(function () {
     Route::get('/laporan/laba-rugi', [LaporanController::class, 'labaRugi'])->name('laporan.laba-rugi');
     Route::get('/laporan/laba-rugi/cetak', [LaporanController::class, 'labaRugiPrint'])->name('laporan.laba-rugi.cetak');
     Route::get('/laporan/per-bulan/{tahun}', [LaporanController::class, 'perBulan'])->name('laporan.per-bulan');
+    Route::get('/laporan/penjualan-harian', [LaporanController::class, 'harian'])->name('laporan.harian');
+    Route::get('/laporan/penjualan-harian/export', [LaporanController::class, 'harianCsv'])->name('laporan.harian-export');
+
+    // Modul Kasir / POS.
+    Route::get('/pos', [PosController::class, 'index'])->name('pos.index');
+    Route::post('/pos', [PosController::class, 'store'])->name('pos.store');
+
+    // Shift kasir.
+    Route::get('/shift', [ShiftController::class, 'index'])->name('shift.index');
+    Route::post('/shift/buka', [ShiftController::class, 'buka'])->name('shift.buka');
+    Route::post('/shift/{id}/tutup', [ShiftController::class, 'tutup'])->name('shift.tutup');
 
     Route::get('/mutasi', [MutasiController::class, 'index'])->name('mutasi.index');
     Route::get('/mutasi/create', [MutasiController::class, 'create'])->name('mutasi.create');

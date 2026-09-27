@@ -20,7 +20,9 @@
                 <div>
                     <label class="block text-sm font-medium text-navy-700 mb-1">Customer</label>
                     <input type="text" name="customer" value="{{ old('customer') }}" placeholder="Nama pembeli"
-                           class="w-full rounded-lg border border-navy-100 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gold-500">
+                           class="w-full rounded-lg border border-navy-100 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gold-500 mb-2">
+                    <input type="text" name="customer_phone" value="{{ old('customer_phone') }}" placeholder="No. HP (untuk struk WA)"
+                           class="w-full rounded-lg border border-navy-100 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gold-500">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-navy-700 mb-1">Keterangan</label>

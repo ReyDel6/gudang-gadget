@@ -7,6 +7,10 @@
     <div class="flex items-center justify-between gap-3 mb-6 print-hidden">
         <h1 class="text-xl font-bold text-navy-800">Laporan Inventaris</h1>
         <div class="flex flex-wrap items-center gap-2">
+            <a href="{{ route('laporan.harian') }}"
+               class="bg-gold-500 hover:bg-gold-600 text-navy-900 text-sm font-bold px-4 py-2 rounded-lg transition-colors shadow-lg shadow-gold-500/30">
+                Rekap Penjualan Harian
+            </a>
             <a href="{{ route('laporan.print', request()->query()) }}" target="_blank"
                class="bg-navy-700 hover:bg-navy-800 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors">
                 Cetak / PDF
