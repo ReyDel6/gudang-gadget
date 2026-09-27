@@ -13,8 +13,10 @@ use App\Http\Controllers\PenjualanController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\ProfilController;
 use App\Http\Controllers\ShiftController;
+use App\Http\Controllers\OrderAdminController;
 use App\Http\Controllers\StoreAdminController;
 use App\Http\Controllers\StorefrontController;
+use App\Http\Controllers\StoreOrderController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -26,6 +28,16 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->midd
 Route::get('/shop', [StorefrontController::class, 'index'])->name('shop.home');
 Route::get('/shop/katalog', [StorefrontController::class, 'katalog'])->name('shop.katalog');
 Route::get('/shop/produk/{id}', [StorefrontController::class, 'produk'])->name('shop.produk');
+
+// Keranjang & checkout publik.
+Route::get('/shop/keranjang', [StoreOrderController::class, 'keranjang'])->name('shop.keranjang');
+Route::post('/shop/keranjang/tambah', [StoreOrderController::class, 'tambah'])->name('shop.keranjang.tambah');
+Route::post('/shop/keranjang/update', [StoreOrderController::class, 'update'])->name('shop.keranjang.update');
+Route::post('/shop/keranjang/hapus', [StoreOrderController::class, 'hapus'])->name('shop.keranjang.hapus');
+Route::get('/shop/checkout', [StoreOrderController::class, 'checkout'])->name('shop.checkout');
+Route::post('/shop/checkout', [StoreOrderController::class, 'store'])->name('shop.checkout.store');
+Route::get('/shop/order/{kode}', [StoreOrderController::class, 'status'])->name('shop.order.status');
+Route::post('/shop/order/{kode}/bukti', [StoreOrderController::class, 'uploadBukti'])->name('shop.order.bukti');
 
 // Portal mitra reseller (B2B).
 Route::middleware('guest')->group(function () {
@@ -88,6 +100,12 @@ Route::middleware(['auth', 'role:admin,staff'])->group(function () {
     Route::get('/penjualan/{id}/cetak', [PenjualanController::class, 'cetak'])->name('penjualan.cetak');
     Route::get('/penjualan/{id}/label', [PenjualanController::class, 'label'])->name('penjualan.label');
     Route::delete('/penjualan/{id}', [PenjualanController::class, 'destroy'])->name('penjualan.destroy')->middleware('role:admin');
+
+    // Order publik (hasil checkout storefront).
+    Route::get('/order', [OrderAdminController::class, 'index'])->name('order.index');
+    Route::get('/order/{id}', [OrderAdminController::class, 'show'])->name('order.show');
+    Route::post('/order/{id}/konfirmasi', [OrderAdminController::class, 'konfirmasi'])->name('order.konfirmasi')->middleware('role:admin');
+    Route::post('/order/{id}/batal', [OrderAdminController::class, 'batal'])->name('order.batal')->middleware('role:admin');
 
     Route::get('/pembelian', [PembelianController::class, 'index'])->name('pembelian.index');
     Route::get('/pembelian/create', [PembelianController::class, 'create'])->name('pembelian.create');

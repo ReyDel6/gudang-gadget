@@ -43,6 +43,14 @@
                 </nav>
 
                 <div class="flex items-center gap-3">
+                    @php $jumlahKeranjang = \Illuminate\Support\Facades\Session::get('keranjang_publik', []); $jumlahKeranjang = array_sum($jumlahKeranjang); @endphp
+                    <a href="{{ route('shop.keranjang') }}" aria-label="Keranjang belanja"
+                       class="relative grid place-items-center w-10 h-10 rounded-xl text-navy-700 hover:bg-navy-50 transition-colors">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                        @if ($jumlahKeranjang > 0)
+                            <span class="absolute -top-0.5 -right-0.5 min-w-5 px-1 h-5 grid place-items-center rounded-full bg-gold-500 text-navy-900 text-[10px] font-black">{{ $jumlahKeranjang }}</span>
+                        @endif
+                    </a>
                     @auth
                         @if (Auth::user()->isReseller())
                             <div class="hidden sm:flex flex-col items-end">
@@ -80,6 +88,9 @@
                     </a>
                     <a href="{{ route('shop.katalog') }}" onclick="toggleMobileMenu(false)" class="flex items-center justify-between w-full px-3 py-3 rounded-xl font-semibold text-navy-800 hover:bg-navy-50 transition-colors">
                         Katalog Lengkap
+                    </a>
+                    <a href="{{ route('shop.keranjang') }}" onclick="toggleMobileMenu(false)" class="flex items-center justify-between w-full px-3 py-3 rounded-xl font-semibold text-navy-800 hover:bg-navy-50 transition-colors">
+                        Keranjang Belanja
                     </a>
                     <a href="{{ route('shop.home') }}#unggulan" onclick="toggleMobileMenu(false)" class="flex items-center justify-between w-full px-3 py-3 rounded-xl font-semibold text-navy-800 hover:bg-navy-50 transition-colors">
                         Produk Unggulan

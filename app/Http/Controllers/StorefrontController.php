@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Auth;
 
 class StorefrontController extends Controller
 {
-    protected array $publicColumns = [
+    public static array $publicColumns = [
         'id', 'nama_produk', 'sku', 'kategori', 'deskripsi', 'harga_jual',
         'harga_promo', 'stock', 'satuan', 'status', 'is_published', 'is_featured',
         'condition', 'specifications', 'warranty_info', 'created_at', 'updated_at',
@@ -21,7 +21,7 @@ class StorefrontController extends Controller
     public function index()
     {
         $banners = StoreBanner::aktif()->get();
-        $featured = Gadget::unggulan()->with(['thumbnail', 'galeri', 'tierPrices'])->limit(8)->get($this->publicColumns);
+        $featured = Gadget::unggulan()->with(['thumbnail', 'galeri', 'tierPrices'])->limit(8)->get(self::$publicColumns);
         $categories = $this->categories();
         $settings = $this->settings();
         $resellerMode = $this->resellerMode();
@@ -31,7 +31,7 @@ class StorefrontController extends Controller
 
     public function katalog(Request $request)
     {
-        $query = Gadget::publik()->with(['thumbnail', 'galeri', 'tierPrices'])->select($this->publicColumns);
+        $query = Gadget::publik()->with(['thumbnail', 'galeri', 'tierPrices'])->select(self::$publicColumns);
 
         if ($keyword = trim((string) $request->input('q'))) {
             $query->where(fn ($q) => $q->where('nama_produk', 'like', "%{$keyword}%")
@@ -90,7 +90,7 @@ class StorefrontController extends Controller
     public function produk($id)
     {
         $product = Gadget::publik()->with(['thumbnail', 'galeri', 'tierPrices'])
-            ->select($this->publicColumns)
+            ->select(self::$publicColumns)
             ->findOrFail($id);
         $settings = $this->settings();
         $resellerMode = $this->resellerMode();
@@ -99,7 +99,7 @@ class StorefrontController extends Controller
             ->where('kategori', $product->kategori)
             ->where('id', '!=', $product->id)
             ->limit(4)
-            ->get($this->publicColumns);
+            ->get(self::$publicColumns);
 
         return view('store.produk', compact('product', 'related', 'settings', 'resellerMode'));
     }
@@ -132,6 +132,10 @@ class StorefrontController extends Controller
             'instagram_url' => StoreSetting::get('instagram_url', '#'),
             'facebook_url' => StoreSetting::get('facebook_url', '#'),
             'tiktok_url' => StoreSetting::get('tiktok_url', '#'),
+            'payment_transfer_enabled' => StoreSetting::get('payment_transfer_enabled', '1'),
+            'payment_transfer_info' => StoreSetting::get('payment_transfer_info', ''),
+            'payment_cod_enabled' => StoreSetting::get('payment_cod_enabled', '1'),
+            'payment_store_enabled' => StoreSetting::get('payment_store_enabled', '1'),
         ];
     }
 

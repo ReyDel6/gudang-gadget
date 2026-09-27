@@ -142,7 +142,7 @@
 
                 {{-- Dropdown: Transaksi --}}
                     @php
-                        $transaksiActive = str_starts_with($routeName, 'penjualan.') || str_starts_with($routeName, 'pembelian.') || str_starts_with($routeName, 'shift.');
+                        $transaksiActive = str_starts_with($routeName, 'penjualan.') || str_starts_with($routeName, 'pembelian.') || str_starts_with($routeName, 'shift.') || str_starts_with($routeName, 'order.');
                     @endphp
                     <div class="space-y-1">
                         <button type="button" onclick="toggleDropdown('transaksi')"
@@ -185,6 +185,18 @@
                                     <path d="M5 12h14M12 5l-7 7 7 7"/>
                                 </svg>
                                 Pembelian
+                            </a>
+                            <a href="{{ route('order.index') }}"
+                               class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all
+                                      {{ str_starts_with($routeName, 'order.')
+                                          ? 'bg-gold-500 text-white shadow-md'
+                                          : 'hover:bg-white/10 text-slate-400 hover:text-white' }}">
+                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                                </svg>
+                                Order Publik
                             </a>
                             <a href="{{ route('shift.index') }}"
                                class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all

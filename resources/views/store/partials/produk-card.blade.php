@@ -34,11 +34,23 @@
                 @endif
             </div>
             <div class="mt-3 flex items-center gap-2">
-                <a href="{{ \App\Support\WhatsApp::link($produk) }}" target="_blank" rel="noopener"
-                   class="flex-1 flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-2.5 rounded-lg transition-colors">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.57 15.07L2 22l5.06-1.37A10 10 0 1 0 12 2zm5.5 14.1c-.23.65-1.34 1.24-1.86 1.29-.5.05-1.09.22-3.64-.76-3.06-1.17-5-4.27-5.16-4.47-.15-.2-1.24-1.65-1.24-3.14 0-1.5.79-2.24 1.07-2.54.28-.3.6-.38.8-.38h.58c.18 0 .44-.07.68.52.25.6.84 2.06.91 2.21.08.15.13.33.02.53-.1.2-.15.32-.3.5-.15.17-.32.38-.45.5-.15.13-.31.27-.13.54.17.27.78 1.28 1.67 2.08 1.15 1.02 2.12 1.34 2.42 1.49.3.15.47.13.65-.08.17-.2.75-.88.95-1.18.2-.3.4-.25.67-.15.28.1 1.76.83 2.06.98.3.15.5.23.58.35.07.13.07.73-.17 1.43z"/></svg>
-                    Pesan
-                </a>
+                @if ($produk->tersedia)
+                    <form method="POST" action="{{ route('shop.keranjang.tambah') }}" class="flex-1">
+                        @csrf
+                        <input type="hidden" name="gadget_id" value="{{ $produk->id }}">
+                        <input type="hidden" name="qty" value="1">
+                        <button type="submit"
+                                class="w-full flex items-center justify-center gap-1.5 bg-gold-500 hover:bg-gold-600 text-navy-900 text-xs font-bold px-3 py-2.5 rounded-lg transition-colors">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                            Keranjang
+                        </button>
+                    </form>
+                @else
+                    <button disabled
+                            class="flex-1 flex items-center justify-center gap-1.5 bg-navy-100 text-navy-400 text-xs font-bold px-3 py-2.5 rounded-lg cursor-not-allowed">
+                        Stok Habis
+                    </button>
+                @endif
                 <a href="{{ route('shop.produk', $produk->id) }}"
                    class="flex-1 text-center border border-navy-100 hover:border-gold-500 text-navy-700 hover:text-gold-600 font-bold px-3 py-2.5 rounded-lg transition-colors">Detail</a>
             </div>

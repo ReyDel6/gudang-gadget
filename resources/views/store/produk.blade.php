@@ -117,11 +117,24 @@
                 @endif
 
                 <div class="mt-6 space-y-3">
-                    <a href="{{ \App\Support\WhatsApp::link($product) }}" target="_blank" rel="noopener"
-                       class="flex items-center justify-center gap-2 w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black px-6 py-4 rounded-xl transition-colors text-lg">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.57 15.07L2 22l5.06-1.37A10 10 0 1 0 12 2zm5.5 14.1c-.23.65-1.34 1.24-1.86 1.29-.5.05-1.09.22-3.64-.76-3.06-1.17-5-4.27-5.16-4.47-.15-.2-1.24-1.65-1.24-3.14 0-1.5.79-2.24 1.07-2.54.28-.3.6-.38.8-.38h.58c.18 0 .44-.07.68.52.25.6.84 2.06.91 2.21.08.15.13.33.02.53-.1.2-.15.32-.3.5-.15.17-.32.38-.45.5-.15.13-.31.27-.13.54.17.27.78 1.28 1.67 2.08 1.15 1.02 2.12 1.34 2.42 1.49.3.15.47.13.65-.08.17-.2.75-.88.95-1.18.2-.3.4-.25.67-.15.28.1 1.76.83 2.06.98.3.15.5.23.58.35.07.13.07.73-.17 1.43z"/></svg>
-                        {{ $product->tersedia ? 'Tanya Stok / Pesan via WhatsApp' : 'Pre-Order / Hubungi Admin' }}
-                    </a>
+                    @if ($product->tersedia)
+                        <form method="POST" action="{{ route('shop.keranjang.tambah') }}" class="flex items-stretch gap-2">
+                            @csrf
+                            <input type="hidden" name="gadget_id" value="{{ $product->id }}">
+                            <input type="number" name="qty" value="1" min="1" max="{{ min(99, $product->stock) }}"
+                                   label="Jumlah" class="w-20 text-center rounded-xl border border-navy-200 text-sm focus:outline-none focus:ring-2 focus:ring-gold-500">
+                            <button type="submit"
+                                    class="flex-1 flex items-center justify-center gap-2 bg-gold-500 hover:bg-gold-600 text-navy-900 font-black px-6 py-4 rounded-xl transition-colors text-lg">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                                Tambahkan ke Keranjang
+                            </button>
+                        </form>
+                    @else
+                        <div class="flex items-center justify-center gap-2 w-full bg-navy-100 text-navy-400 font-black px-6 py-4 rounded-xl text-lg cursor-not-allowed">
+                            Stok Habis — Hubungi Admin
+                        </div>
+                    @endif
+                    <p class="text-xs text-navy-400 text-center">💡 Pesan langsung lewat keranjang &amp; checkout online — tanpa perlu chat WhatsApp.</p>
                     @if ($product->warranty_info)
                         <p class="text-xs text-navy-400 text-center">🛡 {{ $product->warranty_info }}</p>
                     @endif
@@ -196,10 +209,15 @@
                     <div class="mt-6 bg-white rounded-2xl border border-navy-100 p-5">
                         <div class="flex items-center justify-between gap-3 flex-wrap">
                             <p class="text-sm font-black text-navy-900">🏷 Harga Grosir &amp; Partai</p>
-                            <a href="{{ \App\Support\WhatsApp::grosirLink($product) }}" target="_blank" rel="noopener"
-                               class="inline-flex items-center gap-1.5 bg-navy-900 hover:bg-navy-800 text-white text-xs font-bold px-3 py-2 rounded-lg transition-colors">
-                                💬 Tanya Harga Partai / Grosir
-                            </a>
+                            <form method="POST" action="{{ route('shop.keranjang.tambah') }}">
+                                @csrf
+                                <input type="hidden" name="gadget_id" value="{{ $product->id }}">
+                                <input type="hidden" name="qty" value="{{ (int) $tiers->first()->min_qty }}">
+                                <button type="submit"
+                                        class="inline-flex items-center gap-1.5 bg-navy-900 hover:bg-navy-800 text-white text-xs font-bold px-3 py-2 rounded-lg transition-colors">
+                                    🛒 Beli Grosir ({{ (int) $tiers->first()->min_qty }} pcs+)
+                                </button>
+                            </form>
                         </div>
                         <div class="mt-3 grid gap-px bg-navy-100 rounded-xl overflow-hidden">
                             @foreach ($rows as $row)
@@ -217,7 +235,7 @@
                                 </div>
                             @endforeach
                         </div>
-                        <p class="text-[11px] text-navy-400 mt-2.5">Belum termasuk ongkir. Harga berlaku untuk pembelian langsung/grosir; tanyakan ketersediaan stok ke admin.</p>
+                        <p class="text-[11px] text-navy-400 mt-2.5">Belum termasuk ongkir. Harga grosir otomatis berlaku setelah jumlah di keranjang memenuhi syarat.</p>
                     </div>
                 @endif
 
@@ -270,11 +288,18 @@
     {{-- Sticky Quick Action Bar (mobile) --}}
     <div class="fixed bottom-0 inset-x-0 z-40 md:hidden bg-white/95 backdrop-blur border-t border-navy-100 px-4 py-3 flex items-center gap-3"
          aria-label="Aksi cepat">
-        <a href="{{ \App\Support\WhatsApp::link($product) }}" target="_blank" rel="noopener"
-           class="flex-1 flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm px-4 py-3 rounded-xl transition-colors">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.57 15.07L2 22l5.06-1.37A10 10 0 1 0 12 2zm5.5 14.1c-.23.65-1.34 1.24-1.86 1.29-.5.05-1.09.22-3.64-.76-3.06-1.17-5-4.27-5.16-4.47-.15-.2-1.24-1.65-1.24-3.14 0-1.5.79-2.24 1.07-2.54.28-.3.6-.38.8-.38h.58c.18 0 .44-.07.68.52.25.6.84 2.06.91 2.21.08.15.13.33.02.53-.1.2-.15.32-.3.5-.15.17-.32.38-.45.5-.15.13-.31.27-.13.54.17.27.78 1.28 1.67 2.08 1.15 1.02 2.12 1.34 2.42 1.49.3.15.47.13.65-.08.17-.2.75-.88.95-1.18.2-.3.4-.25.67-.15.28.1 1.76.83 2.06.98.3.15.5.23.58.35.07.13.07.73-.17 1.43z"/></svg>
-            Pesan via WhatsApp
-        </a>
+        @if ($product->tersedia)
+            <form method="POST" action="{{ route('shop.keranjang.tambah') }}" class="flex-1 flex items-center gap-2">
+                @csrf
+                <input type="hidden" name="gadget_id" value="{{ $product->id }}">
+                <input type="hidden" name="qty" value="1">
+                <button type="submit"
+                        class="flex-1 flex items-center justify-center gap-2 bg-gold-500 hover:bg-gold-600 text-navy-900 font-black text-sm px-4 py-3 rounded-xl transition-colors">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                    Keranjang
+                </button>
+            </form>
+        @endif
         <button type="button" onclick="copyProductLink()"
                 class="grid place-items-center w-12 h-12 rounded-xl border border-navy-100 text-navy-700 hover:border-gold-500 transition-colors"
                 aria-label="Salin tautan produk">

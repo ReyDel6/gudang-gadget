@@ -101,6 +101,10 @@ class StoreAdminController extends Controller
             'instagram_url' => ['nullable', 'url', 'max:255'],
             'facebook_url' => ['nullable', 'url', 'max:255'],
             'tiktok_url' => ['nullable', 'url', 'max:255'],
+            'payment_transfer_enabled' => ['nullable', 'in:0,1'],
+            'payment_transfer_info' => ['nullable', 'string', 'max:1000'],
+            'payment_cod_enabled' => ['nullable', 'in:0,1'],
+            'payment_store_enabled' => ['nullable', 'in:0,1'],
         ];
         $data = $request->validate($rules);
 
@@ -139,6 +143,10 @@ class StoreAdminController extends Controller
             'instagram_url' => ['label' => 'Instagram', 'type' => 'url', 'hint' => 'Tautan profil (kosongkan jika tidak ada).'],
             'facebook_url' => ['label' => 'Facebook', 'type' => 'url', 'hint' => 'Tautan profil (kosongkan jika tidak ada).'],
             'tiktok_url' => ['label' => 'TikTok', 'type' => 'url', 'hint' => 'Tautan profil (kosongkan jika tidak ada).'],
+            'payment_transfer_enabled' => ['label' => 'Pembayaran Transfer Bank', 'type' => 'select', 'options' => ['1' => 'Aktif', '0' => 'Nonaktif'], 'hint' => 'Tampilkan metode transfer di checkout.'],
+            'payment_transfer_info' => ['label' => 'Info Rekening Transfer', 'type' => 'textarea', 'hint' => 'Contoh: BCA 1234567890 a.n. Gudang Gadget / Mandiri 9876543210 a.n. Gudang Gadget.'],
+            'payment_cod_enabled' => ['label' => 'Pembayaran COD (Bayar di Tempat)', 'type' => 'select', 'options' => ['1' => 'Aktif', '0' => 'Nonaktif'], 'hint' => 'Tampilkan metode COD di checkout.'],
+            'payment_store_enabled' => ['label' => 'Bayar di Toko', 'type' => 'select', 'options' => ['1' => 'Aktif', '0' => 'Nonaktif'], 'hint' => 'Tampilkan metode bayar langsung di toko fisik.'],
         ];
     }
 

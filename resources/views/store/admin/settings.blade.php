@@ -29,6 +29,13 @@
                     @if (($def['type'] ?? 'text') === 'textarea')
                         <textarea name="{{ $key }}" rows="3" maxlength="1000"
                                   class="w-full rounded-lg border border-navy-200 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gold-500">{{ $values[$key] ?? '' }}</textarea>
+                    @elseif (($def['type'] ?? 'text') === 'select')
+                        <select name="{{ $key }}"
+                                class="w-full rounded-lg border border-navy-200 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gold-500">
+                            @foreach ($def['options'] as $val => $label)
+                                <option value="{{ $val }}" @selected(($values[$key] ?? '') === (string) $val)>{{ $label }}</option>
+                            @endforeach
+                        </select>
                     @else
                         <input type="{{ $def['type'] ?? 'text' }}" name="{{ $key }}" value="{{ $values[$key] ?? '' }}"
                                maxlength="255"
