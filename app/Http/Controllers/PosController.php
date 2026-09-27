@@ -14,6 +14,7 @@ class PosController extends Controller
     public function index()
     {
         $products = Gadget::query()
+            ->with(['tierPrices' => fn ($q) => $q->orderBy('min_qty')])
             ->orderBy('nama_produk')
             ->get(['id', 'nama_produk', 'sku', 'harga_beli', 'harga_jual', 'stock', 'kategori', 'satuan']);
 

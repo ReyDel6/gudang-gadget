@@ -102,6 +102,26 @@
                 </div>
             </div>
 
+            @if ($gadget->tierPrices->isNotEmpty())
+                <div class="mt-5 p-4 rounded-xl bg-gold-50/70 border border-gold-200">
+                    <div class="text-xs font-medium text-navy-400 uppercase tracking-wide mb-2">Harga Grosir &amp; Partai (Reseller B2B)</div>
+                    <div class="grid grid-cols-2 gap-3">
+                        @foreach ($gadget->tierPrices->sortBy('min_qty') as $tier)
+                            <div class="bg-white rounded-lg border border-gold-100 px-3 py-2">
+                                <div class="text-xs font-bold text-navy-800">
+                                    @if ($tier->min_qty > 1)
+                                        {{ $tier->tier_name }} · min {{ $tier->min_qty }} {{ $gadget->satuan }}
+                                    @else
+                                        {{ $tier->tier_name }}
+                                    @endif
+                                </div>
+                                <div class="text-sm font-black text-gold-600 mt-0.5">Rp {{ number_format($tier->price, 0, ',', '.') }}<span class="text-[10px] text-navy-400 font-semibold">/{{ $gadget->satuan }}</span></div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
+
             @if ($gadget->deskripsi)
                 <div class="mt-5">
                     <h3 class="text-sm font-semibold text-navy-700 mb-1">Deskripsi</h3>

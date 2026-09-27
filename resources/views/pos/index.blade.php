@@ -196,6 +196,10 @@
             'beli' => (float) $p->harga_beli,
             'jual' => (float) $p->harga_jual ?: (float) $p->harga_beli,
             'stok' => (int) $p->stock,
+            'tiers' => $p->tierPrices
+                ->sortBy('min_qty')
+                ->values()
+                ->map(fn ($t) => ['name' => $t->tier_name, 'min' => (int) $t->min_qty, 'price' => (float) $t->price]),
         ])->values();
     @endphp
 
@@ -219,6 +223,15 @@
         const esc = s => String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 
         // ---------- KATALOG ----------
+        function tierInfo(p, qty) {
+            let t = null;
+            (p.tiers || []).forEach(x => { if (qty >= x.min) t = x; });
+            return t;
+        }
+        function hargaEfektif(p, qty) {
+            const t = tierInfo(p, qty);
+            return t ? t.price : p.jual;
+        }
         let qKata = '';
         let qKategori = '';
         function renderGrid() {
@@ -236,7 +249,10 @@
                         <span class="shrink-0 text-[10px] font-bold rounded px-1.5 py-0.5 ${p.stok > 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">${p.stok > 0 ? 'Stok ' + p.stok : 'Habis'}</span>
                     </div>
                     <div class="mt-1 text-[11px] text-navy-400 font-semibold">${p.sku ? esc(p.sku) : ''}</div>
-                    <div class="mt-2 text-lg font-black text-gold-600">${fmt(p.jual)}</div>
+                    <div class="mt-2 flex items-center gap-2 flex-wrap">
+                        <div class="text-lg font-black text-gold-600">${fmt(p.jual)}</div>
+                        ${(p.tiers && p.tiers.length) ? '<span class="text-[9px] font-bold bg-navy-800 text-gold-300 rounded-full px-2 py-0.5 uppercase">Grosir Tersedia</span>' : ''}
+                    </div>
                 </button>`).join('') || '<div class="col-span-full text-center text-navy-400 py-10 text-sm">Produk tidak ditemukan.</div>';
         }
 
@@ -282,7 +298,11 @@
             c.qty += d;
             if (c.qty <= 0) { cart.splice(i, 1); }
             else if (c.qty > c.stok) { c.qty = c.stok; alert('Stok "' + c.nama + '" hanya tersisa ' + c.stok + '.'); }
-            if (cart[i]) cart[i].subtotal = cart[i].jual * cart[i].qty;
+            if (cart[i]) {
+                const p = pela[String(c.id)];
+                cart[i].jual = hargaEfektif(p, cart[i].qty);
+                cart[i].subtotal = cart[i].jual * cart[i].qty;
+            }
             renderCart();
         }
         function hapusItem(i) { cart.splice(i, 1); renderCart(); }
@@ -306,10 +326,15 @@
             byId('btnBayar').innerHTML = 'BAYAR · <span>' + fmt(total) + '</span>';
 
             byId('cartItems').innerHTML = cart.length
-                ? cart.map((c, i) => `
+                ? cart.map((c, i) => {
+                    const t = tierInfo(pela[String(c.id)], c.qty);
+                    return `
                     <div class="flex items-center gap-2 py-2 border-b border-navy-50">
                         <div class="flex-1 min-w-0">
-                            <div class="text-sm font-bold text-navy-800 truncate">${esc(c.nama)}</div>
+                            <div class="flex items-center gap-1.5">
+                                <div class="text-sm font-bold text-navy-800 truncate">${esc(c.nama)}</div>
+                                ${t ? `<span class="shrink-0 text-[9px] font-bold bg-navy-800 text-gold-300 rounded px-1.5 py-0.5 uppercase">${esc(t.name)}</span>` : ''}
+                            </div>
                             <div class="text-[11px] text-navy-400">${fmt(c.jual)} × ${c.qty}</div>
                         </div>
                         <div class="flex items-center gap-1">
@@ -319,7 +344,7 @@
                         </div>
                         <div class="w-20 text-right text-sm font-bold text-navy-800">${fmt(c.subtotal)}</div>
                         <button onclick="hapusItem(${i})" class="text-rose-500 hover:bg-rose-50 rounded-lg px-1.5 text-sm">✕</button>
-                    </div>`).join('')
+                    </div>`;}).join('')
                 : '<div class="text-center text-navy-400 text-sm py-10">Keranjang kosong.<br>Tekan produk untuk menambah.</div>';
         }
 

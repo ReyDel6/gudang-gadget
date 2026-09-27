@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class GadgetController extends Controller
 {
@@ -131,6 +132,7 @@ class GadgetController extends Controller
                 }
 
                 $this->syncMasters($gadget->kategori, $gadget->supplier);
+                $this->syncTierPrices($gadget, $data);
 
                 if ($fotoPath) {
                     GadgetFoto::create(['id' => $gadget->id, 'url' => $fotoPath]);
@@ -225,6 +227,7 @@ class GadgetController extends Controller
                 }
 
                 $this->syncMasters($gadget->kategori, $gadget->supplier);
+                $this->syncTierPrices($gadget, $data);
 
                 if ($fotoPath) {
                     if ($oldFotoUrl) {
@@ -529,6 +532,75 @@ class GadgetController extends Controller
         }
         if (! empty($supplier)) {
             Supplier::firstOrCreate(['nama' => $supplier]);
+        }
+    }
+
+    /**
+     * Simpan harga tier (Grosir & Partai) dengan aturan harga aman:
+     * tidak boleh di bawah HPP (FR-1.3), harus lebih murah dari harga retail,
+     * partai harus lebih murah dari grosir, dan min_qty bertingkat.
+     * Retail (harga_jual, 1-2 unit) tidak disimpan di tabel.
+     */
+    protected function syncTierPrices(Gadget $gadget, array $data): void
+    {
+        $gadget->tierPrices()->delete();
+
+        $retail = (float) $gadget->harga_jual;
+        $hpp = (float) $gadget->harga_beli;
+
+        $gMin = $data['tier_grosir_min_qty'] ?? null;
+        $gPrice = $data['tier_grosir_price'] ?? null;
+        $pMin = $data['tier_partai_min_qty'] ?? null;
+        $pPrice = $data['tier_partai_price'] ?? null;
+
+        $tiers = [];
+
+        if (($gMin ?? '') !== '' && ($gPrice ?? '') !== '') {
+            $gross = round((float) $gPrice, 2);
+            if ($gross <= 0) {
+                throw ValidationException::withMessages(['tier_grosir_price' => 'Harga grosir harus lebih dari 0.']);
+            }
+            if ($hpp > 0 && $gross < $hpp) {
+                throw ValidationException::withMessages(['tier_grosir_price' => 'Harga grosir tidak boleh di bawah modal (Rp ' . number_format($hpp, 0, ',', '.') . ').']);
+            }
+            if ($retail > 0 && $gross >= $retail) {
+                throw ValidationException::withMessages(['tier_grosir_price' => 'Harga grosir harus lebih murah dari harga retail.']);
+            }
+            $tiers[] = [
+                'tier_name' => 'Grosir',
+                'min_qty' => (int) $gMin,
+                'max_qty' => null,
+                'price' => $gross,
+            ];
+        }
+
+        if (($pMin ?? '') !== '' && ($pPrice ?? '') !== '') {
+            $partai = round((float) $pPrice, 2);
+            if ($partai <= 0) {
+                throw ValidationException::withMessages(['tier_partai_price' => 'Harga partai harus lebih dari 0.']);
+            }
+            if ($hpp > 0 && $partai < $hpp) {
+                throw ValidationException::withMessages(['tier_partai_price' => 'Harga partai tidak boleh di bawah modal (Rp ' . number_format($hpp, 0, ',', '.') . ').']);
+            }
+            if ($retail > 0 && $partai >= $retail) {
+                throw ValidationException::withMessages(['tier_partai_price' => 'Harga partai harus lebih murah dari harga retail.']);
+            }
+            if ($tiers && (int) $pMin <= $tiers[0]['min_qty']) {
+                throw ValidationException::withMessages(['tier_partai_min_qty' => 'Jumlah minimal partai harus lebih besar dari jumlah minimal grosir.']);
+            }
+            if ($tiers && $partai >= $tiers[0]['price']) {
+                throw ValidationException::withMessages(['tier_partai_price' => 'Harga partai harus lebih murah dari harga grosir.']);
+            }
+            $tiers[] = [
+                'tier_name' => 'Partai',
+                'min_qty' => (int) $pMin,
+                'max_qty' => null,
+                'price' => $partai,
+            ];
+        }
+
+        if ($tiers) {
+            $gadget->tierPrices()->createMany($tiers);
         }
     }
 

@@ -47,6 +47,9 @@
             if (request('ready')) {
                 $chips[] = ['label' => 'Ready Stock', 'url' => $remove('ready')];
             }
+            if (request('grosir')) {
+                $chips[] = ['label' => 'Grosir / Partai', 'url' => $remove('grosir')];
+            }
             if (request('min') || request('max')) {
                 $chips[] = ['label' => 'Harga: Rp ' . (request('min') ?: '0') . ' – ' . (request('max') ?: '∞'), 'url' => $remove('min') . (request('max') ? '' : '')];
                 $q2 = collect(request()->query())->except(['min', 'page'])->filter(fn ($v) => $v !== '' && $v !== null)->toArray();
@@ -102,7 +105,7 @@
                             </button>
                         </div>
                         <form method="GET" action="{{ route('shop.katalog') }}" class="hidden md:block">
-                            @foreach (['q', 'kategori', 'brand', 'min', 'max', 'ready', 'condition'] as $f)
+                            @foreach (['q', 'kategori', 'brand', 'min', 'max', 'ready', 'grosir', 'condition'] as $f)
                                 @if (request($f))
                                     <input type="hidden" name="{{ $f }}" value="{{ request($f) }}">
                                 @endif

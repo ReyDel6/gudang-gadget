@@ -34,6 +34,10 @@ class StoreGadgetRequest extends FormRequest
             'condition' => ['nullable', 'in:new,like-new,used'],
             'warranty_info' => ['nullable', 'string', 'max:255'],
             'specifications' => ['nullable', 'array'],
+            'tier_grosir_min_qty' => ['nullable', 'integer', 'min:3'],
+            'tier_grosir_price' => ['nullable', 'numeric', 'min:0'],
+            'tier_partai_min_qty' => ['nullable', 'integer', 'min:4'],
+            'tier_partai_price' => ['nullable', 'numeric', 'min:0'],
             'foto' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
         ];
     }

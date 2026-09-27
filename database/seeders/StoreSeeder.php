@@ -78,5 +78,29 @@ class StoreSeeder extends Seeder
         if ($gadgetPromo) {
             $gadgetPromo->forceFill(['harga_promo' => 10200000])->saveQuietly();
         }
+
+        // Contoh harga tier Grosir & Partai untuk demo modul reseller.
+        $tiersDemo = [
+            'Iphone 14' => [
+                ['tier_name' => 'Grosir', 'min_qty' => 3, 'max_qty' => null, 'price' => 10400000],
+                ['tier_name' => 'Partai', 'min_qty' => 10, 'max_qty' => null, 'price' => 10000000],
+            ],
+            'Macbook Air M1 2020' => [
+                ['tier_name' => 'Grosir', 'min_qty' => 3, 'max_qty' => null, 'price' => 9900000],
+                ['tier_name' => 'Partai', 'min_qty' => 10, 'max_qty' => null, 'price' => 9600000],
+            ],
+        ];
+        foreach ($tiersDemo as $nama => $tiers) {
+            $gadget = Gadget::publik()->where('nama_produk', $nama)->first();
+            if (! $gadget) {
+                continue;
+            }
+            foreach ($tiers as $t) {
+                $gadget->tierPrices()->updateOrCreate(
+                    ['tier_name' => $t['tier_name']],
+                    ['min_qty' => $t['min_qty'], 'max_qty' => $t['max_qty'], 'price' => $t['price']]
+                );
+            }
+        }
     }
 }

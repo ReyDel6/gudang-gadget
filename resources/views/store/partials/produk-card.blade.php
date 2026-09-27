@@ -19,6 +19,9 @@
         <div class="p-4">
             <p class="text-xs text-navy-400 font-medium truncate" title="{{ $produk->kategori ?? '' }}">{{ $produk->kategori ?? '' }}</p>
             <a href="{{ route('shop.produk', $produk->id) }}" class="block font-bold text-navy-900 mt-0.5 leading-snug line-clamp-2 group-hover:text-gold-600 transition-colors min-h-[2.6rem]">{{ $produk->nama_produk }}</a>
+            @if ($produk->tierPrices->isNotEmpty())
+                <span class="inline-flex items-center gap-1 mt-1.5 text-[9px] font-black bg-navy-800 text-gold-300 px-2 py-1 rounded-full uppercase tracking-wide">Tersedia Harga Grosir / Partai</span>
+            @endif
             <div class="mt-2">
                 @if ($tokoh)
                     <p class="text-xs text-navy-400 line-through">Rp {{ number_format((float) $produk->harga_jual, 0, ',', '.') }}</p>

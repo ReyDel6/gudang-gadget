@@ -113,6 +113,17 @@ class Gadget extends Model
         return $this->hasMany(PriceHistory::class, 'gadget_id', 'id');
     }
 
+    public function tierPrices()
+    {
+        return $this->hasMany(GadgetTierPrice::class, 'gadget_id', 'id');
+    }
+
+    public function tierPricesTerurut()
+    {
+        return $this->hasMany(GadgetTierPrice::class, 'gadget_id', 'id')
+            ->orderBy('min_qty');
+    }
+
     public function terjual()
     {
         return $this->hasMany(PenjualanItem::class, 'gadget_id', 'id');

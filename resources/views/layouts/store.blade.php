@@ -134,12 +134,14 @@
                 </div>
                 <div>
                     <p class="font-semibold text-white mb-3">Lokasi</p>
-                    @if ($settings['maps_embed'])
+                    @if ($settings['maps_embed'] && !request()->routeIs('shop.home'))
                         <div class="rounded-xl overflow-hidden border border-white/10">
                             <iframe src="{{ $settings['maps_embed'] }}" width="100%" height="160" style="border:0" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Lokasi {{ $settings['store_name'] }}"></iframe>
                         </div>
                     @else
-                        <p class="text-sm text-navy-200/80">Peta belum diatur di Pengaturan Toko.</p>
+                        <p class="text-sm text-navy-200/80">
+                            {{ request()->routeIs('shop.home') ? 'Lihat peta besar di bagian "Kunjungi Toko Kami" di atas.' : 'Peta belum diatur di Pengaturan Toko.' }}
+                        </p>
                     @endif
                 </div>
             </div>

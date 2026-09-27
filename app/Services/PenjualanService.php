@@ -83,8 +83,27 @@ class PenjualanService
                     "Penjualan {$no}"
                 );
 
-                $hargaJual = (float) ($item['harga_jual'] ?? $gadget->harga_jual ?: $gadget->harga_beli);
-                $subtotal = round($hargaJual * (int) $item['qty'], 2);
+                $qty = (int) $item['qty'];
+                $retail = (float) $gadget->harga_jual ?: (float) $gadget->harga_beli;
+                $hargaJual = (float) ($item['harga_jual'] ?? $retail);
+
+                // Auto-tier harga grosir/partai: hanya saat kasir mengirimkan
+                // harga standar (retail/tier), bukan harga manual/kustom.
+                $tiers = $gadget->tierPrices()->orderByDesc('min_qty')->get();
+                if ($tiers->isNotEmpty() && $hargaJual > 0) {
+                    $dikenal = collect([$retail])->merge($tiers->map(fn ($t) => (float) $t->price))
+                        ->map(fn ($v) => round($v, 2))->unique()->all();
+                    if (in_array(round($hargaJual, 2), $dikenal, true)) {
+                        foreach ($tiers as $tier) {
+                            if ($qty >= (int) $tier->min_qty && (float) $tier->price > 0) {
+                                $hargaJual = round((float) $tier->price, 2);
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                $subtotal = round($hargaJual * $qty, 2);
                 $total += $subtotal;
 
                 $penjualan->items()->create([

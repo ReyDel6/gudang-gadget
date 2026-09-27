@@ -93,6 +93,38 @@
                 </div>
             </div>
 
+            <div class="bg-gold-50 border border-gold-200 rounded-xl p-5 space-y-4">
+                <h2 class="font-black text-navy-800 text-sm uppercase tracking-wide text-gold-700">Harga Grosir &amp; Partai (Reseller B2B)</h2>
+                <p class="text-xs text-navy-500 -mt-2">Tingkatkan jualan ke reseller. Retail memakai Harga Jual untuk 1–2 unit; isi harga grosir/partai agar kasir &amp; katalog otomatis mengenakan tarif khusus saat jumlah memenuhi syarat.</p>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div>
+                        <label class="block text-sm font-medium text-navy-700 mb-1">Min Qty Grosir</label>
+                        <input type="number" name="tier_grosir_min_qty" min="3" value="{{ old('tier_grosir_min_qty', 3) }}"
+                               class="w-full rounded-lg border border-gold-200 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gold-500">
+                        @error('tier_grosir_min_qty') <p class="text-rose-600 text-xs mt-1">{{ $message }}</p> @enderror
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-navy-700 mb-1">Harga Grosir (Rp)</label>
+                        <input type="number" name="tier_grosir_price" min="0" step="0.01" placeholder="cth: 10200000" value="{{ old('tier_grosir_price') }}"
+                               class="w-full rounded-lg border border-gold-200 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gold-500">
+                        @error('tier_grosir_price') <p class="text-rose-600 text-xs mt-1">{{ $message }}</p> @enderror
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-navy-700 mb-1">Min Qty Partai</label>
+                        <input type="number" name="tier_partai_min_qty" min="4" value="{{ old('tier_partai_min_qty', 10) }}"
+                               class="w-full rounded-lg border border-gold-200 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gold-500">
+                        @error('tier_partai_min_qty') <p class="text-rose-600 text-xs mt-1">{{ $message }}</p> @enderror
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-navy-700 mb-1">Harga Partai (Rp)</label>
+                        <input type="number" name="tier_partai_price" min="0" step="0.01" placeholder="cth: 9800000" value="{{ old('tier_partai_price') }}"
+                               class="w-full rounded-lg border border-gold-200 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gold-500">
+                        @error('tier_partai_price') <p class="text-rose-600 text-xs mt-1">{{ $message }}</p> @enderror
+                    </div>
+                </div>
+                <p class="text-xs text-navy-400">Kosongkan harga untuk menonaktifkan tier tersebut. Harga tier tidak boleh di bawah modal (harga beli) dan harus lebih murah dari harga retail.</p>
+            </div>
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-navy-700 mb-1">Serial Number</label>

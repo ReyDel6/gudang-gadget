@@ -75,5 +75,11 @@
         Hanya Ready Stock
     </label>
 
+    <label class="flex items-center gap-2 text-sm text-navy-700 cursor-pointer">
+        <input type="checkbox" name="grosir" value="1" @checked(request('grosir'))
+               onchange="this.form.submit()" class="h-4 w-4 rounded border-navy-200 text-gold-500 focus:ring-gold-500">
+        Hanya Produk Grosir / Partai
+    </label>
+
     <button type="submit" class="w-full bg-navy-900 hover:bg-navy-800 text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors">Terapkan Filter</button>
 </form>

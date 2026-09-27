@@ -129,6 +129,60 @@
                     </div>
                 </div>
 
+                @php
+                    $tiers = $product->tierPrices->sortBy('min_qty')->values();
+                @endphp
+
+                @if ($tiers->isNotEmpty())
+                    @php
+                        $retail = (float) $product->harga_jual;
+                        $rows = [];
+                        $first = $tiers->first();
+                        $rows[] = [
+                            'label' => 'Retail',
+                            'qty' => ((int) $first->min_qty > 1 ? '1 – ' . ((int) $first->min_qty - 1) . ' unit' : '1 unit'),
+                            'harga' => $retail,
+                            'hemat' => null,
+                        ];
+                        foreach ($tiers as $i => $t) {
+                            $next = $tiers[$i + 1] ?? null;
+                            $range = $next ? ((int) $t->min_qty . ' – ' . ((int) $next->min_qty - 1) . ' unit') : ('≥ ' . (int) $t->min_qty . ' unit');
+                            $rows[] = [
+                                'label' => $t->tier_name,
+                                'qty' => $range,
+                                'harga' => (float) $t->price,
+                                'hemat' => ($retail > (float) $t->price) ? ($retail - (float) $t->price) : null,
+                            ];
+                        }
+                    @endphp
+                    <div class="mt-6 bg-white rounded-2xl border border-navy-100 p-5">
+                        <div class="flex items-center justify-between gap-3 flex-wrap">
+                            <p class="text-sm font-black text-navy-900">🏷 Harga Grosir &amp; Partai</p>
+                            <a href="{{ \App\Support\WhatsApp::grosirLink($product) }}" target="_blank" rel="noopener"
+                               class="inline-flex items-center gap-1.5 bg-navy-900 hover:bg-navy-800 text-white text-xs font-bold px-3 py-2 rounded-lg transition-colors">
+                                💬 Tanya Harga Partai / Grosir
+                            </a>
+                        </div>
+                        <div class="mt-3 grid gap-px bg-navy-100 rounded-xl overflow-hidden">
+                            @foreach ($rows as $row)
+                                <div class="bg-white px-4 py-3 flex items-center justify-between gap-4">
+                                    <div class="flex items-center gap-3 min-w-0">
+                                        <span class="text-xs font-bold bg-navy-800 text-gold-300 rounded-md px-2 py-1 uppercase">{{ $row['label'] }}</span>
+                                        <span class="text-sm text-navy-500 font-medium">{{ $row['qty'] }}</span>
+                                    </div>
+                                    <div class="text-right shrink-0">
+                                        <span class="text-sm font-black text-navy-900">Rp {{ number_format($row['harga'], 0, ',', '.') }}<span class="text-[10px] text-navy-400 font-semibold">/unit</span></span>
+                                        @if ($row['hemat'])
+                                            <p class="text-[10px] text-emerald-600 font-bold">Hemat Rp {{ number_format($row['hemat'], 0, ',', '.') }}/unit</p>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                        <p class="text-[11px] text-navy-400 mt-2.5">Belum termasuk ongkir. Harga berlaku untuk pembelian langsung/grosir; tanyakan ketersediaan stok ke admin.</p>
+                    </div>
+                @endif
+
                 <div class="mt-6 rounded-2xl border border-navy-100 bg-white p-5">
                     <p class="text-sm font-black text-navy-900 mb-3">💳 Metode Pembayaran</p>
                     <div class="flex flex-wrap gap-2">
