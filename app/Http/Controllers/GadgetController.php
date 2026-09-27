@@ -554,6 +554,11 @@ class GadgetController extends Controller
             'stok_minimum' => ($data['stok_minimum'] ?? null) !== null ? (int) $data['stok_minimum'] : null,
             'serial_number' => $data['serial_number'] ?? null,
             'status' => $status,
+            'is_published' => isset($data['is_published']) ? (int) $data['is_published'] : true,
+            'is_featured' => isset($data['is_featured']) ? (int) $data['is_featured'] : false,
+            'condition' => $data['condition'] ?? 'new',
+            'warranty_info' => $data['warranty_info'] ?? null,
+            'specifications' => $data['specifications'] ?? null,
         ];
     }
 

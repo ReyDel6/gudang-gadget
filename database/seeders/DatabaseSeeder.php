@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
         }
 
         $this->seedAccount();
+        $this->call(StoreSeeder::class);
         $this->seedSampleStock();
     }
 

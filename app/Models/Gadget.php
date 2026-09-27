@@ -28,6 +28,11 @@ class Gadget extends Model
         'stok_minimum',
         'serial_number',
         'status',
+        'is_published',
+        'is_featured',
+        'condition',
+        'specifications',
+        'warranty_info',
     ];
 
     public $timestamps = true;
@@ -41,6 +46,9 @@ class Gadget extends Model
             'stock' => 'integer',
             'stok_minimum' => 'integer',
             'deleted_at' => 'datetime',
+            'is_published' => 'boolean',
+            'is_featured' => 'boolean',
+            'specifications' => 'array',
         ];
     }
 
@@ -103,6 +111,11 @@ class Gadget extends Model
         return $this->hasMany(PriceHistory::class, 'gadget_id', 'id');
     }
 
+    public function terjual()
+    {
+        return $this->hasMany(PenjualanItem::class, 'gadget_id', 'id');
+    }
+
     public function getFotoUrlAttribute()
     {
         $foto = $this->thumbnail;
@@ -147,5 +160,41 @@ class Gadget extends Model
         return $q->whereNull('deleted_at')
             ->where('stock', '<=', 0)
             ->where('status', '!=', 'Tidak Dijual');
+    }
+
+    public function scopePublik(Builder $q): Builder
+    {
+        return $q->whereNull('deleted_at')
+            ->where('is_published', true)
+            ->where('status', '!=', 'Tidak Dijual');
+    }
+
+    public function scopeUnggulan(Builder $q): Builder
+    {
+        return $q->publik()->where('is_featured', true);
+    }
+
+    public function getTersediaAttribute(): bool
+    {
+        return (int) $this->stock > 0;
+    }
+
+    public function getKetersediaanAttribute(): string
+    {
+        return $this->tersedia ? 'Ready Stock' : 'Stok Habis';
+    }
+
+    public function getKondisiLabelAttribute(): string
+    {
+        return match ($this->condition) {
+            'like-new' => 'Bekas Mulus',
+            'used' => 'Second',
+            default => 'Baru / Segel',
+        };
+    }
+
+    public function getBrandAttribute(): string
+    {
+        return (string) preg_replace('/[^A-Za-z0-9 ]/', '', ucfirst(explode(' ', trim($this->nama_produk))[0] ?? ''));
     }
 }

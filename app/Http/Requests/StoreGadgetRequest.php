@@ -28,6 +28,11 @@ class StoreGadgetRequest extends FormRequest
             'satuan' => ['nullable', 'string', 'max:50'],
             'stok_minimum' => ['nullable', 'integer', 'min:0'],
             'serial_number' => ['nullable', 'string', 'max:150'],
+            'is_published' => ['nullable', 'in:0,1'],
+            'is_featured' => ['nullable', 'in:0,1'],
+            'condition' => ['nullable', 'in:new,like-new,used'],
+            'warranty_info' => ['nullable', 'string', 'max:255'],
+            'specifications' => ['nullable', 'array'],
             'foto' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
         ];
     }

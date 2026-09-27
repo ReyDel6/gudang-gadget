@@ -88,6 +88,24 @@
                             <td class="px-4 py-3 align-top font-medium text-navy-800 truncate" title="{{ $row->nama_produk }}">
                                 <a href="{{ route('gadget.show', $row->id) }}"
                                    class="hover:text-gold-600 transition-colors">{{ $row->nama_produk }}</a>
+                                <div class="flex items-center gap-2 mt-1.5 print-hidden">
+                                    <form action="{{ route('store.barang.toggle', $row->id) }}" method="POST">
+                                        @csrf
+                                        <input type="hidden" name="field" value="is_published">
+                                        <button type="submit" title="{{ $row->is_published ? 'Sembunyikan dari katalog publik' : 'Tampilkan di katalog publik' }}"
+                                                class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full transition-colors {{ $row->is_published ? 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100' : 'bg-navy-100 text-navy-400 hover:bg-navy-200' }}">
+                                            {{ $row->is_published ? '● Publik' : '○ Publik' }}
+                                        </button>
+                                    </form>
+                                    <form action="{{ route('store.barang.toggle', $row->id) }}" method="POST">
+                                        @csrf
+                                        <input type="hidden" name="field" value="is_featured">
+                                        <button type="submit" title="{{ $row->is_featured ? 'Hapus dari unggulan' : 'Jadikan produk unggulan' }}"
+                                                class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full transition-colors {{ $row->is_featured ? 'bg-gold-100 text-gold-700 hover:bg-gold-200' : 'bg-navy-100 text-navy-400 hover:bg-navy-200' }}">
+                                            {{ $row->is_featured ? '★ Unggulan' : '☆ Unggulan' }}
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                             <td class="px-4 py-3 align-top text-navy-600 truncate" title="{{ $row->kategori }}">{{ $row->kategori }}</td>
                             <td class="px-4 py-3 align-top">
@@ -114,7 +132,8 @@
                             <td class="px-4 py-3 text-right align-top whitespace-nowrap print-hidden">
                                 <a href="{{ route('gadget.barcode', $row->id) }}" class="text-navy-600 hover:text-gold-600 font-medium mr-2">Barcode</a>
                                 <a href="{{ route('gadget.kartu-stok', $row->id) }}" class="text-navy-600 hover:text-gold-600 font-medium mr-2">Kartu Stok</a>
-                                <a href="{{ route('gadget.edit', $row->id) }}" class="text-navy-600 hover:text-gold-600 font-medium mr-3">Edit</a>
+                                <a href="{{ route('gadget.edit', $row->id) }}" class="text-navy-600 hover:text-gold-600 font-medium mr-2">Edit</a>
+                                <a href="{{ route('shop.produk', $row->id) }}" target="_blank" class="text-gold-600 hover:text-gold-700 font-medium mr-3">Toko ↗</a>
                                 @if (Auth::user()->isAdmin())
                                     <form action="{{ route('gadget.destroy', $row->id) }}" method="POST" class="inline"
                                         onsubmit="return confirm('Arsipkan produk {{ $row->nama_produk }}? Produk tetap bisa dipulihkan dari menu Arsip.')">

@@ -11,12 +11,19 @@ use App\Http\Controllers\PenjualanController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\ProfilController;
 use App\Http\Controllers\ShiftController;
+use App\Http\Controllers\StoreAdminController;
+use App\Http\Controllers\StorefrontController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/login', [LoginController::class, 'showLogin'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->middleware('guest', 'throttle:5,1');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->middleware('auth');
+
+// Storefront publik (tanpa login).
+Route::get('/shop', [StorefrontController::class, 'index'])->name('shop.home');
+Route::get('/shop/katalog', [StorefrontController::class, 'katalog'])->name('shop.katalog');
+Route::get('/shop/produk/{id}', [StorefrontController::class, 'produk'])->name('shop.produk');
 
 Route::middleware('guest')->group(function () {
     Route::get('/forgot-password', [LoginController::class, 'showForgot'])->name('password.request');
@@ -104,6 +111,15 @@ Route::middleware('auth')->group(function () {
         Route::post('/master/supplier', [MasterController::class, 'storeSupplier'])->name('master.supplier.store');
         Route::delete('/master/supplier/{id}', [MasterController::class, 'destroySupplier'])->name('master.supplier.destroy');
 
-        Route::get('/audit', [AuditLogController::class, 'index'])->name('audit.index');
+Route::get('/audit', [AuditLogController::class, 'index'])->name('audit.index');
     });
+
+    // Storefront admin.
+    Route::get('/store/banner', [StoreAdminController::class, 'banners'])->name('store.banner.index');
+    Route::post('/store/banner', [StoreAdminController::class, 'bannerStore'])->name('store.banner.store');
+    Route::put('/store/banner/{id}', [StoreAdminController::class, 'bannerUpdate'])->name('store.banner.update');
+    Route::delete('/store/banner/{id}', [StoreAdminController::class, 'bannerDestroy'])->name('store.banner.destroy');
+    Route::get('/store/settings', [StoreAdminController::class, 'settings'])->name('store.settings');
+    Route::post('/store/settings', [StoreAdminController::class, 'settingsStore'])->name('store.settings.store');
+    Route::post('/store/barang/{id}/toggle', [StoreAdminController::class, 'toggleGadget'])->name('store.barang.toggle');
 });

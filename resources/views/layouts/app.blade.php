@@ -266,6 +266,61 @@
                         </div>
                     </div>
 
+                {{-- Dropdown: Toko Online (Storefront) --}}
+                    @php
+                        $storeActive = str_starts_with($routeName, 'store.') || str_starts_with($routeName, 'shop.');
+                    @endphp
+                    <div class="space-y-1">
+                        <button type="button" onclick="toggleDropdown('store')"
+                                class="w-full flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-xl font-semibold text-sm transition-all
+                                       {{ $storeActive
+                                           ? 'bg-gold-500 text-white shadow-lg shadow-gold-500/30'
+                                           : 'hover:bg-white/10 text-slate-400 hover:text-white' }}">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 9l1.5-5h15L21 9v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9zM3 9h18M9 21v-6h6v6"/>
+                                </svg>
+                                <span class="truncate">Toko Online</span>
+                            </div>
+                            <svg id="chevron-store" class="w-4 h-4 shrink-0 transition-transform duration-200 {{ $storeActive ? 'text-white' : 'text-slate-400' }}"
+                                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                 stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M6 9l6 6 6-6"/>
+                            </svg>
+                        </button>
+                        <div id="submenu-store" class="pl-6 space-y-1 pt-1 hidden">
+                            <a href="{{ route('shop.home') }}" target="_blank"
+                               class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all hover:bg-white/10 text-slate-400 hover:text-white">
+                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/>
+                                </svg>
+                                Lihat Toko Publik ↗
+                            </a>
+                            <a href="{{ route('store.banner.index') }}"
+                               class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all
+                                      {{ $routeName === 'store.banner.index' || $routeName === 'store.banner.create'
+                                          ? 'bg-gold-500 text-white shadow-md'
+                                          : 'hover:bg-white/10 text-slate-400 hover:text-white' }}">
+                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
+                                </svg>
+                                Banner Promo
+                            </a>
+                            <a href="{{ route('store.settings') }}"
+                               class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all
+                                      {{ $routeName === 'store.settings'
+                                          ? 'bg-gold-500 text-white shadow-md'
+                                          : 'hover:bg-white/10 text-slate-400 hover:text-white' }}">
+                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M4 6h16M4 12h16M4 18h16" transform="rotate(90 12 12)"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                                Pengaturan Toko
+                            </a>
+                        </div>
+                    </div>
+
                 {{-- Link: Manajemen Pengguna --}}
                     @if (Auth::user()->isAdmin())
                         <a href="{{ route('user.index') }}"
@@ -466,6 +521,9 @@
 
             @if ($produkActive)
                 toggleDropdown('produk');
+            @endif
+            @if ($storeActive)
+                toggleDropdown('store');
             @endif
         </script>
 

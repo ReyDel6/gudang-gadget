@@ -84,7 +84,7 @@
                         </div>
                     @endif
 
-                    <form method="POST" action="{{ route('login') }}">
+                    <form method="POST" action="{{ route('login') }}" id="loginForm">
 
                         <div class="bg-white rounded-2xl border border-navy-100 p-6 space-y-5 shadow-sm">
                             @csrf
@@ -142,9 +142,48 @@
                             </button>
                         </div>
                     </form>
+
+                    <div class="mt-6 rounded-2xl border border-gold-200 bg-white p-5 shadow-sm">
+                        <div class="flex items-center justify-between mb-3">
+                            <p class="text-xs font-bold text-navy-400 uppercase tracking-wide">Akun Demo</p>
+                            <span class="text-[10px] font-bold bg-gold-100 text-gold-700 rounded-full px-2 py-0.5">Trial</span>
+                        </div>
+                        <p class="text-xs text-navy-500 mb-4">Klik satu tombol untuk masuk langsung ke akun demo.</p>
+                        <div class="space-y-2.5">
+                            <div class="flex items-center justify-between gap-3 rounded-xl border border-navy-100 bg-navy-50/50 px-4 py-3">
+                                <div class="min-w-0">
+                                    <p class="text-sm font-semibold text-navy-800">Admin Gudang</p>
+                                    <p class="text-xs text-navy-500 font-mono truncate">admin@gudanggadget.com</p>
+                                </div>
+                                <button type="button" onclick="demoLogin('admin@gudanggadget.com', 'AdminGudang2026!')"
+                                        class="shrink-0 bg-navy-700 hover:bg-navy-800 text-white text-xs font-bold px-3.5 py-2 rounded-lg transition-colors">
+                                    Masuk →
+                                </button>
+                            </div>
+                            <div class="flex items-center justify-between gap-3 rounded-xl border border-navy-100 bg-navy-50/50 px-4 py-3">
+                                <div class="min-w-0">
+                                    <p class="text-sm font-semibold text-navy-800">Staf Gudang</p>
+                                    <p class="text-xs text-navy-500 font-mono truncate">staff@gudang.test</p>
+                                </div>
+                                <button type="button" onclick="demoLogin('staff@gudang.test', 'staffpassword')"
+                                        class="shrink-0 bg-navy-700 hover:bg-navy-800 text-white text-xs font-bold px-3.5 py-2 rounded-lg transition-colors">
+                                    Masuk →
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+
+        <script>
+            function demoLogin(email, password) {
+                const form = document.getElementById('loginForm');
+                form.querySelector('input[name="email"]').value = email;
+                form.querySelector('input[name="password"]').value = password;
+                form.submit();
+            }
+        </script>
 
     </body>
 </html>

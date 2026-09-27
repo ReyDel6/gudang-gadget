@@ -119,6 +119,37 @@
                 </div>
             </div>
 
+            <div class="bg-gold-50 border border-gold-200 rounded-xl p-5 space-y-4">
+                <h2 class="font-black text-navy-800 text-sm uppercase tracking-wide text-gold-700">Storefront</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-navy-700 mb-1">Kondisi Barang</label>
+                        <select name="condition"
+                                class="w-full rounded-lg border border-gold-200 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gold-500">
+                            @foreach ([['new', 'Baru / Segel'], ['like-new', 'Bekas Mulus'], ['used', 'Second']] as [$val, $label])
+                                <option value="{{ $val }}" @selected(old('condition', 'new') === $val)>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-navy-700 mb-1">Informasi Garansi (opsional)</label>
+                        <input type="text" name="warranty_info" maxlength="255" value="{{ old('warranty_info') }}"
+                               placeholder="cth: Garansi toko 7 hari"
+                               class="w-full rounded-lg border border-gold-200 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gold-500">
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-6">
+                    <label class="flex items-center gap-2 text-sm font-medium text-navy-700 cursor-pointer">
+                        <input type="checkbox" name="is_published" value="1" @checked(old('is_published', true)) class="h-4 w-4 rounded border-navy-200 text-gold-500">
+                        Tampilkan di Katalog Publik
+                    </label>
+                    <label class="flex items-center gap-2 text-sm font-medium text-navy-700 cursor-pointer">
+                        <input type="checkbox" name="is_featured" value="1" @checked(old('is_featured')) class="h-4 w-4 rounded border-navy-200 text-gold-500">
+                        Jadikan Produk Unggulan (vitrin beranda)
+                    </label>
+                </div>
+            </div>
+
             <div>
                 <label class="block text-sm font-medium text-navy-700 mb-1">Deskripsi</label>
                 <textarea name="deskripsi" rows="4"
