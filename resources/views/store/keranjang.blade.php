@@ -13,7 +13,7 @@
                 <p class="text-sm text-navy-500 mt-1">
                     {{ $baris->isEmpty() ? 'Keranjang masih kosong.' : $baris->count() . ' produk siap checkout.' }}
                     @if ($resellerMode)
-                        <span class="font-bold text-gold-600">· Harga sudah pakai tarif Mitra Reseller</span>
+                        <span class="font-bold text-gold-600">· Harga sudah memakai tier grosir/partai sesuai jumlah</span>
                     @endif
                 </p>
             </div>
@@ -62,11 +62,11 @@
                         <form method="POST" action="{{ route('shop.keranjang.update') }}" class="flex items-center gap-2 shrink-0">
                             @csrf
                             <input type="hidden" name="gadget_id" value="{{ $item['gadget']->id }}">
-                            <button type="submit" name="qty" value="{{ max(1, $item['qty'] - 1) }}"
+                            <button type="submit" name="aksi" value="kurang"
                                     class="grid place-items-center w-8 h-8 rounded-lg border border-navy-200 text-navy-700 hover:border-gold-500 transition-colors" aria-label="Kurangi">−</button>
                             <input type="number" name="qty" value="{{ $item['qty'] }}" min="1" max="99"
                                    class="w-14 text-center rounded-lg border border-navy-200 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gold-500">
-                            <button type="button" onclick="this.closest('form').qty.value = {{ min(99, $item['qty'] + 1) }}; this.closest('form').submit()"
+                            <button type="submit" name="aksi" value="tambah"
                                     class="grid place-items-center w-8 h-8 rounded-lg border border-navy-200 text-navy-700 hover:border-gold-500 transition-colors" aria-label="Tambah">+</button>
                         </form>
                         <form method="POST" action="{{ route('shop.keranjang.hapus') }}" class="shrink-0">

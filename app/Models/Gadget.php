@@ -240,6 +240,28 @@ class Gadget extends Model
         return $this->harga_aktif;
     }
 
+    /**
+     * Harga efektif per unit untuk sejumlah qty tertentu:
+     * memakai tier grosir/partai yang paling dalam yang sudah terpenuhi, fallback ke harga retail.
+     * Dipakai untuk pembeli retail maupun mitra sehingga diskon hanya berlaku saat jumlah terpenuhi.
+     */
+    public function hargaUntuk(int $qty): float
+    {
+        $harga = (float) $this->harga_aktif;
+        if ($harga <= 0) {
+            return round($harga, 2);
+        }
+
+        $tierPrices = $this->tierPrices ?? collect();
+        foreach ($tierPrices->sortByDesc('min_qty') as $tier) {
+            if ($qty >= (int) $tier->min_qty && (float) $tier->price > 0) {
+                return round((float) $tier->price, 2);
+            }
+        }
+
+        return round($harga, 2);
+    }
+
     public function getDiskonPersenAttribute(): ?int
     {
         if (! $this->harga_promo_aktif) {

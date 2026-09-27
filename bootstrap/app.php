@@ -20,7 +20,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectUsersTo(function () {
             $user = auth()->user();
 
-            return $user && $user->isReseller() ? route('shop.mitra.beranda') : '/';
+            if ($user && $user->isReseller()) {
+                return route('shop.mitra.beranda');
+            }
+
+            return $user && $user->isTeknisi() ? '/servis' : '/';
         });
     })
     ->withExceptions(function (Exceptions $exceptions): void {

@@ -20,7 +20,7 @@
         <div class="bg-gold-500/15 border-b border-gold-500/30">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
                 <p class="text-sm font-bold text-navy-800">
-                    Mode Reseller aktif — harga menampilkan <span class="text-gold-700">tarif khusus mitra</span>.
+                    Mode Reseller aktif — harga menampilkan <span class="text-gold-700">tarif sesuai jumlah (tier grosir/partai)</span>.
                 </p>
                 <a href="{{ route('shop.mitra.beranda') }}"
                    class="shrink-0 text-xs font-black bg-navy-900 text-white px-4 py-2 rounded-full hover:bg-navy-800 transition-colors">
@@ -101,14 +101,14 @@
                 </div>
 
                 <div class="mt-4 flex items-end gap-3">
-                    <p class="text-3xl font-black {{ !$resellerMode && $product->harga_promo_aktif ? 'text-rose-600' : 'text-gold-600' }}">Rp {{ number_format($resellerMode ? $product->harga_mitra : $product->harga_aktif, 0, ',', '.') }}</p>
-                    @if ($product->harga_promo_aktif && !$resellerMode)
+                    <p class="text-3xl font-black {{ $product->harga_promo_aktif ? 'text-rose-600' : 'text-gold-600' }}">Rp {{ number_format($product->harga_aktif, 0, ',', '.') }}</p>
+                    @if ($product->harga_promo_aktif)
                         <p class="text-lg text-navy-400 line-through mb-1">Rp {{ number_format((float) $product->harga_jual, 0, ',', '.') }}</p>
                     @endif
                 </div>
                 @if ($resellerMode)
                     <p class="mt-1.5 text-xs font-black uppercase tracking-wide text-navy-500 inline-flex items-center gap-1.5 bg-navy-50 px-3 py-1.5 rounded-full">
-                        ✓ Tarif khusus Mitra Reseller terverifikasi
+                        ✓ Mitra Reseller terverifikasi — harga mengikuti jumlah (tier grosir/partai)
                     </p>
                 @endif
 

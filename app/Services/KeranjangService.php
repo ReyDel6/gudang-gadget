@@ -75,32 +75,18 @@ class KeranjangService
             return collect();
         }
 
-        $reseller = Auth::user() && Auth::user()->isReseller() && Auth::user()->reseller?->isApproved();
-
         $gadgets = Gadget::publik()
             ->with(['thumbnail', 'tierPrices' => fn ($q) => $q->orderBy('min_qty')])
             ->whereIn('id', array_keys($keranjang))
             ->get(StorefrontController::$publicColumns);
 
-        return $gadgets->map(function (Gadget $g) use ($keranjang, $reseller) {
+        return $gadgets->map(function (Gadget $g) use ($keranjang) {
             $qty = (int) ($keranjang[$g->id] ?? 0);
             if ($qty < 1) {
                 return null;
             }
 
-            if ($reseller) {
-                $harga = $g->harga_mitra;
-            } else {
-                $harga = (float) ($g->harga_promo_aktif ? $g->harga_promo : $g->harga_jual);
-                if ($harga > 0) {
-                    foreach ($g->tierPrices as $tier) {
-                        if ($qty >= (int) $tier->min_qty && (float) $tier->price > 0) {
-                            $harga = round((float) $tier->price, 2);
-                            break;
-                        }
-                    }
-                }
-            }
+            $harga = $g->hargaUntuk($qty);
 
             return [
                 'gadget' => $g,

@@ -127,10 +127,10 @@ class PenjualanService
                 $retail = (float) $gadget->harga_jual ?: (float) $gadget->harga_beli;
                 $hargaJual = (float) ($item['harga_jual'] ?? $retail);
 
-                // FR-3.2: tipe transaksi Mitra Reseller mengunci harga khusus mitra
-                // (tarif partai terendah) tanpa autotier lanjutan.
+                // FR-3.2: tipe transaksi Mitra Reseller memakai tier
+                // grosir/partai sesuai jumlah (diskon hanya saat min jumlah terpenuhi).
                 if ($tipe === 'reseller') {
-                    $hargaJual = $gadget->harga_mitra;
+                    $hargaJual = $gadget->hargaUntuk($qty);
                 } else {
                     // Auto-tier harga grosir/partai: hanya saat kasir mengirimkan
                     // harga standar (retail/tier), bukan harga manual/kustom.

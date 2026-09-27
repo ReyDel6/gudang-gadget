@@ -187,7 +187,7 @@ class MitraController extends Controller
             $keluar = fopen('php://output', 'w');
             fputcsv($keluar, [
                 'SKU', 'Nama Produk', 'Kategori', 'Harga Retail',
-                'Harga Mitra (Reseller)', 'Satuan', 'Stok', 'Tier Grosir / Partai',
+                'Harga Mitra/Partai (terendah)', 'Satuan', 'Stok', 'Tier Grosir / Partai',
             ]);
 
             foreach ($products as $p) {

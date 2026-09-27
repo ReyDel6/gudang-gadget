@@ -16,11 +16,13 @@ class User extends Authenticatable
     public const ROLE_ADMIN = 'admin';
     public const ROLE_STAFF = 'staff';
     public const ROLE_RESELLER = 'reseller';
+    public const ROLE_TEKNISI = 'teknisi';
 
     public const ROLES = [
         self::ROLE_ADMIN,
         self::ROLE_STAFF,
         self::ROLE_RESELLER,
+        self::ROLE_TEKNISI,
     ];
 
     /** @use HasFactory<UserFactory> */
@@ -46,6 +48,11 @@ class User extends Authenticatable
     public function isReseller(): bool
     {
         return $this->role === self::ROLE_RESELLER;
+    }
+
+    public function isTeknisi(): bool
+    {
+        return $this->role === self::ROLE_TEKNISI;
     }
 
     public function reseller()

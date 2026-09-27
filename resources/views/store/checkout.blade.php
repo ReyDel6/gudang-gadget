@@ -22,7 +22,7 @@
 
         @if ($resellerMode)
             <div class="mb-5 rounded-xl border border-gold-200 bg-gold-50 px-4 py-3 text-sm text-gold-800">
-                ✓ Anda login sebagai <b>Mitra Reseller terverifikasi</b> — harga di bawah sudah memakai tarif khusus mitra.
+                ✓ Anda login sebagai <b>Mitra Reseller terverifikasi</b> — harga otomatis memakai tier grosir/partai sesuai jumlah.
             </div>
         @endif
 

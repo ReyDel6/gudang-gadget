@@ -41,7 +41,18 @@ class StoreOrderController extends Controller
             'qty' => ['required', 'integer', 'min:1', 'max:99'],
         ]);
 
-        KeranjangService::set((int) $data['gadget_id'], (int) $data['qty']);
+        $qty = (int) $data['qty'];
+        $aksi = (string) $request->input('aksi', '');
+
+        if ($aksi === 'tambah' || $aksi === 'kurang') {
+            $gadget = Gadget::publik()->find($data['gadget_id']);
+            $batas = $gadget ? min(99, max(1, (int) $gadget->stock)) : 99;
+            $qty = $aksi === 'tambah'
+                ? min($batas, $qty + 1)
+                : max(1, $qty - 1);
+        }
+
+        KeranjangService::set((int) $data['gadget_id'], $qty);
 
         return redirect()->route('shop.keranjang');
     }

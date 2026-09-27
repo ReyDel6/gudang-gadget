@@ -38,6 +38,7 @@
                     <a href="{{ route('shop.katalog') }}" class="text-navy-600 hover:text-gold-600 transition-colors">Katalog</a>
                     <a href="{{ route('shop.home') }}#unggulan" class="text-navy-600 hover:text-gold-600 transition-colors">Unggulan</a>
                     <a href="{{ route('shop.home') }}#lokasi" class="text-navy-600 hover:text-gold-600 transition-colors">Lokasi Toko</a>
+                    <a href="{{ route('shop.tracking') }}" class="text-navy-600 hover:text-gold-600 transition-colors">Tracking Service</a>
                     <a href="{{ \Illuminate\Support\Facades\Auth::user()?->isReseller() ? route('shop.mitra.beranda') : route('shop.mitra.masuk') }}"
                        class="text-navy-600 hover:text-gold-600 transition-colors">Portal Mitra</a>
                 </nav>
@@ -97,6 +98,9 @@
                     </a>
                     <a href="{{ route('shop.home') }}#lokasi" onclick="toggleMobileMenu(false)" class="flex items-center justify-between w-full px-3 py-3 rounded-xl font-semibold text-navy-800 hover:bg-navy-50 transition-colors">
                         Info Lokasi & Jam Buka
+                    </a>
+                    <a href="{{ route('shop.tracking') }}" onclick="toggleMobileMenu(false)" class="flex items-center justify-between w-full px-3 py-3 rounded-xl font-semibold text-navy-800 hover:bg-navy-50 transition-colors">
+                        Tracking Service
                     </a>
                     <a href="{{ \Illuminate\Support\Facades\Auth::user()?->isReseller() ? route('shop.mitra.beranda') : route('shop.mitra.masuk') }}" onclick="toggleMobileMenu(false)"
                        class="flex items-center justify-between w-full px-3 py-3 rounded-xl font-semibold bg-navy-900 text-white hover:bg-navy-800 transition-colors">

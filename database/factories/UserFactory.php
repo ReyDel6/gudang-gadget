@@ -45,6 +45,26 @@ class UserFactory extends Factory
     }
 
     /**
+     * Indicate that the user has the reseller role.
+     */
+    public function reseller(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'reseller',
+        ]);
+    }
+
+    /**
+     * Indicate that the user has the technician role.
+     */
+    public function teknisi(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'teknisi',
+        ]);
+    }
+
+    /**
      * Indicate that the model's email address should be unverified.
      */
     public function unverified(): static

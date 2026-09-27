@@ -13,21 +13,23 @@ use App\Http\Controllers\PenjualanController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\ProfilController;
 use App\Http\Controllers\ShiftController;
-use App\Http\Controllers\OrderAdminController;
 use App\Http\Controllers\StoreAdminController;
 use App\Http\Controllers\StorefrontController;
 use App\Http\Controllers\StoreOrderController;
+use App\Http\Controllers\ServisController;
+use App\Http\Controllers\ServisTrackingController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/login', [LoginController::class, 'showLogin'])->name('login');
-Route::post('/login', [LoginController::class, 'login'])->middleware('guest', 'throttle:5,1');
+Route::post('/login', [LoginController::class, 'login'])->middleware('throttle:5,1');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->middleware('auth');
 
 // Storefront publik (tanpa login).
 Route::get('/shop', [StorefrontController::class, 'index'])->name('shop.home');
 Route::get('/shop/katalog', [StorefrontController::class, 'katalog'])->name('shop.katalog');
 Route::get('/shop/produk/{id}', [StorefrontController::class, 'produk'])->name('shop.produk');
+Route::get('/shop/tracking-service', [ServisTrackingController::class, 'index'])->name('shop.tracking');
 
 // Keranjang & checkout publik.
 Route::get('/shop/keranjang', [StoreOrderController::class, 'keranjang'])->name('shop.keranjang');
@@ -40,12 +42,12 @@ Route::get('/shop/order/{kode}', [StoreOrderController::class, 'status'])->name(
 Route::post('/shop/order/{kode}/bukti', [StoreOrderController::class, 'uploadBukti'])->name('shop.order.bukti');
 
 // Portal mitra reseller (B2B).
+Route::get('/shop/mitra/masuk', [MitraController::class, 'masuk'])->name('shop.mitra.masuk');
+Route::post('/shop/mitra/masuk', [MitraController::class, 'masukStore'])->name('shop.mitra.masuk.store')->middleware('throttle:5,10');
+Route::post('/shop/mitra/demo', [MitraController::class, 'demoMasuk'])->name('shop.mitra.demo.masuk')->middleware('throttle:5,10');
 Route::middleware('guest')->group(function () {
     Route::get('/shop/mitra/daftar', [MitraController::class, 'daftar'])->name('shop.mitra.daftar');
     Route::post('/shop/mitra/daftar', [MitraController::class, 'daftarStore'])->name('shop.mitra.daftar.store')->middleware('throttle:5,10');
-    Route::get('/shop/mitra/masuk', [MitraController::class, 'masuk'])->name('shop.mitra.masuk');
-    Route::post('/shop/mitra/masuk', [MitraController::class, 'masukStore'])->name('shop.mitra.masuk.store')->middleware('throttle:5,10');
-    Route::post('/shop/mitra/demo', [MitraController::class, 'demoMasuk'])->name('shop.mitra.demo.masuk')->middleware('throttle:5,10');
 });
 Route::post('/shop/mitra/keluar', [MitraController::class, 'keluar'])->name('shop.mitra.keluar')->middleware('auth');
 
@@ -163,4 +165,21 @@ Route::get('/audit', [AuditLogController::class, 'index'])->name('audit.index');
     Route::get('/store/settings', [StoreAdminController::class, 'settings'])->name('store.settings');
     Route::post('/store/settings', [StoreAdminController::class, 'settingsStore'])->name('store.settings.store');
     Route::post('/store/barang/{id}/toggle', [StoreAdminController::class, 'toggleGadget'])->name('store.barang.toggle');
+});
+
+// Modul Servis & Reparasi (PRD-SERVICE-REPARASI). Bisa diakses admin, staff, dan teknisi.
+Route::middleware(['auth', 'role:admin,staff,teknisi'])->prefix('servis')->name('servis.')->group(function () {
+    Route::get('/', [ServisController::class, 'index'])->name('index');
+    Route::get('/tiket-baru', [ServisController::class, 'create'])->name('create')->middleware('role:admin,staff');
+    Route::post('/', [ServisController::class, 'store'])->name('store')->middleware('role:admin,staff');
+    Route::post('/{servis}/status', [ServisController::class, 'status'])->name('status');
+    Route::post('/{servis}/items', [ServisController::class, 'tambahItem'])->name('item.tambah');
+    Route::delete('/{servis}/items/{item}', [ServisController::class, 'hapusItem'])->name('item.hapus');
+    Route::post('/{servis}/qc', [ServisController::class, 'qc'])->name('qc');
+    Route::get('/{servis}/lunas', [ServisController::class, 'lunas'])->name('lunas')->middleware('role:admin,staff');
+    Route::post('/{servis}/lunas', [ServisController::class, 'lunasStore'])->name('lunas.store')->middleware('role:admin,staff');
+    Route::post('/{servis}/garansi', [ServisController::class, 'garansi'])->name('garansi')->middleware('role:admin,staff');
+    Route::get('/{servis}/cetak', [ServisController::class, 'cetak'])->name('cetak')->middleware('role:admin,staff');
+    Route::get('/{servis}/cetak-lunas', [ServisController::class, 'cetakLunas'])->name('cetak-lunas')->middleware('role:admin,staff');
+    Route::get('/{servis}', [ServisController::class, 'show'])->name('show');
 });

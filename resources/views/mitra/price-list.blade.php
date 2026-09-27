@@ -13,7 +13,7 @@
                 <h1 class="text-2xl font-black text-navy-900 mt-1">Price List Harian</h1>
                 <p class="text-sm text-navy-500 mt-1">
                     {{ $products->count() }} produk ready stock · berlaku {{ now()->format('d M Y') }}.
-                    Harga mitra berlaku otomatis di keranjang selama Anda login sebagai mitra terverifikasi.
+                    Diskon tier (grosir/partai) berlaku otomatis di keranjang sesuai jumlah yang dibeli.
                 </p>
             </div>
             <div class="flex flex-wrap gap-2">
@@ -67,7 +67,7 @@
                             <th class="px-4 py-3 font-medium">SKU</th>
                             <th class="px-4 py-3 font-medium">Produk</th>
                             <th class="px-4 py-3 font-medium text-right">Harga Retail</th>
-                            <th class="px-4 py-3 font-medium text-right">Harga Mitra</th>
+                            <th class="px-4 py-3 font-medium text-right">Harga Mitra/Partai*</th>
                             <th class="px-4 py-3 font-medium text-center">Stok</th>
                             <th class="px-4 py-3 font-medium">Keterangan Tier</th>
                             <th class="px-4 py-3 font-medium text-center">Beli</th>
@@ -135,8 +135,9 @@
 
         <div class="mt-4 rounded-2xl border border-navy-100 bg-navy-50/50 p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <p class="text-xs text-navy-500">
-                * Harga mitra adalah tarif partai/terendah dan berlaku otomatis di keranjang selama Anda login.
-                Setelah checkout, admin mengonfirmasi ketersediaan & ongkir sebelum barang dikirim.
+                * Harga Mitra/Partai = tarif terendah (biasanya tier partai) sebagai acuan. Harga yang ditagih mengikuti
+                jumlah pembelian: harga retail untuk pembelian kecil, lalu otomatis turun ke tier grosir/partai saat
+                minimal jumlah terpenuhi. Setelah checkout, admin mengonfirmasi ketersediaan & ongkir sebelum barang dikirim.
             </p>
             <a href="{{ route('shop.keranjang') }}"
                class="shrink-0 bg-navy-900 hover:bg-navy-800 text-white text-sm font-bold px-4 py-2.5 rounded-xl transition-colors text-center">

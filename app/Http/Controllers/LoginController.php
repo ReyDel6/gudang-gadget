@@ -28,9 +28,11 @@ class LoginController extends Controller
             $request->session()->regenerate();
 
             $user = Auth::user();
-            $tujuan = $user && $user->isReseller() ? route('shop.mitra.beranda') : 'landing';
+            $tujuan = $user && $user->isReseller() ? route('shop.mitra.beranda') : route('landing');
 
-            return redirect()->intended($tujuan)
+            $request->session()->forget('url.intended');
+
+            return redirect($tujuan)
                 ->with('success', 'Selamat datang kembali!');
         }
 

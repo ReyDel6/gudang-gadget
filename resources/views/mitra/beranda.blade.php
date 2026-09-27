@@ -94,7 +94,7 @@
             <div class="mt-6 rounded-2xl border border-gold-200 bg-gold-500/10 p-5">
             <p class="text-sm font-black text-navy-900 mb-2">🛒 Checkout Online untuk Mitra</p>
             <p class="text-sm text-navy-500 leading-relaxed mb-4">
-                Tambahkan produk dari price list ke keranjang — harga mitra otomatis berlaku. Checkout lalu admin
+                Tambahkan produk dari price list ke keranjang — diskon tier grosir/partai otomatis mengikuti jumlah. Checkout lalu admin
                 konfirmasi ketersediaan &amp; ongkir sebelum barang dikirim. Untuk dropship, tulis alamat pengiriman
                 pelanggan Anda di form checkout.
             </p>

@@ -1,8 +1,7 @@
 @php
     $produk = $produk ?? null;
     $tokoh = $produk->harga_promo_aktif;
-    $resellerMode = $resellerMode ?? false;
-    $hargaTampil = $resellerMode ? $produk->harga_mitra : $produk->harga_aktif;
+    $hargaTampil = $produk->harga_aktif;
 @endphp
 @if ($produk)
     <div class="group bg-white rounded-2xl border border-navy-100 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all">
@@ -25,13 +24,10 @@
                 <span class="inline-flex items-center gap-1 mt-1.5 text-[9px] font-black bg-navy-800 text-gold-300 px-2 py-1 rounded-full uppercase tracking-wide">Tersedia Harga Grosir / Partai</span>
             @endif
             <div class="mt-2">
-                @if ($tokoh && !$resellerMode)
+                @if ($tokoh)
                     <p class="text-xs text-navy-400 line-through">Rp {{ number_format((float) $produk->harga_jual, 0, ',', '.') }}</p>
                 @endif
-                <p class="text-lg font-black {{ $tokoh && !$resellerMode ? 'text-rose-600' : 'text-gold-600' }}">Rp {{ number_format((float) $hargaTampil, 0, ',', '.') }}</p>
-                @if ($resellerMode)
-                    <p class="text-[10px] font-black uppercase tracking-wide text-navy-500 mt-0.5">Harga Mitra Reseller</p>
-                @endif
+                <p class="text-lg font-black {{ $tokoh ? 'text-rose-600' : 'text-gold-600' }}">Rp {{ number_format((float) $hargaTampil, 0, ',', '.') }}</p>
             </div>
             <div class="mt-3 flex items-center gap-2">
                 @if ($produk->tersedia)
