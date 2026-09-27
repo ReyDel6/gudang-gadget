@@ -9,6 +9,7 @@ class Pembayaran
     public const TRANSFER = 'transfer';
     public const DEBIT = 'debit';
     public const SPLIT = 'split';
+    public const TRADEIN = 'tradein';
 
     public const METODE = [
         self::CASH => 'Tunai',
@@ -16,6 +17,7 @@ class Pembayaran
         self::TRANSFER => 'Transfer Bank',
         self::DEBIT => 'Debit / EDC',
         self::SPLIT => 'Split',
+        self::TRADEIN => 'Tukar Tambah',
     ];
 
     public const STATUS = [

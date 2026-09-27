@@ -29,6 +29,8 @@ class Penjualan extends Model
         'paid_amount',
         'change_amount',
         'payment_ref',
+        'trade_in_value',
+        'trade_in_desc',
         'payment_status',
         'cashier_shift_id',
         'voided_at',
@@ -45,6 +47,7 @@ class Penjualan extends Model
             'pajak' => 'decimal:2',
             'paid_amount' => 'decimal:2',
             'change_amount' => 'decimal:2',
+            'trade_in_value' => 'decimal:2',
             'voided_at' => 'datetime',
             'is_dropship' => 'boolean',
         ];

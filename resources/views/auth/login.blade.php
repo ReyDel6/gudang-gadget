@@ -18,17 +18,9 @@
                     radial-gradient(500px 400px at -10% 110%, rgba(61,100,145,0.55), transparent 60%);"></div>
 
                 <div class="relative">
-                    <div class="flex items-center gap-2">
-                        <div class="grid place-items-center w-10 h-10 rounded-xl bg-gold-500 text-navy-900">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <rect x="2" y="7" width="20" height="14" rx="2"/>
-                                <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
-                                <path d="M12 12v3M9 13.5h6"/>
-                            </svg>
-                        </div>
-                        <span class="font-bold text-xl tracking-tight">Gudang <span class="text-gold-400">Gadget</span></span>
-                    </div>
+                    <x-logo size="lg" textClass="text-white">
+                        Gudang <span class="text-gold-400">Gadget</span>
+                    </x-logo>
                 </div>
 
                 <div class="relative">
@@ -56,16 +48,10 @@
                 <div class="w-full max-w-sm">
 
                     {{-- Logo (mobile) --}}
-                    <div class="lg:hidden flex items-center justify-center gap-2 mb-8">
-                        <div class="grid place-items-center w-10 h-10 rounded-xl bg-navy-700 text-gold-400">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <rect x="2" y="7" width="20" height="14" rx="2"/>
-                                <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
-                                <path d="M12 12v3M9 13.5h6"/>
-                            </svg>
-                        </div>
-                        <span class="font-bold text-xl tracking-tight text-navy-800">Gudang <span class="text-gold-500">Gadget</span></span>
+                    <div class="lg:hidden flex items-center justify-center mb-8">
+                        <x-logo size="lg" textClass="text-navy-900">
+                            Gudang <span class="text-gold-500">Gadget</span>
+                        </x-logo>
                     </div>
 
                     <h2 class="text-2xl font-bold text-navy-800">Masuk</h2>

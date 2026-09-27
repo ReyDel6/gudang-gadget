@@ -122,24 +122,43 @@
         </section>
     @endif
 
-    {{-- Produk unggulan --}}
-    <section id="unggulan" class="max-w-7xl mx-auto px-4 sm:px-6 py-6 pb-14">
-        <div class="flex items-end justify-between mb-6">
-            <div>
-                <p class="text-xs font-bold uppercase tracking-widest text-gold-600">Pilihan Kami</p>
-                <h2 class="text-2xl font-black text-navy-900 mt-1">Produk Unggulan</h2>
+    {{-- Gadget Baru --}}
+    @if ($baru->isNotEmpty())
+        <section id="baru" class="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+            <div class="flex items-end justify-between mb-6">
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-widest text-gold-600">Baru / Segel</p>
+                    <h2 class="text-2xl font-black text-navy-900 mt-1">Gadget Baru</h2>
+                </div>
+                <a href="{{ route('shop.katalog', ['condition' => 'new']) }}" class="text-sm font-semibold text-navy-600 hover:text-gold-600 transition-colors">Lihat semua →</a>
             </div>
-            <a href="{{ route('shop.katalog') }}" class="text-sm font-semibold text-navy-600 hover:text-gold-600 transition-colors">Lihat semua →</a>
-        </div>
 
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-            @forelse ($featured as $p)
-                @include('store.partials.produk-card', ['produk' => $p])
-            @empty
-                <div class="col-span-full text-center py-12 text-navy-400">Belum ada produk unggulan. Atur di Dashboard → Produk (centang Unggulan).</div>
-            @endforelse
-        </div>
-    </section>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                @foreach ($baru as $p)
+                    @include('store.partials.produk-card', ['produk' => $p])
+                @endforeach
+            </div>
+        </section>
+    @endif
+
+    {{-- Gadget Second & Bekas Mulus --}}
+    @if ($second->isNotEmpty())
+        <section id="second" class="max-w-7xl mx-auto px-4 sm:px-6 py-6 pb-14">
+            <div class="flex items-end justify-between mb-6">
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-widest text-gold-600">Second / Bekas</p>
+                    <h2 class="text-2xl font-black text-navy-900 mt-1">Gadget Second & Bekas Mulus</h2>
+                </div>
+                <a href="{{ route('shop.katalog', ['condition' => 'like-new']) }}" class="text-sm font-semibold text-navy-600 hover:text-gold-600 transition-colors">Lihat semua →</a>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                @foreach ($second as $p)
+                    @include('store.partials.produk-card', ['produk' => $p])
+                @endforeach
+            </div>
+        </section>
+    @endif
 
     {{-- Kunjungi Toko --}}
     <section id="lokasi" class="bg-navy-900 text-navy-100">

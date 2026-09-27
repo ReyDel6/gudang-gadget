@@ -3,6 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
         <title>@yield('title', 'Gudang Gadget')</title>
         <link rel="icon" type="image/svg+xml" href="/favicon.svg">
         @vite('resources/css/app.css')
@@ -19,22 +20,10 @@
             <aside id="sidebar"
                    class="w-64 bg-navy-900 text-slate-300 flex flex-col shadow-xl transition-all duration-300 overflow-hidden print-hidden">
 
-                {{-- Brand / Logo --}}
-                <div class="p-6 border-b border-white/10 flex items-center gap-3 w-64">
-                    <div class="p-2.5 bg-gold-500 rounded-xl text-navy-900 shadow-md">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="2" y="7" width="20" height="14" rx="2"/>
-                            <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
-                            <path d="M12 12v3M9 13.5h6"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <h1 class="font-black text-white text-lg tracking-tight">
-                            Gudang <span class="text-gold-400">Gadget</span>
-                        </h1>
-                        <span class="text-xs text-slate-400 font-medium">Panel Admin</span>
-                    </div>
+                <div class="p-5 border-b border-white/10 flex items-center w-64">
+                    <x-logo size="md" textClass="text-white" subtext="Panel Admin">
+                        Gudang <span class="text-gold-400">Gadget</span>
+                    </x-logo>
                 </div>
 
                 {{-- Navigation --}}
@@ -240,7 +229,53 @@
                         <span class="truncate">Mutasi Stok</span>
                     </a>
 
-                {{-- Dropdown: Laporan --}}
+                {{-- Dropdown: IMEI & Opname (PRD-IMEI-TRADEIN-OPNAME) --}}
+                    @php
+                        $inventarisActive = str_starts_with($routeName, 'imei.') || str_starts_with($routeName, 'opname.')
+                            || str_starts_with($routeName, 'trade-in.');
+                    @endphp
+                    <div class="space-y-1">
+                        <button type="button" onclick="toggleDropdown('inventaris')"
+                                class="w-full flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-xl font-semibold text-sm transition-all
+                                       {{ $inventarisActive
+                                           ? 'bg-gold-500 text-white shadow-lg shadow-gold-500/30'
+                                           : 'hover:bg-white/10 text-slate-400 hover:text-white' }}">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
+                                </svg>
+                                <span>IMEI, Trade-in & Opname</span>
+                            </div>
+                            <svg class="w-3.5 h-3.5 shrink-0 transition-transform {{ $inventarisActive ? 'rotate-180' : '' }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div id="dd_inventaris" class="{{ $inventarisActive ? '' : 'hidden' }} pl-3 space-y-1">
+                            <a href="{{ route('imei.index') }}"
+                               class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all
+                                      {{ str_starts_with($routeName, 'imei.')
+                                          ? 'bg-gold-500 text-white shadow-md'
+                                          : 'hover:bg-white/10 text-slate-400 hover:text-white' }}">
+                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+                                Pelacakan IMEI
+                            </a>
+                            <a href="{{ route('trade-in.index') }}"
+                               class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all
+                                      {{ str_starts_with($routeName, 'trade-in.')
+                                          ? 'bg-gold-500 text-white shadow-md'
+                                          : 'hover:bg-white/10 text-slate-400 hover:text-white' }}">
+                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9M3 3v6h6"/></svg>
+                                Matriks Trade-In
+                            </a>
+                            <a href="{{ route('opname.index') }}"
+                               class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all
+                                      {{ str_starts_with($routeName, 'opname.')
+                                          ? 'bg-gold-500 text-white shadow-md'
+                                          : 'hover:bg-white/10 text-slate-400 hover:text-white' }}">
+                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                                Stok Opname
+                            </a>
+                        </div>
+                    </div>
                     @php
                         $laporanActive = str_starts_with($routeName, 'laporan.');
                     @endphp

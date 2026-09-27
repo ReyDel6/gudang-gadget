@@ -123,6 +123,17 @@ class Gadget extends Model
         return $this->hasMany(GadgetTierPrice::class, 'gadget_id', 'id');
     }
 
+    public function imeis()
+    {
+        return $this->hasMany(GadgetImei::class, 'gadget_id', 'id');
+    }
+
+    public function imeisTersedia()
+    {
+        return $this->hasMany(GadgetImei::class, 'gadget_id', 'id')
+            ->where('status', GadgetImei::STA_AVAILABLE);
+    }
+
     public function tierPricesTerurut()
     {
         return $this->hasMany(GadgetTierPrice::class, 'gadget_id', 'id')

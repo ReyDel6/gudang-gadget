@@ -21,15 +21,8 @@
                             <path d="M4 7h16M4 12h16M4 17h16"/>
                         </svg>
                     </button>
-                    <a href="{{ route('shop.home') }}" class="flex items-center gap-2.5">
-                        <div class="grid place-items-center w-9 h-9 rounded-xl bg-gold-500 text-navy-900">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <rect x="2" y="7" width="20" height="14" rx="2"/>
-                                <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
-                                <path d="M12 12v3M9 13.5h6"/>
-                            </svg>
-                        </div>
-                        <span class="font-bold text-lg tracking-tight text-navy-900">{{ $settings['store_name'] }}</span>
+                    <a href="{{ route('shop.home') }}" class="flex items-center">
+                        <x-logo size="sm">{{ $settings['store_name'] }}</x-logo>
                     </a>
                 </div>
 
@@ -79,7 +72,7 @@
             <aside class="absolute left-0 top-0 h-full w-72 max-w-[85vw] bg-white shadow-2xl -translate-x-full transition-transform duration-300 flex flex-col"
                    aria-label="Tautan menu">
                 <div class="flex items-center justify-between px-5 h-16 border-b border-navy-100">
-                    <span class="font-bold text-navy-900">{{ $settings['store_name'] }}</span>
+                    <x-logo size="xs">{{ $settings['store_name'] }}</x-logo>
                     <button type="button" onclick="toggleMobileMenu(false)" class="grid place-items-center w-9 h-9 rounded-xl text-navy-500 hover:bg-navy-50 transition-colors" aria-label="Tutup menu">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
                     </button>

@@ -68,6 +68,13 @@
                     <p class="text-xs font-medium text-navy-400 uppercase tracking-wide mt-1">PPN {{ number_format($penjualan->pajak, 0, ',', '.') }}%</p>
                     <p class="text-sm text-navy-600">Rp {{ number_format($penjualan->pajak_nominal, 0, ',', '.') }}</p>
                 @endif
+                @if ((float) $penjualan->trade_in_value > 0)
+                    <p class="text-xs font-medium text-navy-400 uppercase tracking-wide mt-1">Tukar Tambah</p>
+                    <p class="text-sm text-emerald-600">− Rp {{ number_format($penjualan->trade_in_value, 0, ',', '.') }}</p>
+                    @if ($penjualan->trade_in_desc)
+                        <p class="text-xs text-navy-500">→ {{ $penjualan->trade_in_desc }}</p>
+                    @endif
+                @endif
                 <p class="text-xs font-medium text-navy-400 uppercase tracking-wide mt-1">Total</p>
                 <p class="text-2xl font-black text-navy-800 mt-0.5">Rp {{ number_format($penjualan->total, 0, ',', '.') }}</p>
                 <p class="text-sm text-emerald-600 font-semibold mt-1">Laba: Rp {{ number_format($penjualan->laba, 0, ',', '.') }}</p>
@@ -148,6 +155,9 @@
                             <td class="px-4 py-3 font-semibold text-navy-800">
                                 {{ $item->nama_produk }}
                                 <span class="block text-xs font-normal text-navy-400 mt-0.5">{{ $item->gadget?->sku ?: '' }}</span>
+                                @foreach ($item->imeis as $im)
+                                    <span class="block text-xs font-mono text-navy-500 mt-0.5">IMEI: {{ $im->imei }}</span>
+                                @endforeach
                             </td>
                             <td class="px-4 py-3 text-navy-600">Rp {{ number_format($item->harga_beli, 0, ',', '.') }}</td>
                             <td class="px-4 py-3 text-navy-800">Rp {{ number_format($item->harga_jual, 0, ',', '.') }}</td>

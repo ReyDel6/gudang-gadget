@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CashierShift;
 use App\Models\Gadget;
+use App\Models\GadgetImei;
 use App\Services\PenjualanService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,12 +16,15 @@ class PosController extends Controller
     {
         $products = Gadget::query()
             ->with(['tierPrices' => fn ($q) => $q->orderBy('min_qty')])
+            ->with(['imeis' => fn ($q) => $q->status(GadgetImei::STA_AVAILABLE)->orderBy('imei')])
             ->orderBy('nama_produk')
             ->get(['id', 'nama_produk', 'sku', 'harga_beli', 'harga_jual', 'stock', 'kategori', 'satuan']);
 
+        $matriksTradeIn = \App\Models\TradeInMaster::aktif()->orderBy('brand')->orderBy('model_name')->get();
+
         $shiftAktif = CashierShift::aktif()->where('user_id', Auth::id())->first();
 
-        return view('pos.index', compact('products', 'shiftAktif'));
+        return view('pos.index', compact('products', 'shiftAktif', 'matriksTradeIn'));
     }
 
     public function store(Request $request)

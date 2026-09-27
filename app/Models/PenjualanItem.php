@@ -35,4 +35,9 @@ class PenjualanItem extends Model
     {
         return $this->belongsTo(Gadget::class, 'gadget_id', 'id');
     }
+
+    public function imeis()
+    {
+        return $this->hasMany(GadgetImei::class, 'penjualan_item_id', 'id');
+    }
 }

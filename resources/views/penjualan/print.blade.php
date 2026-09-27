@@ -45,6 +45,9 @@
             <span>{{ $item->qty }} x Rp {{ number_format($item->harga_jual, 0, ',', '.') }}</span>
             <span>Rp {{ number_format($item->subtotal, 0, ',', '.') }}</span>
         </div>
+        @foreach ($item->imeis as $im)
+            <div style="padding-left: 6px;">IMEI: {{ $im->imei }}</div>
+        @endforeach
     @endforeach
     <div class="hr"></div>
     <div class="row"><span>Subtotal</span><span>Rp {{ number_format($penjualan->subtotal, 0, ',', '.') }}</span></div>
@@ -54,7 +57,10 @@
     @if ((float) $penjualan->pajak > 0)
         <div class="row"><span>PPN {{ number_format($penjualan->pajak, 0, ',', '.') }}%</span><span>Rp {{ number_format($penjualan->pajak_nominal, 0, ',', '.') }}</span></div>
     @endif
-    <div class="row besar bold"><span>TOTAL</span><span>Rp {{ number_format($penjualan->total, 0, ',', '.') }}</span></div>
+    @if ((float) $penjualan->trade_in_value > 0)
+        <div class="row"><span>Tukar Tambah</span><span>− Rp {{ number_format($penjualan->trade_in_value, 0, ',', '.') }}</span></div>
+    @endif
+        <div class="row besar bold"><span>TOTAL</span><span>Rp {{ number_format($penjualan->total, 0, ',', '.') }}</span></div>
     <div class="hr"></div>
     <div class="row"><span>Bayar</span><span>{{ $penjualan->payment_label }}</span></div>
     <div class="row"><span>Dibayar</span><span>Rp {{ number_format($penjualan->dibayar, 0, ',', '.') }}</span></div>

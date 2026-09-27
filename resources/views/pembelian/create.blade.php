@@ -119,6 +119,11 @@
                 <div class="col-span-2 md:col-span-1">
                     <button type="button" onclick="hapusBaris(this)"
                             class="w-full text-sm text-rose-500 hover:bg-rose-50 rounded-lg px-2 py-2.5 transition-colors">Hapus</button>
+                </div>
+                <div class="col-span-12">
+                    <label class="block text-xs font-medium text-navy-400 uppercase tracking-wide mb-1">IMEI / Serial Number (opsional)</label>
+                    <textarea name="items[${idx}][imei]" rows="2" placeholder="Satu nomor IMEI per baris (scan dus/IMEI barcode)" class="row-imei w-full rounded-lg border border-navy-100 px-3 py-2 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-gold-500"></textarea>
+                    <p class="text-[10px] text-navy-400 mt-0.5">Jumlah IMEI biasanya sama dengan qty item (1 unit = 1 nomor).</p>
                 </div>`;
             wrap.appendChild(div);
             hitung();

@@ -34,6 +34,37 @@
         </div>
 
         @php
+            $tabUrl = function (?string $kondisi): string {
+                $q = collect(request()->query())->except(['page', 'condition'])
+                    ->filter(fn ($v) => $v !== '' && $v !== null)->toArray();
+                if ($kondisi) {
+                    $q['condition'] = $kondisi;
+                }
+                return route('shop.katalog') . ($q ? '?' . http_build_query($q) : '');
+            };
+            $tabKondisiAktif = request('condition') ?: '';
+            $tabs = [
+                ['kode' => '',      'label' => 'Semua'],
+                ['kode' => 'new',   'label' => 'Baru / Segel'],
+                ['kode' => 'like-new', 'label' => 'Bekas Mulus'],
+                ['kode' => 'used',  'label' => 'Second'],
+            ];
+        @endphp
+
+        <div class="flex items-center gap-2 mb-6 overflow-x-auto pb-1 -mx-1 px-1">
+            <span class="shrink-0 text-xs font-black uppercase tracking-wide text-navy-400 mr-1">Kondisi:</span>
+            @foreach ($tabs as $tab)
+                <a href="{{ $tabUrl($tab['kode'] ?: null) }}"
+                   class="shrink-0 inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full text-sm font-black transition-colors
+                          {{ $tabKondisiAktif === $tab['kode']
+                              ? 'bg-navy-900 text-white shadow-lg'
+                              : 'bg-white border border-navy-100 text-navy-600 hover:border-gold-500 hover:text-gold-600' }}">
+                    {{ $tab['label'] }}
+                </a>
+            @endforeach
+        </div>
+
+        @php
             $chips = [];
             $base = route('shop.katalog');
             $remove = fn (string $except) => $base . (function () use ($except) {

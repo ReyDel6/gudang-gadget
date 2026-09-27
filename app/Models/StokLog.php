@@ -14,6 +14,7 @@ class StokLog extends Model
     public const TIPE_PENYESUAIAN = 'Penyesuaian';
     public const TIPE_TRANSFER = 'Transfer';
     public const TIPE_RUSAK = 'Rusak/Hilang';
+    public const TIPE_OPNAME = 'Opname';
 
     protected $fillable = [
         'gadget_id',

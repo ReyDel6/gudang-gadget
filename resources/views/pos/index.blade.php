@@ -195,27 +195,69 @@
                     </div>
                 </div>
 
-                <div>
-                    <label class="text-xs font-bold text-navy-400 uppercase block mb-1.5">Metode Pembayaran</label>
-                    <div class="grid grid-cols-3 gap-2">
-                        <button type="button" data-metode="cash" class="metrode px-3 py-3 rounded-xl border-2 border-gold-500 bg-gold-50 text-navy-900 font-bold text-sm">Tunai</button>
-                        <button type="button" data-metode="qris" class="metrode px-3 py-3 rounded-xl border-2 border-navy-200 text-navy-600 font-bold text-sm">QRIS</button>
-                        <button type="button" data-metode="transfer" class="metrode px-3 py-3 rounded-xl border-2 border-navy-200 text-navy-600 font-bold text-sm">Transfer</button>
-                        <button type="button" data-metode="debit" class="metrode px-3 py-3 rounded-xl border-2 border-navy-200 text-navy-600 font-bold text-sm">Debit/EDC</button>
-                        <button type="button" data-metode="split" class="metrode px-3 py-3 rounded-xl border-2 border-navy-200 text-navy-600 font-bold text-sm">Split</button>
+<div>
+                        <label class="text-xs font-bold text-navy-400 uppercase block mb-1.5">Metode Pembayaran</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button type="button" data-metode="cash" class="metrode px-3 py-3 rounded-xl border-2 border-gold-500 bg-gold-50 text-navy-900 font-bold text-sm">Tunai</button>
+                            <button type="button" data-metode="qris" class="metrode px-3 py-3 rounded-xl border-2 border-navy-200 text-navy-600 font-bold text-sm">QRIS</button>
+                            <button type="button" data-metode="transfer" class="metrode px-3 py-3 rounded-xl border-2 border-navy-200 text-navy-600 font-bold text-sm">Transfer</button>
+                            <button type="button" data-metode="debit" class="metrode px-3 py-3 rounded-xl border-2 border-navy-200 text-navy-600 font-bold text-sm">Debit/EDC</button>
+                            <button type="button" data-metode="split" class="metrode px-3 py-3 rounded-xl border-2 border-navy-200 text-navy-600 font-bold text-sm">Split</button>
+                        </div>
                     </div>
-                </div>
 
-                <div id="bayarPanel" class="space-y-3"></div>
+                    <div class="rounded-xl border-2 border-navy-100 p-3">
+                        <label class="flex items-center gap-2.5 cursor-pointer select-none">
+                            <input id="tradeinCheck" type="checkbox"
+                                   class="w-4.5 h-4.5 rounded border-navy-200 text-gold-500 focus:ring-gold-500">
+                            <span class="text-sm font-bold text-navy-800">🔄 Tukar Tambah</span>
+                            <span class="text-[10px] text-navy-400 font-semibold">terima unit lama sebagai potongan harga</span>
+                        </label>
+                        <div id="tradeinFields" class="hidden mt-3 space-y-3">
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="text-xs font-bold text-navy-500 uppercase block mb-1">Nilai Taksiran (Rp)</label>
+                                    <input id="tradeinValue" type="number" min="0" step="1000" value="0"
+                                           class="w-full rounded-lg border border-navy-200 px-3 py-2 text-sm text-right font-mono">
+                                </div>
+                                <div>
+                                    <label class="text-xs font-bold text-navy-500 uppercase block mb-1">IMEI / Seri Unit</label>
+                                    <input id="tradeinImei" type="text" placeholder="opsional"
+                                           class="w-full rounded-lg border border-navy-200 px-3 py-2 text-sm font-mono">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold text-navy-500 uppercase block mb-1">Deskripsi Unit (merk/model/kondisi)</label>
+                                <input id="tradeinDesc" type="text" placeholder="cth: iPhone 11 64GB — bekas mulus, minus baterai"
+                                       class="w-full rounded-lg border border-navy-200 px-3 py-2 text-sm">
+                            </div>
+                            <a href="{{ route('shop.trade-in') }}" target="_blank"
+                               class="inline-block text-xs font-bold text-gold-600 hover:text-gold-700">
+                                Cek nilai taksiran via Kalkulator Tukar Tambah →
+                            </a>
+                        </div>
+                    </div>
 
-                <div class="bg-navy-50 rounded-xl p-3 flex items-center justify-between">
-                    <span class="text-sm font-semibold text-navy-700">Total Tagihan</span>
-                    <span id="modalTotal" class="text-xl font-black text-navy-900">Rp 0</span>
-                </div>
-                <div id="kembalianRow" class="hidden bg-emerald-50 rounded-xl p-3 flex items-center justify-between">
-                    <span class="text-sm font-semibold text-emerald-700">Kembalian</span>
-                    <span id="modalKembalian" class="text-xl font-black text-emerald-700">Rp 0</span>
-                </div>
+                    <div id="bayarPanel" class="space-y-3"></div>
+
+                    <div class="bg-navy-50 rounded-xl p-3 space-y-1">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-semibold text-navy-700">Total Tagihan</span>
+                            <span id="modalTotal" class="text-lg font-black text-navy-900">Rp 0</span>
+                        </div>
+                        <div id="tradeinPotonganRow" class="hidden flex items-center justify-between">
+                            <span class="text-sm font-semibold text-emerald-700">− Potongan Tukar Tambah</span>
+                            <span id="tradeinPotongan" class="text-lg font-black text-emerald-700">− Rp 0</span>
+                        </div>
+                        <div class="border-t border-navy-200 pt-1 flex items-center justify-between">
+                            <span class="text-sm font-bold text-navy-800">Sisa Tagihan</span>
+                            <span id="modalSisa" class="text-xl font-black text-gold-600">Rp 0</span>
+                        </div>
+                    </div>
+                    <div id="kembalianRow" class="hidden bg-emerald-50 rounded-xl p-3 flex items-center justify-between">
+                        <span class="text-sm font-semibold text-emerald-700">Kembalian</span>
+                        <span id="modalKembalian" class="text-xl font-black text-emerald-700">Rp 0</span>
+                    </div>
 
                 <form id="formBayar" method="POST" action="{{ route('pos.store') }}" class="pt-1">
                     @csrf
@@ -238,6 +280,7 @@
             'beli' => (float) $p->harga_beli,
             'jual' => (float) $p->harga_jual ?: (float) $p->harga_beli,
             'stok' => (int) $p->stock,
+            'imeis' => $p->imeis->pluck('imei')->all(),
             'tiers' => $p->tierPrices
                 ->sortBy('min_qty')
                 ->values()
@@ -259,6 +302,7 @@
         let bayarTunai = '';
         let refBayar = '';
         let splitTunai = '';
+        let tradeIn = 0;
         let tipePelanggan = 'retail';
 
         const $ = sel => document.querySelector(sel);
@@ -332,7 +376,11 @@
                 if (ada.qty < p.stok) { ada.qty++; ada.subtotal = ada.jual * ada.qty; }
                 else { alert('Stok "' + p.nama + '" hanya tersisa ' + ada.qty + '.'); }
             } else {
-                cart.push({ id: String(id), nama: p.nama, jual: p.jual, stok: p.stok, qty: 1, subtotal: p.jual });
+                cart.push({
+                    id: String(id), nama: p.nama, jual: p.jual, stok: p.stok, qty: 1, subtotal: p.jual,
+                    punyaImei: (p.imeis || []).length > 0,
+                    imei: (p.imeis || []).slice(0, 1).map(x => String(x))
+                });
             }
             renderCart();
         }
@@ -341,14 +389,35 @@
             c.qty += d;
             if (c.qty <= 0) { cart.splice(i, 1); }
             else if (c.qty > c.stok) { c.qty = c.stok; alert('Stok "' + c.nama + '" hanya tersisa ' + c.stok + '.'); }
+            const p = pela[String(c.id)];
             if (cart[i]) {
-                const p = pela[String(c.id)];
                 cart[i].jual = hargaEfektif(p, cart[i].qty);
                 cart[i].subtotal = cart[i].jual * cart[i].qty;
             }
+            if (cart[i] && p.imeis && cart[i].qty > cart[i].imei.length) {
+                const belum = p.imeis.map(x => String(x)).filter(x => !cart[i].imei.includes(x));
+                while (cart[i].imei.length < cart[i].qty && belum.length) {
+                    cart[i].imei.push(belum.shift());
+                }
+            }
+            if (cart[i]) { cart[i].imei = cart[i].imei.slice(0, cart[i].qty); }
             renderCart();
         }
         function hapusItem(i) { cart.splice(i, 1); renderCart(); }
+
+        function aturImei(i) {
+            const c = cart[i];
+            const sel = document.querySelectorAll('.imei-pick')[i];
+            if (!sel) return;
+            c.imei = Array.from(sel.selectedOptions).map(o => o.value);
+            const sum = sel.closest('details').querySelector('summary');
+            if (sum) sum.textContent = 'IMEI: ' + c.imei.length + '/' + c.qty + ' terpilih · pilih ▾';
+        }
+
+        function sisaTagihan() {
+            const { total } = hitung();
+            return Math.max(0, total - tradeIn);
+        }
 
         function hitung() {
             diskon = Math.max(0, parseFloat(byId('diskonInput').value) || 0);
@@ -379,6 +448,17 @@
                                 ${t ? `<span class="shrink-0 text-[9px] font-bold bg-navy-800 text-gold-300 rounded px-1.5 py-0.5 uppercase">${esc(t.name)}</span>` : ''}
                             </div>
                             <div class="text-[11px] text-navy-400">${fmt(c.jual)} × ${c.qty}</div>
+                            ${c.punyaImei ? `
+                            <details class="mt-1 border border-navy-100 rounded-lg">
+                                <summary class="px-2 py-1 text-[10px] font-bold text-navy-600 cursor-pointer select-none">IMEI: ${c.imei.length}/${c.qty} terpilih · pilih ▾</summary>
+                                <div class="p-1">
+                                <select multiple size="${Math.min(4, (pela[String(c.id)].imeis || []).length)}"
+                                        onchange="aturImei(${i})" class="imei-pick w-full text-[11px] font-mono text-navy-700">
+                                    ${(pela[String(c.id)].imeis || []).map(im => `<option value="${esc(im)}" ${c.imei.includes(String(im)) ? 'selected' : ''}>${esc(im)}</option>`).join('')}
+                                </select>
+                                <div class="px-1 pb-1 text-[9px] text-navy-400">tahan Ctrl untuk pilih beberapa</div>
+                                </div>
+                            </details>` : ''}
                         </div>
                         <div class="flex items-center gap-1">
                             <button onclick="ubahQty(${i},-1)" class="w-7 h-7 rounded-lg border border-navy-200 text-navy-700 font-bold">−</button>
@@ -446,6 +526,12 @@
             if (cart.length === 0) return;
             const { total } = hitung();
             metode = 'cash'; bayarTunai = String(Math.ceil(total)); refBayar = ''; splitTunai = '';
+            tradeIn = 0;
+            byId('tradeinCheck').checked = false;
+            byId('tradeinFields').classList.add('hidden');
+            byId('tradeinValue').value = 0;
+            byId('tradeinDesc').value = '';
+            byId('tradeinImei').value = '';
             tipePelanggan = 'retail';
             byId('dropshipCheck').checked = false;
             byId('dropshipFields').classList.add('hidden');
@@ -460,6 +546,7 @@
                 b.classList.toggle('text-navy-600', !aktif);
             });
             renderBayar();
+            terapkanTradeIn();
             byId('modalBayar').classList.remove('hidden');
             byId('custName').focus();
         }
@@ -503,11 +590,28 @@
             hitungKembalian();
         });
 
+        byId('tradeinCheck').addEventListener('change', e => {
+            byId('tradeinFields').classList.toggle('hidden', !e.target.checked);
+            terapkanTradeIn();
+        });
+        byId('tradeinValue').addEventListener('input', terapkanTradeIn);
+
+        function terapkanTradeIn() {
+            tradeIn = Math.max(0, parseFloat(byId('tradeinValue').value) || 0);
+            const sisa = sisaTagihan();
+            byId('tradeinPotonganRow').classList.toggle('hidden', tradeIn <= 0);
+            byId('tradeinPotongan').textContent = '- ' + fmt(tradeIn);
+            byId('modalSisa').textContent = fmt(sisa);
+            hitungKembalian();
+        }
+
         function renderBayar() {
             const { total } = hitung();
             const panel = byId('bayarPanel');
             let html = '';
             if (metode === 'cash') {
+                bayarTunai = (parseFloat(bayarTunai) || 0).toString();
+                if (!bayarTunai || parseFloat(bayarTunai) === 0) bayarTunai = String(Math.ceil(sisaTagihan()) || 0);
                 html = tentangTunai('Uang Diterima', 'bayarTunai', bayarTunai);
             } else if (metode === 'split') {
                 html = tentangTunai('Tunai (sebagian)', 'splitTunai', splitTunai)
@@ -530,22 +634,38 @@
         }
 
         function hitungKembalian() {
-            const { total } = hitung();
-            const dibayar = dibayarSebenarnya(total);
-            byId('modalKembalian').parentElement.classList.toggle('hidden', dibayar < total);
-            byId('modalKembalian').textContent = fmt(Math.max(0, dibayar - total));
+            const sisa = sisaTagihan();
+            const dibayar = dibayarSebenarnya();
+            byId('modalKembalian').parentElement.classList.toggle('hidden', dibayar < sisa);
+            byId('modalKembalian').textContent = fmt(Math.max(0, dibayar - sisa));
         }
-        function dibayarSebenarnya(total) {
+        function dibayarSebenarnya() {
+            const sisa = sisaTagihan();
             if (metode === 'cash') return parseFloat(bayarTunai) || 0;
-            if (metode === 'split') return Math.max(total, parseFloat(splitTunai) || 0);
-            return total; // qris / transfer / debit dianggap lunas penuh.
+            if (metode === 'split') return Math.max(sisa, parseFloat(splitTunai) || 0);
+            return sisa; // qris / transfer / debit dianggap lunas penuh.
         }
 
         // ---------- SUBMIT ----------
         byId('formBayar').addEventListener('submit', e => {
-            const { sub, total } = hitung();
-            const dibayar = dibayarSebenarnya(total);
+            const { total } = hitung();
+            const sisa = sisaTagihan();
+            const dibayar = dibayarSebenarnya();
             const refEd = byId('refBayar');
+
+            // Validasi IMEI: wajib tepat satu nomor per unit untuk produk ber-IMEI.
+            for (const c of cart) {
+                if (c.punyaImei && c.imei.length !== c.qty) {
+                    e.preventDefault();
+                    alert('Pilih IMEI untuk "' + c.nama + '" tepat ' + c.qty + ' nomor unit sebelum membayar.');
+                    return;
+                }
+            }
+            if (metode === 'cash' && (dibayar + tradeIn + 0.001) < total) {
+                e.preventDefault();
+                alert('Uang yang diterima + tukar tambah kurang dari tagihan.');
+                return;
+            }
 
             const el = byId('hiddenItems');
             el.innerHTML = '';
@@ -554,6 +674,9 @@
                     `<input type="hidden" name="items[${i}][gadget_id]" value="${c.id}">
                      <input type="hidden" name="items[${i}][qty]" value="${c.qty}">
                      <input type="hidden" name="items[${i}][harga_jual]" value="${c.jual}">`);
+                (c.imei || []).forEach(im => {
+                    el.insertAdjacentHTML('beforeend', `<input type="hidden" name="items[${i}][imei][]" value="${esc(im)}">`);
+                });
             });
             el.insertAdjacentHTML('beforeend',
                 `<input type="hidden" name="diskon" value="${diskon}">
@@ -567,9 +690,11 @@
                  <input type="hidden" name="recipient_name" value="${byId('dropshipCheck').checked ? esc(byId('recipientName').value.trim()) : ''}">
                  <input type="hidden" name="recipient_address" value="${byId('dropshipCheck').checked ? esc(byId('recipientAddress').value.trim()) : ''}">
                  <input type="hidden" name="payment_method" value="${metode}">
-                 <input type="hidden" name="paid_amount" value="${dibayar}">
-                 <input type="hidden" name="payment_ref" value="${refEd ? esc(refEd.value.trim()) : ''}">`);
-            // Nonaktif dulu supaya tidak dobel submit.
+                 <input type="hidden" name="paid_amount" value="${Math.max(0, dibayar)}">
+                 <input type="hidden" name="payment_ref" value="${refEd ? esc(refEd.value.trim()) : ''}">
+                 <input type="hidden" name="trade_in_value" value="${Math.max(0, tradeIn)}">
+                 <input type="hidden" name="trade_in_desc" value="${byId('tradeinFields').classList.contains('hidden') ? '' : esc(byId('tradeinDesc').value.trim())}">
+                 <input type="hidden" name="trade_in_imei" value="${byId('tradeinFields').classList.contains('hidden') ? '' : esc(byId('tradeinImei').value.trim())}">`);
             byId('btnProses').disabled = true;
             byId('btnProses').textContent = 'Memproses...';
         });

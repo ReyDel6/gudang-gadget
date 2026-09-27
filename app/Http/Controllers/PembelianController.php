@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AuditLog;
 use App\Models\Gadget;
+use App\Models\GadgetImei;
 use App\Models\Pembelian;
 use App\Models\PriceHistory;
 use App\Models\StokLog;
@@ -49,6 +50,7 @@ class PembelianController extends Controller
             'items.*.gadget_id' => ['required', 'integer', 'exists:products,id'],
             'items.*.qty' => ['required', 'integer', 'min:1'],
             'items.*.harga_beli' => ['nullable', 'numeric', 'min:0'],
+            'items.*.imei' => ['nullable', 'string', 'max:10000'],
             'diskon' => ['nullable', 'numeric', 'min:0'],
             'pajak' => ['nullable', 'numeric', 'min:0', 'max:100'],
         ], [
@@ -104,6 +106,22 @@ class PembelianController extends Controller
                         'qty' => (int) $item['qty'],
                         'subtotal' => $subtotal,
                     ]);
+
+                    // FR-I: catat daftar IMEI/Serial unit fisik yang masuk (1 nomor per baris).
+                    if ($imeiBlok = trim((string) ($item['imei'] ?? ''))) {
+                        $daftarImei = preg_split('/[\s,;]+/', $imeiBlok);
+                        foreach (array_filter($daftarImei, fn ($v) => $v !== '') as $nomor) {
+                            GadgetImei::updateOrCreate(
+                                ['imei' => $nomor],
+                                [
+                                    'gadget_id' => $gadget->id,
+                                    'status' => GadgetImei::STA_AVAILABLE,
+                                    'masuk_via' => $no,
+                                    'masuk_at' => now(),
+                                ]
+                            );
+                        }
+                    }
                 }
 
                 $dasarPajak = $total - $diskon;

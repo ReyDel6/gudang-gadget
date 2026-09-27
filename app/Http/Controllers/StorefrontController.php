@@ -21,12 +21,23 @@ class StorefrontController extends Controller
     public function index()
     {
         $banners = StoreBanner::aktif()->get();
-        $featured = Gadget::unggulan()->with(['thumbnail', 'galeri', 'tierPrices'])->limit(8)->get(self::$publicColumns);
+        $baru = Gadget::publik()->with(['thumbnail', 'galeri', 'tierPrices'])
+            ->where('condition', '=', 'new')
+            ->orderByDesc('is_featured')
+            ->orderByDesc('id')
+            ->limit(8)
+            ->get(self::$publicColumns);
+        $second = Gadget::publik()->with(['thumbnail', 'galeri', 'tierPrices'])
+            ->whereIn('condition', ['like-new', 'used'])
+            ->orderByDesc('is_featured')
+            ->orderByDesc('id')
+            ->limit(8)
+            ->get(self::$publicColumns);
         $categories = $this->categories();
         $settings = $this->settings();
         $resellerMode = $this->resellerMode();
 
-        return view('store.index', compact('banners', 'featured', 'categories', 'settings', 'resellerMode'));
+        return view('store.index', compact('banners', 'baru', 'second', 'categories', 'settings', 'resellerMode'));
     }
 
     public function katalog(Request $request)
@@ -139,7 +150,7 @@ class StorefrontController extends Controller
         ];
     }
 
-    protected function resellerMode(): bool
+    public function resellerMode(): bool
     {
         $user = Auth::user();
 

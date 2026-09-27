@@ -19,7 +19,11 @@ use App\Http\Controllers\StoreOrderController;
 use App\Http\Controllers\ServisController;
 use App\Http\Controllers\ServisIntakeController;
 use App\Http\Controllers\ServisTrackingController;
+use App\Http\Controllers\TradeInController;
+use App\Http\Controllers\TradeInMasterController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\GadgetImeiController;
+use App\Http\Controllers\OpnameController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/login', [LoginController::class, 'showLogin'])->name('login');
@@ -31,6 +35,9 @@ Route::get('/shop', [StorefrontController::class, 'index'])->name('shop.home');
 Route::get('/shop/katalog', [StorefrontController::class, 'katalog'])->name('shop.katalog');
 Route::get('/shop/produk/{id}', [StorefrontController::class, 'produk'])->name('shop.produk');
 Route::get('/shop/tracking-service', [ServisTrackingController::class, 'index'])->name('shop.tracking');
+
+// Kalkulator / taksiran Tukar Tambah (publik).
+Route::get('/shop/tukar-tambah', [TradeInController::class, 'index'])->name('shop.trade-in');
 
 // Ajukan servis dari storefront (publik).
 Route::get('/shop/ajukan-servis', [ServisIntakeController::class, 'create'])->name('shop.intake');
@@ -121,6 +128,27 @@ Route::middleware(['auth', 'role:admin,staff'])->group(function () {
     Route::get('/pembelian/{id}', [PembelianController::class, 'show'])->name('pembelian.show');
     Route::get('/pembelian/{id}/cetak', [PembelianController::class, 'cetak'])->name('pembelian.cetak');
     Route::delete('/pembelian/{id}', [PembelianController::class, 'destroy'])->name('pembelian.destroy')->middleware('role:admin');
+
+    // Pelacakan IMEI / Serial Number (PRD-IMEI-TRADEIN-OPNAME #1).
+    Route::get('/imei', [GadgetImeiController::class, 'index'])->name('imei.index');
+    Route::get('/imei/{id}', [GadgetImeiController::class, 'show'])->name('imei.show');
+
+    // Matriks Tukar Tambah (PRD-IMEI-TRADEIN-OPNAME #2).
+    Route::get('/trade-in', [TradeInMasterController::class, 'index'])->name('trade-in.index');
+    Route::get('/trade-in/create', [TradeInMasterController::class, 'create'])->name('trade-in.create')->middleware('role:admin');
+    Route::post('/trade-in', [TradeInMasterController::class, 'store'])->name('trade-in.store')->middleware('role:admin');
+    Route::get('/trade-in/{id}/edit', [TradeInMasterController::class, 'edit'])->name('trade-in.edit')->middleware('role:admin');
+    Route::put('/trade-in/{id}', [TradeInMasterController::class, 'update'])->name('trade-in.update')->middleware('role:admin');
+    Route::delete('/trade-in/{id}', [TradeInMasterController::class, 'destroy'])->name('trade-in.destroy')->middleware('role:admin');
+
+    // Stok Opname (PRD-IMEI-TRADEIN-OPNAME #3).
+    Route::get('/opname', [OpnameController::class, 'index'])->name('opname.index')->middleware('role:admin');
+    Route::post('/opname', [OpnameController::class, 'store'])->name('opname.store')->middleware('role:admin');
+    Route::post('/opname/{opname}/batal', [OpnameController::class, 'batal'])->name('opname.batal')->middleware('role:admin');
+    Route::get('/opname/{opname}', [OpnameController::class, 'show'])->name('opname.show')->middleware('role:admin');
+    Route::post('/opname/{opname}/scan', [OpnameController::class, 'scan'])->name('opname.scan')->middleware('role:admin');
+    Route::post('/opname/{opname}/selesai', [OpnameController::class, 'selesai'])->name('opname.selesai')->middleware('role:admin');
+    Route::get('/opname/{opname}/cetak', [OpnameController::class, 'cetak'])->name('opname.cetak')->middleware('role:admin');
 
     // Urutan penting: rute statis (/arsip, /import, /export) harus
     // dideklarasikan sebelum rute dinamis /gadget/{id}.
