@@ -62,4 +62,34 @@ function initCharts() {
             },
         });
     }
+
+    const trendCanvas = document.getElementById('trendChart');
+    if (trendCanvas && dash.trend && dash.trend.length) {
+        new Chart(trendCanvas, {
+            type: 'bar',
+            data: {
+                labels: dash.trend.map(t => t.label),
+                datasets: [{
+                    label: 'Pendapatan Penjualan',
+                    data: dash.trend.map(t => t.total),
+                    backgroundColor: '#D9A441',
+                    hoverBackgroundColor: '#C08F2D',
+                    borderRadius: 8,
+                    maxBarThickness: 46,
+                }],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { callbacks: { label: ctx => 'Rp ' + Math.round(ctx.raw).toLocaleString('id-ID') } },
+                },
+                scales: {
+                    y: { beginAtZero: true, ticks: { color: '#274A70', callback: v => v.toLocaleString('id-ID') }, grid: { color: '#EFF3F8' } },
+                    x: { ticks: { color: '#274A70' } },
+                },
+            },
+        });
+    }
 }

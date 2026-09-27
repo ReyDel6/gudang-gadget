@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
@@ -21,6 +22,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Paginator::useTailwind();
+
         Gate::define('role-admin', fn ($user) => $user !== null && $user->isAdmin());
         Gate::define('role-staff', fn ($user) => $user !== null && ($user->isAdmin() || $user->isStaff()));
     }

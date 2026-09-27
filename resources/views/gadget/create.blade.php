@@ -40,8 +40,13 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-navy-700 mb-1">Supplier</label>
-                    <input type="text" name="supplier" value="{{ old('supplier') }}"
+                    <input type="text" name="supplier" list="supplier-list" value="{{ old('supplier') }}"
                            class="w-full rounded-lg border border-navy-100 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gold-500">
+                    <datalist id="supplier-list">
+                        @foreach ($supplierList as $supplier)
+                            <option value="{{ $supplier }}"></option>
+                        @endforeach
+                    </datalist>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-navy-700 mb-1">Lokasi Rak</label>
@@ -67,9 +72,17 @@
                     <input type="text" name="satuan" value="{{ old('satuan', 'pcs') }}"
                            class="w-full rounded-lg border border-navy-100 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gold-500">
                 </div>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-navy-700 mb-1">Harga Beli (Rp)</label>
                     <input type="number" name="harga_beli" min="0" step="0.01" value="{{ old('harga_beli', 0) }}"
+                           class="w-full rounded-lg border border-navy-100 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gold-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-navy-700 mb-1">Harga Jual (Rp)</label>
+                    <input type="number" name="harga_jual" min="0" step="0.01" value="{{ old('harga_jual', 0) }}"
                            class="w-full rounded-lg border border-navy-100 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gold-500">
                 </div>
             </div>

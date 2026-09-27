@@ -41,7 +41,48 @@
         </div>
     @endif
 
-    <section class="grid lg:grid-cols-2 gap-5 mt-8">
+    <section class="grid grid-cols-2 lg:grid-cols-4 gap-5 mt-8">
+        <a href="{{ route('penjualan.index') }}" class="bg-white rounded-xl border border-navy-100 p-5 hover:border-gold-300 transition-colors">
+            <p class="text-gold-500 font-semibold text-sm mb-1">Penjualan Hari Ini</p>
+            <p class="text-2xl font-bold text-navy-800">Rp {{ number_format($ringkasanTransaksi['penjualan_hari']['total'], 0, ',', '.') }}</p>
+            <p class="text-xs text-navy-400 mt-1">{{ $ringkasanTransaksi['penjualan_hari']['jumlah'] }} transaksi</p>
+        </a>
+        <a href="{{ route('pembelian.index') }}" class="bg-white rounded-xl border border-navy-100 p-5 hover:border-gold-300 transition-colors">
+            <p class="text-gold-500 font-semibold text-sm mb-1">Pembelian Hari Ini</p>
+            <p class="text-2xl font-bold text-navy-800">Rp {{ number_format($ringkasanTransaksi['pembelian_hari']['total'], 0, ',', '.') }}</p>
+            <p class="text-xs text-navy-400 mt-1">{{ $ringkasanTransaksi['pembelian_hari']['jumlah'] }} transaksi</p>
+        </a>
+        <a href="{{ route('laporan.laba-rugi') }}" class="bg-white rounded-xl border border-navy-100 p-5 hover:border-gold-300 transition-colors">
+            <p class="text-gold-500 font-semibold text-sm mb-1">Penjualan Bulan Ini</p>
+            <p class="text-2xl font-bold text-navy-800">Rp {{ number_format($ringkasanTransaksi['penjualan_bulan']['total'], 0, ',', '.') }}</p>
+            <p class="text-xs text-emerald-600 mt-1">Laba bulan ini: Rp {{ number_format($ringkasanTransaksi['penjualan_bulan']['laba'], 0, ',', '.') }}</p>
+        </a>
+        <a href="{{ route('pembelian.index') }}" class="bg-white rounded-xl border border-navy-100 p-5 hover:border-gold-300 transition-colors">
+            <p class="text-gold-500 font-semibold text-sm mb-1">Pembelian Bulan Ini</p>
+            <p class="text-2xl font-bold text-navy-800">Rp {{ number_format($ringkasanTransaksi['pembelian_bulan']['total'], 0, ',', '.') }}</p>
+            <p class="text-xs text-navy-400 mt-1">{{ $ringkasanTransaksi['pembelian_bulan']['jumlah'] }} transaksi</p>
+        </a>
+    </section>
+
+    <a href="{{ route('laporan.laba-rugi') }}"
+       class="mt-5 flex items-center justify-between gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-5 py-4 transition-colors hover:border-emerald-300">
+        <div class="flex items-center gap-3">
+            <span class="grid place-items-center w-10 h-10 rounded-xl bg-emerald-600/10 text-emerald-600">
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 1v22M17 5.5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                </svg>
+            </span>
+            <div>
+                <p class="text-sm font-bold text-emerald-800">Laba Tahun Berjalan ({{ date('Y') }})</p>
+                <p class="text-xs text-emerald-600 mt-0.5">{{ $ringkasanTransaksi['penjualan_tahun']['jumlah'] }} transaksi penjualan</p>
+            </div>
+        </div>
+        <p class="text-lg font-bold {{ $ringkasanTransaksi['penjualan_tahun']['laba'] >= 0 ? 'text-emerald-700' : 'text-rose-600' }}">
+            {{ $ringkasanTransaksi['penjualan_tahun']['laba'] >= 0 ? '+' : '−' }}Rp {{ number_format(abs($ringkasanTransaksi['penjualan_tahun']['laba']), 0, ',', '.') }}
+        </p>
+    </a>
+
+    <section class="grid lg:grid-cols-2 gap-5 mt-8 print-hidden">
         <div class="bg-white rounded-2xl border border-navy-100 p-6 print-hidden">
             <h2 class="text-lg font-bold text-navy-800 mb-1">Stok per Kategori</h2>
             <p class="text-sm text-navy-400 mb-4">Distribusi stok berdasarkan kategori produk.</p>
@@ -50,10 +91,10 @@
             </div>
         </div>
         <div class="bg-white rounded-2xl border border-navy-100 p-6 print-hidden">
-            <h2 class="text-lg font-bold text-navy-800 mb-1">Jumlah Produk per Kategori</h2>
-            <p class="text-sm text-navy-400 mb-4">Banyaknya produk tiap kategori.</p>
+            <h2 class="text-lg font-bold text-navy-800 mb-1">Tren Penjualan 6 Bulan</h2>
+            <p class="text-sm text-navy-400 mb-4">Total pendapatan penjualan per bulan.</p>
             <div class="h-64">
-                <canvas id="categoryChart"></canvas>
+                <canvas id="trendChart"></canvas>
             </div>
         </div>
     </section>
@@ -90,11 +131,7 @@
                         </td>
                     </tr>
                     @empty
-                    <tr>
-                        <td colspan="6" class="px-4 py-10 text-center text-navy-400">
-                            Tidak ada produk yang menipis atau habis.
-                        </td>
-                    </tr>
+                    <x-empty-state colspan="6" icon="activity" message="Tidak ada produk yang menipis atau habis." />
                     @endforelse
                 </tbody>
             </table>
@@ -131,11 +168,7 @@
                         </td>
                     </tr>
                     @empty
-                    <tr>
-                        <td colspan="5" class="px-4 py-10 text-center text-navy-400">
-                            Belum ada produk. Mulai tambahkan produk pertama.
-                        </td>
-                    </tr>
+                    <x-empty-state colspan="5" icon="box" message="Belum ada produk. Mulai tambahkan produk pertama." />
                     @endforelse
                 </tbody>
             </table>
@@ -178,9 +211,7 @@
                             <td class="px-4 py-3 text-navy-600">{{ $log->pelaku }}</td>
                         </tr>
                     @empty
-                        <tr>
-                            <td colspan="6" class="px-4 py-8 text-center text-navy-400">Belum ada aktivitas stok.</td>
-                        </tr>
+                        <x-empty-state colspan="6" icon="activity" message="Belum ada aktivitas stok." />
                     @endforelse
                 </tbody>
             </table>
@@ -191,7 +222,7 @@
 
 @push('scripts')
     <script>
-        window.__dashData = @json($chartData);
+        window.__dashData = @json(array_merge($chartData, ['trend' => $trenPenjualan]));
     </script>
     @vite('resources/js/dashboard.js')
 @endpush

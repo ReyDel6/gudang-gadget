@@ -56,20 +56,12 @@
                             </td>
                         </tr>
                     @empty
-                        <tr>
-                            <td colspan="6" class="px-4 py-10 text-center text-navy-400">
-                                Tidak ada produk yang diarsipkan.
-                            </td>
-                        </tr>
+                        <x-empty-state colspan="6" icon="box" message="Tidak ada produk yang diarsipkan." />
                     @endforelse
                 </tbody>
             </table>
         </div>
-        @if ($data->hasPages())
-            <div class="px-4 py-4 border-t border-navy-100">
-                {{ $data->links() }}
-            </div>
-        @endif
+        {{ $data->links() }}
     </div>
 
 @endsection

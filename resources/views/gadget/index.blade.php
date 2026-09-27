@@ -113,6 +113,7 @@
                             </td>
                             <td class="px-4 py-3 text-right align-top whitespace-nowrap print-hidden">
                                 <a href="{{ route('gadget.barcode', $row->id) }}" class="text-navy-600 hover:text-gold-600 font-medium mr-2">Barcode</a>
+                                <a href="{{ route('gadget.kartu-stok', $row->id) }}" class="text-navy-600 hover:text-gold-600 font-medium mr-2">Kartu Stok</a>
                                 <a href="{{ route('gadget.edit', $row->id) }}" class="text-navy-600 hover:text-gold-600 font-medium mr-3">Edit</a>
                                 @if (Auth::user()->isAdmin())
                                     <form action="{{ route('gadget.destroy', $row->id) }}" method="POST" class="inline"
@@ -125,20 +126,12 @@
                             </td>
                         </tr>
                     @empty
-                        <tr>
-                            <td colspan="9" class="px-4 py-10 text-center text-navy-400">
-                                Belum ada data gadget.
-                            </td>
-                        </tr>
+                        <x-empty-state colspan="9" message="Belum ada produk. Tambahkan produk pertama Anda." />
                     @endforelse
                 </tbody>
             </table>
         </div>
-        @if ($data->hasPages())
-            <div class="px-4 py-4 border-t border-navy-100 print-hidden">
-                {{ $data->links() }}
-            </div>
-        @endif
+        {{ $data->links() }}
     </div>
 
     <style>

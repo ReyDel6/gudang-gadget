@@ -21,6 +21,7 @@ class Gadget extends Model
         'lokasi_rak',
         'deskripsi',
         'harga_beli',
+        'harga_jual',
         'satuan',
         'tanggal_pembelian',
         'stock',
@@ -35,6 +36,7 @@ class Gadget extends Model
     {
         return [
             'harga_beli' => 'decimal:2',
+            'harga_jual' => 'decimal:2',
             'tanggal_pembelian' => 'date',
             'stock' => 'integer',
             'stok_minimum' => 'integer',
@@ -53,6 +55,37 @@ class Gadget extends Model
                 $gadget->satuan = 'pcs';
             }
         });
+
+        static::created(function (Gadget $gadget) {
+            AuditLog::catat(
+                auth()->user(),
+                'tambah produk',
+                $gadget,
+                ['nama_produk' => $gadget->nama_produk, 'sku' => $gadget->sku]
+            );
+        });
+
+        static::updated(function (Gadget $gadget) {
+            $diff = $gadget->getChanges();
+            unset($diff['updated_at']);
+            if ($diff) {
+                AuditLog::catat(
+                    auth()->user(),
+                    'ubah produk',
+                    $gadget,
+                    $diff
+                );
+            }
+        });
+
+        static::deleted(function (Gadget $gadget) {
+            AuditLog::catat(
+                auth()->user(),
+                'arsip produk',
+                $gadget,
+                ['nama_produk' => $gadget->nama_produk, 'sku' => $gadget->sku]
+            );
+        });
     }
 
     public function thumbnail()
@@ -63,6 +96,11 @@ class Gadget extends Model
     public function stokLogs()
     {
         return $this->hasMany(StokLog::class, 'gadget_id', 'id');
+    }
+
+    public function priceHistories()
+    {
+        return $this->hasMany(PriceHistory::class, 'gadget_id', 'id');
     }
 
     public function getFotoUrlAttribute()

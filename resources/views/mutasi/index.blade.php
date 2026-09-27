@@ -79,18 +79,12 @@
                             <td class="px-4 py-3 text-navy-600">{{ $log->pelaku }}</td>
                         </tr>
                     @empty
-                        <tr>
-                            <td colspan="7" class="px-4 py-10 text-center text-navy-400">Belum ada mutasi stok.</td>
-                        </tr>
+                        <x-empty-state colspan="7" icon="activity" message="Belum ada mutasi stok." />
                     @endforelse
                 </tbody>
             </table>
         </div>
-        @if ($logs->hasPages())
-            <div class="px-4 py-4 border-t border-navy-100">
-                {{ $logs->links() }}
-            </div>
-        @endif
+        {{ $logs->links() }}
     </div>
 
 @endsection

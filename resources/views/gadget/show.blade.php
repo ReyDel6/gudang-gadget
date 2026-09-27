@@ -23,6 +23,10 @@
                class="border border-navy-100 bg-white hover:bg-navy-50 text-navy-700 text-sm font-semibold px-4 py-2 rounded-lg transition-colors">
                 Barcode
             </a>
+            <a href="{{ route('gadget.kartu-stok', $gadget->id) }}"
+               class="border border-navy-100 bg-white hover:bg-navy-50 text-navy-700 text-sm font-semibold px-4 py-2 rounded-lg transition-colors">
+                Kartu Stok
+            </a>
             <a href="{{ route('gadget.edit', $gadget->id) }}"
                class="bg-gold-500 hover:bg-gold-600 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors">
                 Edit
@@ -150,6 +154,50 @@
         </div>
     </div>
 
+    {{-- Riwayat harga --}}
+    <div class="mt-8 print-hidden">
+        <h2 class="text-base font-bold text-navy-800 mb-4">Riwayat Harga Beli</h2>
+        <div class="bg-white rounded-2xl border border-navy-100 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full min-w-[700px] text-sm">
+                    <thead>
+                        <tr class="bg-navy-50 text-navy-500 text-left">
+                            <th class="px-4 py-3 font-medium">Waktu</th>
+                            <th class="px-4 py-3 font-medium">Harga Lama</th>
+                            <th class="px-4 py-3 font-medium">Harga Baru</th>
+                            <th class="px-4 py-3 font-medium">Selisih</th>
+                            <th class="px-4 py-3 font-medium">Alasan</th>
+                            <th class="px-4 py-3 font-medium">Oleh</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-navy-100">
+                        @forelse ($gadget->priceHistories()->latest('id')->limit(20)->get() as $hist)
+                            @php $selisih = (float) $hist->harga_beli_baru - (float) $hist->harga_beli_lama; @endphp
+                            <tr>
+                                <td class="px-4 py-3 text-navy-500">{{ $hist->created_at->format('d M Y H:i') }}</td>
+                                <td class="px-4 py-3 text-navy-600">Rp {{ number_format($hist->harga_beli_lama, 0, ',', '.') }}</td>
+                                <td class="px-4 py-3 font-semibold text-navy-800">Rp {{ number_format($hist->harga_beli_baru, 0, ',', '.') }}</td>
+                                <td class="px-4 py-3">
+                                    @if ($selisih > 0)
+                                        <span class="rounded-full bg-emerald-50 px-2.5 py-0.5 text-emerald-600 text-xs font-bold">+Rp {{ number_format($selisih, 0, ',', '.') }}</span>
+                                    @elseif ($selisih < 0)
+                                        <span class="rounded-full bg-rose-50 px-2.5 py-0.5 text-rose-600 text-xs font-bold">−Rp {{ number_format(abs($selisih), 0, ',', '.') }}</span>
+                                    @else
+                                        <span class="text-navy-400 text-xs">0</span>
+                                    @endif
+                                </td>
+                                <td class="px-4 py-3 text-navy-600">{{ $hist->alasan }}</td>
+                                <td class="px-4 py-3 text-navy-600">{{ $hist->perubah ?: '—' }}</td>
+                            </tr>
+                        @empty
+                            <x-empty-state colspan="6" icon="chart" message="Belum ada riwayat harga." />
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     {{-- Riwayat mutasi stok --}}
     <div class="mt-8 print-hidden">
         <h2 class="text-base font-bold text-navy-800 mb-4">Riwayat Mutasi Stok</h2>
@@ -187,9 +235,7 @@
                                 <td class="px-4 py-3 text-navy-600">{{ $log->pelaku }}</td>
                             </tr>
                         @empty
-                            <tr>
-                                <td colspan="6" class="px-4 py-8 text-center text-navy-400">Belum ada mutasi stok.</td>
-                            </tr>
+                            <x-empty-state colspan="6" icon="activity" message="Belum ada mutasi stok untuk produk ini." />
                         @endforelse
                     </tbody>
                 </table>

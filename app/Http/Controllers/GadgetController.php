@@ -8,7 +8,12 @@ use App\Http\Requests\TransferRequest;
 use App\Http\Requests\UpdateGadgetRequest;
 use App\Models\Gadget;
 use App\Models\GadgetFoto;
+use App\Models\Kategori;
+use App\Models\Pembelian;
+use App\Models\Penjualan;
+use App\Models\PriceHistory;
 use App\Models\StokLog;
+use App\Models\Supplier;
 use App\Services\BarcodeGenerator;
 use App\Services\StokService;
 use Illuminate\Http\Request;
@@ -45,15 +50,62 @@ class GadgetController extends Controller
             })->values(),
         ];
 
+        $hariIni = now()->toDateString();
+
+        $penjualanBulan = Penjualan::with('items')
+            ->whereDate('tanggal', '>=', now()->startOfMonth()->toDateString())
+            ->get();
+        $pembelianBulan = Pembelian::whereDate('tanggal', '>=', now()->startOfMonth()->toDateString())
+            ->latest('id')
+            ->get();
+
+        $penjualanTahun = Penjualan::with('items')
+            ->whereDate('tanggal', '>=', now()->startOfYear()->toDateString())
+            ->whereDate('tanggal', '<=', now()->toDateString())
+            ->get();
+
+        $penjualanHariIni = Penjualan::whereDate('tanggal', $hariIni);
+        $pembelianHariIni = Pembelian::whereDate('tanggal', $hariIni);
+
+        $ringkasanTransaksi = [
+            'penjualan_hari' => ['jumlah' => $penjualanHariIni->count(), 'total' => (float) $penjualanHariIni->sum('total')],
+            'pembelian_hari' => ['jumlah' => $pembelianHariIni->count(), 'total' => (float) $pembelianHariIni->sum('total')],
+            'penjualan_bulan' => [
+                'jumlah' => $penjualanBulan->count(),
+                'total' => (float) $penjualanBulan->sum('total'),
+                'laba' => (float) $penjualanBulan->sum(fn (Penjualan $p) => $p->laba),
+            ],
+            'pembelian_bulan' => ['jumlah' => $pembelianBulan->count(), 'total' => (float) $pembelianBulan->sum('total')],
+            'penjualan_tahun' => [
+                'jumlah' => $penjualanTahun->count(),
+                'total' => (float) $penjualanTahun->sum('total'),
+                'laba' => (float) $penjualanTahun->sum(fn (Penjualan $p) => $p->laba),
+            ],
+        ];
+
+        $namaBulan = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+        $trenPenjualan = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $awal = now()->copy()->subMonths($i)->startOfMonth()->toDateString();
+            $akhir = now()->copy()->subMonths($i)->endOfMonth()->toDateString();
+            $trenPenjualan[] = [
+                'label' => $namaBulan[now()->copy()->subMonths($i)->month - 1],
+                'total' => (float) Penjualan::whereDate('tanggal', '>=', $awal)->whereDate('tanggal', '<=', $akhir)->sum('total'),
+            ];
+        }
+
         return view('landing', compact(
             'totalProduk', 'totalStock', 'nilaiAset', 'habis', 'menipis', 'kategori',
-            'recent', 'lowStock', 'chartData', 'recentLogs'
+            'recent', 'lowStock', 'chartData', 'recentLogs', 'ringkasanTransaksi', 'trenPenjualan'
         ));
     }
 
     public function create()
     {
-        return view('gadget.create', ['kategoriList' => $this->kategoriOptions()]);
+        return view('gadget.create', [
+            'kategoriList' => $this->kategoriOptions(),
+            'supplierList' => $this->supplierOptions(),
+        ]);
     }
 
     public function store(StoreGadgetRequest $request)
@@ -73,6 +125,12 @@ class GadgetController extends Controller
                 $gadget = Gadget::create($this->collectData($data, $stock, $status, $sku));
 
                 StokService::log($gadget, $stock, 0, $stock, StokLog::TIPE_STOK_AWAL, 'Produk baru dibuat dengan stok awal');
+
+                if ((float) $gadget->harga_beli > 0) {
+                    $this->catatHarga($gadget, 0, (float) $gadget->harga_beli, PriceHistory::ALASAN_CREATE);
+                }
+
+                $this->syncMasters($gadget->kategori, $gadget->supplier);
 
                 if ($fotoPath) {
                     GadgetFoto::create(['id' => $gadget->id, 'url' => $fotoPath]);
@@ -128,7 +186,10 @@ class GadgetController extends Controller
     {
         $gadget = Gadget::where('id', $id)->firstOrFail();
 
-        return view('gadget.edit', compact('gadget'), ['kategoriList' => $this->kategoriOptions()]);
+        return view('gadget.edit', compact('gadget'), [
+            'kategoriList' => $this->kategoriOptions(),
+            'supplierList' => $this->supplierOptions(),
+        ]);
     }
 
     public function update(UpdateGadgetRequest $request, $id)
@@ -140,12 +201,14 @@ class GadgetController extends Controller
         $stock = (int) ($data['stock'] ?? $stokLama);
         $status = $data['status'] ?? $gadget->status;
         $sku = $gadget->sku ?: $this->generateSku($data['sku'] ?? null);
+        $hargaLama = (float) $gadget->harga_beli;
+        $hargaBaru = (float) ($data['harga_beli'] ?? $hargaLama);
 
         $fotoPath = null;
         $oldFotoUrl = null;
 
         try {
-            DB::transaction(function () use ($data, $gadget, $stock, $status, $sku, $stokLama, $request, &$fotoPath, &$oldFotoUrl) {
+            DB::transaction(function () use ($data, $gadget, $stock, $status, $sku, $stokLama, $request, $hargaLama, $hargaBaru, &$fotoPath, &$oldFotoUrl) {
                 if ($request->hasFile('foto')) {
                     $fotoPath = $request->file('foto')->store('thumbnails', 'public');
                     $oldFotoUrl = $gadget->thumbnail?->url;
@@ -156,6 +219,12 @@ class GadgetController extends Controller
                 if ($stock !== $stokLama) {
                     StokService::log($gadget, $stock - $stokLama, $stokLama, $stock, StokLog::TIPE_PENYESUAIAN, 'Perubahan data (edit)');
                 }
+
+                if ($hargaBaru !== $hargaLama) {
+                    $this->catatHarga($gadget, $hargaLama, $hargaBaru, 'Perubahan data (edit)');
+                }
+
+                $this->syncMasters($gadget->kategori, $gadget->supplier);
 
                 if ($fotoPath) {
                     if ($oldFotoUrl) {
@@ -272,7 +341,7 @@ class GadgetController extends Controller
 
         $contents = array_merge([[
             'ID', 'SKU', 'Nama Produk', 'Kategori', 'Supplier', 'Lokasi Rak', 'Serial Number',
-            'Stok', 'Satuan', 'Harga Beli', 'Nilai Aset', 'Status', 'Tanggal Pembelian',
+            'Stok', 'Satuan', 'Harga Beli', 'Harga Jual', 'Nilai Aset', 'Status', 'Tanggal Pembelian',
         ]], $rows);
 
         $out = fopen('php://temp', 'w');
@@ -364,6 +433,10 @@ class GadgetController extends Controller
                 ]);
 
                 StokService::log($gadget, $stock, 0, $stock, StokLog::TIPE_STOK_AWAL, 'Import dari CSV');
+                if ((float) $gadget->harga_beli > 0) {
+                    $this->catatHarga($gadget, 0, (float) $gadget->harga_beli, 'Import dari CSV');
+                }
+                $this->syncMasters($gadget->kategori, $gadget->supplier);
             }
         });
 
@@ -396,13 +469,72 @@ class GadgetController extends Controller
         return view('gadget.barcode', compact('gadget', 'barcode'));
     }
 
+    public function kartuStok(Request $request, $id)
+    {
+        $gadget = Gadget::where('id', $id)->firstOrFail();
+
+        $dari = $request->input('tanggal_awal') ?: null;
+        $sampai = $request->input('tanggal_akhir') ?: null;
+
+        $query = StokLog::with('user')->where('gadget_id', $gadget->id);
+        if ($dari) {
+            $query->whereDate('created_at', '>=', $dari);
+        }
+        if ($sampai) {
+            $query->whereDate('created_at', '<=', $sampai);
+        }
+        $logs = $query->orderBy('id')->get();
+
+        $saldoAwal = 0;
+        if ($dari) {
+            $sebelum = StokLog::where('gadget_id', $gadget->id)
+                ->whereDate('created_at', '<', $dari)
+                ->latest('id')
+                ->first();
+            $saldoAwal = $sebelum ? (int) $sebelum->stok_sesudah : 0;
+        } else {
+            $first = StokLog::where('gadget_id', $gadget->id)->oldest('id')->first();
+            $saldoAwal = $first ? (int) $first->stok_sebelum : (int) $gadget->stock;
+        }
+
+        $masuk = (int) $logs->where('perubahan', '>', 0)->sum('perubahan');
+        $keluar = (int) abs($logs->where('perubahan', '<', 0)->sum('perubahan'));
+
+        return view('gadget.kartu-stok', compact('gadget', 'logs', 'dari', 'sampai', 'saldoAwal', 'masuk', 'keluar'));
+    }
+
     protected function kategoriOptions(): array
     {
         $defaults = ['SmartPhone', 'Laptop', 'Tablet', 'SmartWatch'];
         $existing = Gadget::query()->distinct()->pluck('kategori')
             ->map(fn ($k) => trim((string) $k))->filter()->all();
+        $masters = Kategori::query()->pluck('nama')->all();
 
-        return collect($defaults)->concat($existing)->unique()->sort()->values()->all();
+        return collect($defaults)->concat($existing)->concat($masters)->unique()->sort()->values()->all();
+    }
+
+    protected function supplierOptions(): array
+    {
+        $existing = Gadget::query()->distinct()->pluck('supplier')
+            ->map(fn ($s) => trim((string) $s))->filter()->all();
+        $masters = Supplier::query()->pluck('nama')->all();
+
+        return collect($existing)->concat($masters)->unique()->sort()->values()->all();
+    }
+
+    protected function syncMasters(?string $kategori, ?string $supplier): void
+    {
+        if (! empty($kategori)) {
+            Kategori::firstOrCreate(['nama' => $kategori]);
+        }
+        if (! empty($supplier)) {
+            Supplier::firstOrCreate(['nama' => $supplier]);
+        }
+    }
+
+    protected function catatHarga(Gadget $gadget, float $lama, float $baru, string $alasan): void
+    {
+        PriceHistory::catat($gadget, $lama, $baru, $alasan);
     }
 
     protected function collectData(array $data, int $stock, string $status, string $sku): array
@@ -415,6 +547,7 @@ class GadgetController extends Controller
             'lokasi_rak' => $data['lokasi_rak'] ?? null,
             'deskripsi' => $data['deskripsi'] ?? null,
             'harga_beli' => $data['harga_beli'] ?? 0,
+            'harga_jual' => $data['harga_jual'] ?? 0,
             'satuan' => $data['satuan'] ?? 'pcs',
             'tanggal_pembelian' => $data['tanggal_pembelian'] ?? null,
             'stock' => $stock,
@@ -463,6 +596,7 @@ class GadgetController extends Controller
                 (string) $g->stock,
                 (string) ($g->satuan ?? 'pcs'),
                 (string) $g->harga_beli,
+                (string) $g->harga_jual,
                 number_format($g->nilai_aset, 2, ',', '.'),
                 (string) $g->status,
                 $g->tanggal_pembelian?->format('Y-m-d') ?? '',

@@ -23,6 +23,7 @@ class StockAdjustRequest extends FormRequest
                     StokLog::TIPE_PENERIMAAN,
                     StokLog::TIPE_PENGELUARAN,
                     StokLog::TIPE_RETUR,
+                    StokLog::TIPE_RUSAK,
                     'Penyesuaian (+)', 'Penyesuaian (-)',
                 ]),
             ],

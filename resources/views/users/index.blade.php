@@ -128,18 +128,12 @@
                                     </td>
                                 </tr>
                             @empty
-                                <tr>
-                                    <td colspan="5" class="px-4 py-8 text-center text-navy-400">Belum ada pengguna.</td>
-                                </tr>
+                                <x-empty-state colspan="5" icon="users" message="Belum ada pengguna." />
                             @endforelse
                         </tbody>
                     </table>
                 </div>
-                @if ($users->hasPages())
-                    <div class="px-4 py-4 border-t border-navy-100">
-                        {{ $users->links() }}
-                    </div>
-                @endif
+                {{ $users->links() }}
             </div>
         </div>
     </div>

@@ -30,7 +30,7 @@
                     <label class="block text-sm font-medium text-navy-700 mb-1">Jenis Mutasi</label>
                     <select name="jenis" id="jenis-mutasi" required
                             class="w-full rounded-lg border px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gold-500 {{ $errors->first('jenis') ? 'border-rose-400' : 'border-navy-100' }}">
-                        @foreach (['Penerimaan', 'Pengeluaran', 'Retur', 'Penyesuaian (+)', 'Penyesuaian (-)'] as $jenis)
+                        @foreach (['Penerimaan', 'Pengeluaran', 'Retur', 'Rusak/Hilang', 'Penyesuaian (+)', 'Penyesuaian (-)'] as $jenis)
                             <option value="{{ $jenis }}" @selected(old('jenis') == $jenis)>{{ $jenis }}</option>
                         @endforeach
                     </select>

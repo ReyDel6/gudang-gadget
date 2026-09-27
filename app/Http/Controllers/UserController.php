@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
+use App\Models\AuditLog;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -29,12 +30,14 @@ class UserController extends Controller
     {
         $data = $request->validated();
 
-        User::create([
+        $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
             'role' => $data['role'],
             'password' => $data['password'],
         ]);
+
+        AuditLog::catat($request->user(), 'tambah pengguna', $user, ['name' => $user->name, 'email' => $user->email, 'role' => $user->role]);
 
         return redirect()->route('user.index')
             ->with('success', 'Pengguna baru berhasil ditambahkan.');
@@ -66,6 +69,8 @@ class UserController extends Controller
 
         $user->save();
 
+        AuditLog::catat($request->user(), 'ubah pengguna', $user, ['name' => $user->name, 'email' => $user->email, 'role' => $user->role]);
+
         return redirect()->route('user.index')
             ->with('success', 'Data pengguna berhasil diperbarui.');
     }
@@ -82,7 +87,10 @@ class UserController extends Controller
             return back()->withErrors(['user' => 'Tidak bisa menghapus satu-satunya admin.']);
         }
 
+        $nama = $user->name;
         $user->delete();
+
+        AuditLog::catat($request->user(), 'hapus pengguna', null, ['name' => $nama]);
 
         return redirect()->route('user.index')
             ->with('success', 'Pengguna berhasil dihapus.');

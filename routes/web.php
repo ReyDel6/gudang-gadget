@@ -1,9 +1,14 @@
 <?php
 
+use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\GadgetController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\MasterController;
 use App\Http\Controllers\MutasiController;
+use App\Http\Controllers\PembelianController;
+use App\Http\Controllers\PenjualanController;
+use App\Http\Controllers\ProfilController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -21,12 +26,35 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/', [GadgetController::class, 'landing'])->name('landing');
 
+    Route::get('/profil', [ProfilController::class, 'show'])->name('profil.show');
+    Route::post('/profil/password', [ProfilController::class, 'updatePassword'])->name('profil.password');
+
     Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
     Route::get('/laporan/export', [LaporanController::class, 'export'])->name('laporan.export');
+    Route::get('/laporan/export-xls', [LaporanController::class, 'exportXls'])->name('laporan.export-xls');
+    Route::get('/laporan/cetak', [LaporanController::class, 'print'])->name('laporan.print');
+    Route::get('/laporan/laba-rugi', [LaporanController::class, 'labaRugi'])->name('laporan.laba-rugi');
+    Route::get('/laporan/laba-rugi/cetak', [LaporanController::class, 'labaRugiPrint'])->name('laporan.laba-rugi.cetak');
+    Route::get('/laporan/per-bulan/{tahun}', [LaporanController::class, 'perBulan'])->name('laporan.per-bulan');
 
     Route::get('/mutasi', [MutasiController::class, 'index'])->name('mutasi.index');
     Route::get('/mutasi/create', [MutasiController::class, 'create'])->name('mutasi.create');
     Route::post('/mutasi', [MutasiController::class, 'store'])->name('mutasi.store');
+
+    // Transaksi penjualan & pembelian.
+    Route::get('/penjualan', [PenjualanController::class, 'index'])->name('penjualan.index');
+    Route::get('/penjualan/create', [PenjualanController::class, 'create'])->name('penjualan.create');
+    Route::post('/penjualan', [PenjualanController::class, 'store'])->name('penjualan.store');
+    Route::get('/penjualan/{id}', [PenjualanController::class, 'show'])->name('penjualan.show');
+    Route::get('/penjualan/{id}/cetak', [PenjualanController::class, 'cetak'])->name('penjualan.cetak');
+    Route::delete('/penjualan/{id}', [PenjualanController::class, 'destroy'])->name('penjualan.destroy')->middleware('role:admin');
+
+    Route::get('/pembelian', [PembelianController::class, 'index'])->name('pembelian.index');
+    Route::get('/pembelian/create', [PembelianController::class, 'create'])->name('pembelian.create');
+    Route::post('/pembelian', [PembelianController::class, 'store'])->name('pembelian.store');
+    Route::get('/pembelian/{id}', [PembelianController::class, 'show'])->name('pembelian.show');
+    Route::get('/pembelian/{id}/cetak', [PembelianController::class, 'cetak'])->name('pembelian.cetak');
+    Route::delete('/pembelian/{id}', [PembelianController::class, 'destroy'])->name('pembelian.destroy')->middleware('role:admin');
 
     // Urutan penting: rute statis (/arsip, /import, /export) harus
     // dideklarasikan sebelum rute dinamis /gadget/{id}.
@@ -46,6 +74,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/gadget/{id}/edit', [GadgetController::class, 'edit'])->name('gadget.edit');
     Route::put('/gadget/{id}', [GadgetController::class, 'update'])->name('gadget.update');
     Route::delete('/gadget/{id}', [GadgetController::class, 'destroy'])->name('gadget.destroy')->middleware('role:admin');
+    Route::get('/gadget/{id}/kartu-stok', [GadgetController::class, 'kartuStok'])->name('gadget.kartu-stok');
     Route::get('/gadget/{id}/barcode', [GadgetController::class, 'barcode'])->name('gadget.barcode');
 
     Route::middleware('role:admin')->group(function () {
@@ -54,5 +83,14 @@ Route::middleware('auth')->group(function () {
         Route::get('/users/{id}/edit', [UserController::class, 'edit'])->name('user.edit');
         Route::put('/users/{id}', [UserController::class, 'update'])->name('user.update');
         Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('user.destroy');
+
+        Route::get('/master/kategori', [MasterController::class, 'kategori'])->name('master.kategori');
+        Route::post('/master/kategori', [MasterController::class, 'storeKategori'])->name('master.kategori.store');
+        Route::delete('/master/kategori/{id}', [MasterController::class, 'destroyKategori'])->name('master.kategori.destroy');
+        Route::get('/master/supplier', [MasterController::class, 'supplier'])->name('master.supplier');
+        Route::post('/master/supplier', [MasterController::class, 'storeSupplier'])->name('master.supplier.store');
+        Route::delete('/master/supplier/{id}', [MasterController::class, 'destroySupplier'])->name('master.supplier.destroy');
+
+        Route::get('/audit', [AuditLogController::class, 'index'])->name('audit.index');
     });
 });

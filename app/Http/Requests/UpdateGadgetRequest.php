@@ -25,6 +25,7 @@ class UpdateGadgetRequest extends FormRequest
             'supplier' => ['nullable', 'string', 'max:255'],
             'lokasi_rak' => ['nullable', 'string', 'max:100'],
             'harga_beli' => ['nullable', 'numeric', 'min:0'],
+            'harga_jual' => ['nullable', 'numeric', 'min:0'],
             'satuan' => ['nullable', 'string', 'max:50'],
             'stok_minimum' => ['nullable', 'integer', 'min:0'],
             'serial_number' => ['nullable', 'string', 'max:150'],

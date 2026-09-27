@@ -4,6 +4,7 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>@yield('title', 'Gudang Gadget')</title>
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg">
         @vite('resources/css/app.css')
     </head>
     <body class="bg-navy-100/60 text-navy-900 min-h-screen">
@@ -55,7 +56,7 @@
                     @php
                         $produkActive = in_array($routeName, [
                             'gadget.index', 'gadget.create', 'gadget.import',
-                            'gadget.archive', 'gadget.show', 'gadget.edit', 'gadget.barcode',
+                            'gadget.archive', 'gadget.show', 'gadget.edit', 'gadget.barcode', 'gadget.kartu-stok',
                         ]);
                     @endphp
                     <div class="space-y-1">
@@ -81,7 +82,7 @@
                         <div id="submenu-produk" class="pl-6 space-y-1 pt-1 hidden">
                             <a href="{{ route('gadget.index') }}"
                                class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all
-                                      {{ in_array($routeName, ['gadget.index', 'gadget.show', 'gadget.edit', 'gadget.barcode'])
+                                      {{ in_array($routeName, ['gadget.index', 'gadget.show', 'gadget.edit', 'gadget.barcode', 'gadget.kartu-stok'])
                                           ? 'bg-gold-500 text-white shadow-md'
                                           : 'hover:bg-white/10 text-slate-400 hover:text-white' }}">
                                 <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -128,6 +129,55 @@
                         </div>
                     </div>
 
+                {{-- Dropdown: Transaksi --}}
+                    @php
+                        $transaksiActive = str_starts_with($routeName, 'penjualan.') || str_starts_with($routeName, 'pembelian.');
+                    @endphp
+                    <div class="space-y-1">
+                        <button type="button" onclick="toggleDropdown('transaksi')"
+                                class="w-full flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-xl font-semibold text-sm transition-all
+                                       {{ $transaksiActive
+                                           ? 'bg-gold-500 text-white shadow-lg shadow-gold-500/30'
+                                           : 'hover:bg-white/10 text-slate-400 hover:text-white' }}">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 1v22M17 5.5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                                </svg>
+                                <span class="truncate">Transaksi</span>
+                            </div>
+                            <svg id="chevron-transaksi" class="w-4 h-4 shrink-0 transition-transform duration-200 {{ $transaksiActive ? 'text-white' : 'text-slate-400' }}"
+                                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                 stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M6 9l6 6 6-6"/>
+                            </svg>
+                        </button>
+                        <div id="submenu-transaksi" class="pl-6 space-y-1 pt-1 hidden">
+                            <a href="{{ route('penjualan.index') }}"
+                               class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all
+                                      {{ str_starts_with($routeName, 'penjualan.')
+                                          ? 'bg-gold-500 text-white shadow-md'
+                                          : 'hover:bg-white/10 text-slate-400 hover:text-white' }}">
+                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                                </svg>
+                                Penjualan
+                            </a>
+                            <a href="{{ route('pembelian.index') }}"
+                               class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all
+                                      {{ str_starts_with($routeName, 'pembelian.')
+                                          ? 'bg-gold-500 text-white shadow-md'
+                                          : 'hover:bg-white/10 text-slate-400 hover:text-white' }}">
+                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M5 12h14M12 5l-7 7 7 7"/>
+                                </svg>
+                                Pembelian
+                            </a>
+                        </div>
+                    </div>
+
                 {{-- Link: Mutasi Stok --}}
                     <a href="{{ route('mutasi.index') }}"
                        class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-semibold text-sm transition-all
@@ -143,18 +193,56 @@
                         <span class="truncate">Mutasi Stok</span>
                     </a>
 
-                {{-- Link: Laporan --}}
-                    <a href="{{ route('laporan.index') }}"
-                       class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-semibold text-sm transition-all
-                              {{ str_starts_with($routeName, 'laporan.')
-                                  ? 'bg-gold-500 text-white shadow-lg shadow-gold-500/30'
-                                  : 'hover:bg-white/10 text-slate-400 hover:text-white' }}">
-                        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21 3H3v18h18V3zM7 17V9m5 8V5m5 12v-6"/>
-                        </svg>
-                        <span class="truncate">Laporan</span>
-                    </a>
+                {{-- Dropdown: Laporan --}}
+                    @php
+                        $laporanActive = str_starts_with($routeName, 'laporan.');
+                    @endphp
+                    <div class="space-y-1">
+                        <button type="button" onclick="toggleDropdown('laporan')"
+                                class="w-full flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-xl font-semibold text-sm transition-all
+                                       {{ $laporanActive
+                                           ? 'bg-gold-500 text-white shadow-lg shadow-gold-500/30'
+                                           : 'hover:bg-white/10 text-slate-400 hover:text-white' }}">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 3H3v18h18V3zM7 17V9m5 8V5m5 12v-6"/>
+                                </svg>
+                                <span class="truncate">Laporan</span>
+                            </div>
+                            <svg id="chevron-laporan" class="w-4 h-4 shrink-0 transition-transform duration-200 {{ $laporanActive ? 'text-white' : 'text-slate-400' }}"
+                                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                 stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M6 9l6 6 6-6"/>
+                            </svg>
+                        </button>
+                        <div id="submenu-laporan" class="pl-6 space-y-1 pt-1 hidden">
+                            <a href="{{ route('laporan.index') }}"
+                               class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all
+                                      {{ in_array($routeName, ['laporan.index']) ? 'bg-gold-500 text-white shadow-md' : 'hover:bg-white/10 text-slate-400 hover:text-white' }}">
+                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
+                                </svg>
+                                Laporan Umum
+                            </a>
+                            <a href="{{ route('laporan.laba-rugi') }}"
+                               class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all
+                                      {{ in_array($routeName, ['laporan.laba-rugi']) ? 'bg-gold-500 text-white shadow-md' : 'hover:bg-white/10 text-slate-400 hover:text-white' }}">
+                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 3l8 4.5v5C20 18 16.5 21 12 22.5 7.5 21 4 18 4 12.5v-5L12 3z"/><path d="M9 12l2 2 4-5"/>
+                                </svg>
+                                Laba Rugi
+                            </a>
+                            <a href="{{ route('laporan.per-bulan', date('Y')) }}"
+                               class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all
+                                      {{ in_array($routeName, ['laporan.per-bulan']) ? 'bg-gold-500 text-white shadow-md' : 'hover:bg-white/10 text-slate-400 hover:text-white' }}">
+                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 9h18"/>
+                                </svg>
+                                Per Bulan
+                            </a>
+                        </div>
+                    </div>
 
                 {{-- Link: Manajemen Pengguna --}}
                     @if (Auth::user()->isAdmin())
@@ -172,6 +260,73 @@
                             Manajemen Pengguna
                         </a>
                     @endif
+
+                {{-- Dropdown: Master Data (admin) --}}
+                    @if (Auth::user()->isAdmin())
+                        @php
+                            $masterActive = str_starts_with($routeName, 'master.');
+                        @endphp
+                        <div class="space-y-1">
+                            <button type="button" onclick="toggleDropdown('master')"
+                                    class="w-full flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-xl font-semibold text-sm transition-all
+                                           {{ $masterActive
+                                               ? 'bg-gold-500 text-white shadow-lg shadow-gold-500/30'
+                                               : 'hover:bg-white/10 text-slate-400 hover:text-white' }}">
+                                <div class="flex items-center gap-3 min-w-0">
+                                    <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M12 3l8 4v5c0 4.5-3.2 7.6-8 9-4.8-1.4-8-4.5-8-9V7l8-4zM12 3v18"/>
+                                    </svg>
+                                    <span class="truncate">Master Data</span>
+                                </div>
+                                <svg id="chevron-master" class="w-4 h-4 shrink-0 transition-transform duration-200 {{ $masterActive ? 'text-white' : 'text-slate-400' }}"
+                                     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                     stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M6 9l6 6 6-6"/>
+                                </svg>
+                            </button>
+                            <div id="submenu-master" class="pl-6 space-y-1 pt-1 hidden">
+                                <a href="{{ route('master.kategori') }}"
+                                   class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all
+                                          {{ $routeName === 'master.kategori'
+                                              ? 'bg-gold-500 text-white shadow-md'
+                                              : 'hover:bg-white/10 text-slate-400 hover:text-white' }}">
+                                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M4 6h16v12H4zM4 10h16M4 14h16M8 6v12"/>
+                                    </svg>
+                                    Kategori
+                                </a>
+                                <a href="{{ route('master.supplier') }}"
+                                   class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all
+                                          {{ $routeName === 'master.supplier'
+                                              ? 'bg-gold-500 text-white shadow-md'
+                                              : 'hover:bg-white/10 text-slate-400 hover:text-white' }}">
+                                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M22 6l-10 7L2 6M4 6h16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/>
+                                    </svg>
+                                    Supplier
+                                </a>
+                            </div>
+                        </div>
+                    @endif
+
+                {{-- Link: Audit Log (admin) --}}
+                    @if (Auth::user()->isAdmin())
+                        <a href="{{ route('audit.index') }}"
+                           class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-semibold text-sm transition-all
+                                  {{ str_starts_with($routeName, 'audit.')
+                                      ? 'bg-gold-500 text-white shadow-lg shadow-gold-500/30'
+                                      : 'hover:bg-white/10 text-slate-400 hover:text-white' }}">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                 stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                <path d="M7 12h2l1-4 3 8 1-4h3"/>
+                            </svg>
+                            Audit Log
+                        </a>
+                    @endif
                 </nav>
 
                 {{-- Footer --}}
@@ -183,6 +338,14 @@
                             <path d="M3 12l9-9 9 9M5 10v10h5v-6h4v6h5V10"/>
                         </svg>
                         Buka Halaman Dashboard
+                    </a>
+                    <a href="{{ route('profil.show') }}"
+                       class="mt-3 w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-white/10 hover:bg-white/20 text-slate-300 rounded-xl text-sm font-semibold transition-colors">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                             stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/>
+                        </svg>
+                        Profil & Password
                     </a>
                     <form method="POST" action="{{ route('logout') }}" class="mt-3">
                         @csrf

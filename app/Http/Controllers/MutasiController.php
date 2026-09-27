@@ -48,7 +48,7 @@ class MutasiController extends Controller
             'Penyesuaian (-)' => StokLog::TIPE_PENYESUAIAN,
             default => $jenis,
         };
-        $delta = in_array($jenis, ['Pengeluaran', 'Penyesuaian (-)'], true) ? -$qty : $qty;
+        $delta = in_array($jenis, ['Pengeluaran', 'Penyesuaian (-)', StokLog::TIPE_RUSAK], true) ? -$qty : $qty;
 
         StokService::adjust($gadget, $tipe, $delta, $alasan);
 
