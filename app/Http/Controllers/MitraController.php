@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Gadget;
 use App\Models\ResellerProfile;
 use App\Models\User;
+use App\Services\KeranjangService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\URL;
@@ -158,8 +159,9 @@ class MitraController extends Controller
         $settings = (new StorefrontController)->settings();
         $produkReady = Gadget::publik()->where('stock', '>', 0)->count();
         $produkTier = Gadget::publik()->whereHas('tierPrices', fn ($q) => $q->where('price', '>', 0))->count();
+        $totalKeranjang = KeranjangService::jumlahItem();
 
-        return view('mitra.beranda', compact('user', 'profil', 'settings', 'produkReady', 'produkTier'));
+        return view('mitra.beranda', compact('user', 'profil', 'settings', 'produkReady', 'produkTier', 'totalKeranjang'));
     }
 
     public function priceList()
@@ -168,8 +170,9 @@ class MitraController extends Controller
 
         $products = $this->ambilProduk();
         $settings = (new StorefrontController)->settings();
+        $totalKeranjang = KeranjangService::jumlahItem();
 
-        return view('mitra.price-list', compact('products', 'settings'));
+        return view('mitra.price-list', compact('products', 'settings', 'totalKeranjang'));
     }
 
     public function priceListCsv(Request $request)

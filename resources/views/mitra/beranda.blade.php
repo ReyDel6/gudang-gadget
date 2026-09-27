@@ -46,6 +46,13 @@
                            class="bg-navy-900 hover:bg-navy-800 text-white text-sm font-bold px-4 py-2.5 rounded-xl transition-colors">
                             Lihat Price List
                         </a>
+                        <a href="{{ route('shop.keranjang') }}"
+                           class="bg-gold-500 hover:bg-gold-600 text-navy-900 text-sm font-black px-4 py-2.5 rounded-xl transition-colors relative">
+                            🛒 Checkout
+                            @if ($totalKeranjang > 0)
+                                <span class="absolute -top-2 -right-2 min-w-5 h-5 px-1 grid place-items-center rounded-full bg-navy-900 text-gold-300 text-[10px] font-black">{{ $totalKeranjang }}</span>
+                            @endif
+                        </a>
                         <a href="{{ route('shop.mitra.price-list.csv') }}"
                            class="border border-navy-100 bg-white hover:border-gold-500 text-navy-700 text-sm font-bold px-4 py-2.5 rounded-xl transition-colors">
                             ⬇ CSV
@@ -84,11 +91,28 @@
         </div>
 
         @if ($profil->isApproved())
-            <div class="mt-6 rounded-2xl border border-navy-100 bg-white p-5">
+            <div class="mt-6 rounded-2xl border border-gold-200 bg-gold-500/10 p-5">
+            <p class="text-sm font-black text-navy-900 mb-2">🛒 Checkout Online untuk Mitra</p>
+            <p class="text-sm text-navy-500 leading-relaxed mb-4">
+                Tambahkan produk dari price list ke keranjang — harga mitra otomatis berlaku. Checkout lalu admin
+                konfirmasi ketersediaan &amp; ongkir sebelum barang dikirim. Untuk dropship, tulis alamat pengiriman
+                pelanggan Anda di form checkout.
+            </p>
+            <a href="{{ route('shop.mitra.price-list') }}"
+               class="inline-block bg-navy-900 hover:bg-navy-800 text-white text-sm font-bold px-4 py-2.5 rounded-xl transition-colors">
+                Pesan via Price List →
+            </a>
+            <a href="{{ route('shop.keranjang') }}"
+               class="inline-block bg-white border border-navy-200 hover:border-gold-500 text-navy-800 text-sm font-bold px-4 py-2.5 rounded-xl transition-colors ml-2">
+                🛒 Keranjang ({{ $totalKeranjang }})
+            </a>
+        </div>
+
+        <div class="mt-6 rounded-2xl border border-navy-100 bg-white p-5">
                 <p class="text-sm font-black text-navy-900 mb-2">🚚 Layanan Dropship</p>
                 <p class="text-sm text-navy-500 leading-relaxed">
-                    Pesan di konter kami lalu pilih <b>"Kirim sebagai Dropship"</b> di layar kasir. Kami kirim langsung ke
-                    pelanggan Anda dan sediakan <b>label resi pengiriman tanpa nama toko kami</b>, sehingga pelanggan tetap
+                    Lewat checkout online, isi alamat pengiriman dengan alamat pelanggan Anda — pesanan tercatat sebagai
+                    dropship dan dikirim langsung dengan <b>label resi tanpa nama toko kami</b>, sehingga pelanggan tetap
                     melihat identitas toko Anda.
                 </p>
             </div>
