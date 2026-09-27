@@ -26,6 +26,24 @@
                 </div>
             @endif
 
+            <form method="POST" action="{{ route('shop.mitra.demo.masuk') }}" class="mb-6">
+                @csrf
+                <button type="submit"
+                        class="w-full flex items-center justify-center gap-2 bg-gold-500 hover:bg-gold-600 text-navy-900 font-black py-4 rounded-xl transition-colors text-base">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    Coba Login Demo (1-klik)
+                </button>
+                <p class="text-xs text-navy-400 mt-2 leading-relaxed">
+                    Akun demo otomatis dibuat & status <b>terverifikasi</b>. Akses penuh: beranda mitra,
+                    price list, unduh CSV, cetak price list, dan mode harga mitra di storefront.
+                </p>
+            </form>
+
+            <div class="relative mb-6">
+                <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-navy-100"></div></div>
+                <div class="relative flex justify-center text-xs font-bold text-navy-400 uppercase tracking-widest bg-white px-3"><span>atau masuk dengan akun sendiri</span></div>
+            </div>
+
             <form method="POST" action="{{ route('shop.mitra.masuk.store') }}" class="space-y-4">
                 @csrf
                 <div>

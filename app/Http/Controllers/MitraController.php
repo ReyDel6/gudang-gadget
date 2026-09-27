@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class MitraController extends Controller
@@ -109,6 +110,45 @@ class MitraController extends Controller
 
         return redirect()->route('shop.home')
             ->with('success', 'Anda telah keluar dari portal mitra.');
+    }
+
+    public const DEMO_EMAIL = 'demo.mitra@gudanggadget.com';
+
+    public function demoMasuk(Request $request)
+    {
+        $user = User::query()->where('email', self::DEMO_EMAIL)->first();
+
+        if (! $user) {
+            $user = User::create([
+                'name' => 'Mitra Demo',
+                'email' => self::DEMO_EMAIL,
+                'password' => Str::random(24),
+                'role' => User::ROLE_RESELLER,
+            ]);
+        }
+
+        if ($user->role !== User::ROLE_RESELLER) {
+            $user->update(['role' => User::ROLE_RESELLER]);
+        }
+
+        if (! $user->reseller) {
+            $user->reseller()->create([
+                'store_name' => 'Toko Gadget Demo',
+                'owner_name' => 'Owner Demo',
+                'phone' => '081234567899',
+                'whatsapp' => '081234567899',
+                'address' => 'Jl. Demo No. 1, Indonesia',
+                'status' => ResellerProfile::STATUS_APPROVED,
+            ]);
+        } elseif ($user->reseller->status !== ResellerProfile::STATUS_APPROVED) {
+            $user->reseller->update(['status' => ResellerProfile::STATUS_APPROVED]);
+        }
+
+        Auth::login($user);
+        $request->session()->regenerate();
+
+        return redirect()->route('shop.mitra.beranda')
+            ->with('success', 'Login akun demo berhasil. Anda kini melihat semua fitur portal mitra.');
     }
 
     public function beranda()

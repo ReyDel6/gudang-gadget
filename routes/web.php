@@ -33,6 +33,7 @@ Route::middleware('guest')->group(function () {
     Route::post('/shop/mitra/daftar', [MitraController::class, 'daftarStore'])->name('shop.mitra.daftar.store')->middleware('throttle:5,10');
     Route::get('/shop/mitra/masuk', [MitraController::class, 'masuk'])->name('shop.mitra.masuk');
     Route::post('/shop/mitra/masuk', [MitraController::class, 'masukStore'])->name('shop.mitra.masuk.store')->middleware('throttle:5,10');
+    Route::post('/shop/mitra/demo', [MitraController::class, 'demoMasuk'])->name('shop.mitra.demo.masuk')->middleware('throttle:5,10');
 });
 Route::post('/shop/mitra/keluar', [MitraController::class, 'keluar'])->name('shop.mitra.keluar')->middleware('auth');
 
