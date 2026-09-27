@@ -21,7 +21,7 @@ class StorefrontController extends Controller
     public function index()
     {
         $banners = StoreBanner::aktif()->get();
-        $featured = Gadget::unggulan()->with(['thumbnail', 'tierPrices'])->limit(8)->get($this->publicColumns);
+        $featured = Gadget::unggulan()->with(['thumbnail', 'galeri', 'tierPrices'])->limit(8)->get($this->publicColumns);
         $categories = $this->categories();
         $settings = $this->settings();
         $resellerMode = $this->resellerMode();
@@ -31,7 +31,7 @@ class StorefrontController extends Controller
 
     public function katalog(Request $request)
     {
-        $query = Gadget::publik()->with(['thumbnail', 'tierPrices']);
+        $query = Gadget::publik()->with(['thumbnail', 'galeri', 'tierPrices'])->select($this->publicColumns);
 
         if ($keyword = trim((string) $request->input('q'))) {
             $query->where(fn ($q) => $q->where('nama_produk', 'like', "%{$keyword}%")
@@ -89,11 +89,13 @@ class StorefrontController extends Controller
 
     public function produk($id)
     {
-        $product = Gadget::publik()->with(['thumbnail', 'tierPrices'])->findOrFail($id);
+        $product = Gadget::publik()->with(['thumbnail', 'galeri', 'tierPrices'])
+            ->select($this->publicColumns)
+            ->findOrFail($id);
         $settings = $this->settings();
         $resellerMode = $this->resellerMode();
 
-        $related = Gadget::publik()->with(['thumbnail', 'tierPrices'])
+        $related = Gadget::publik()->with(['thumbnail', 'galeri', 'tierPrices'])
             ->where('kategori', $product->kategori)
             ->where('id', '!=', $product->id)
             ->limit(4)

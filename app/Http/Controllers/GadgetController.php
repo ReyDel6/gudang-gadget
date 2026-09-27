@@ -8,6 +8,7 @@ use App\Http\Requests\TransferRequest;
 use App\Http\Requests\UpdateGadgetRequest;
 use App\Models\Gadget;
 use App\Models\GadgetFoto;
+use App\Models\GadgetGaleri;
 use App\Models\Kategori;
 use App\Models\Pembelian;
 use App\Models\Penjualan;
@@ -122,7 +123,7 @@ class GadgetController extends Controller
         }
 
         try {
-            $gadget = DB::transaction(function () use ($data, $stock, $status, $sku, $fotoPath) {
+            $gadget = DB::transaction(function () use ($data, $stock, $status, $sku, $fotoPath, $request) {
                 $gadget = Gadget::create($this->collectData($data, $stock, $status, $sku));
 
                 StokService::log($gadget, $stock, 0, $stock, StokLog::TIPE_STOK_AWAL, 'Produk baru dibuat dengan stok awal');
@@ -136,6 +137,10 @@ class GadgetController extends Controller
 
                 if ($fotoPath) {
                     GadgetFoto::create(['id' => $gadget->id, 'url' => $fotoPath]);
+                }
+
+                if ($request->hasFile('galeri')) {
+                    $this->simpanGaleri($gadget, $request->file('galeri'));
                 }
 
                 return $gadget;
@@ -236,6 +241,11 @@ class GadgetController extends Controller
                         GadgetFoto::create(['id' => $gadget->id, 'url' => $fotoPath]);
                     }
                 }
+
+                if ($request->hasFile('galeri')) {
+                    $this->hapusGaleri($gadget);
+                    $this->simpanGaleri($gadget, $request->file('galeri'));
+                }
             });
         } catch (\Throwable $e) {
             if ($fotoPath) {
@@ -329,6 +339,8 @@ class GadgetController extends Controller
             Storage::disk('public')->delete($gadget->thumbnail->url);
             $gadget->thumbnail->delete();
         }
+
+        $this->hapusGaleri($gadget);
 
         $nama = $gadget->nama_produk;
         $gadget->forceDelete();
@@ -740,5 +752,32 @@ class GadgetController extends Controller
         }
 
         return $value;
+    }
+
+    /**
+     * Simpan lampiran galeri multi-sudut (Depan, Belakang, Sisi Samping,
+     * Layar Menyala) dengan label otomatis sesuai urutan upload.
+     */
+    protected function simpanGaleri(Gadget $gadget, array|object $files): void
+    {
+        $labels = ['Depan', 'Belakang', 'Sisi Samping', 'Layar Menyala'];
+
+        foreach ($files as $i => $file) {
+            $path = $file->store('galeri', 'public');
+            GadgetGaleri::create([
+                'gadget_id' => $gadget->id,
+                'url' => $path,
+                'label' => $labels[$i] ?? ('Foto ' . ($i + 1)),
+                'sort_order' => $i + 1,
+            ]);
+        }
+    }
+
+    protected function hapusGaleri(Gadget $gadget): void
+    {
+        foreach ($gadget->galeri as $foto) {
+            Storage::disk('public')->delete($foto->url);
+            $foto->delete();
+        }
     }
 }

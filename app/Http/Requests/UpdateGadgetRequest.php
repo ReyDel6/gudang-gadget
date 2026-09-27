@@ -40,6 +40,8 @@ class UpdateGadgetRequest extends FormRequest
             'tier_partai_min_qty' => ['nullable', 'integer', 'min:4'],
             'tier_partai_price' => ['nullable', 'numeric', 'min:0'],
             'foto' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+            'galeri' => ['nullable', 'array', 'max:6'],
+            'galeri.*' => ['image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
         ];
     }
 

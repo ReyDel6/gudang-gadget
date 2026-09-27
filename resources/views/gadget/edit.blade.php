@@ -166,6 +166,25 @@
                            class="w-full rounded-lg border border-navy-100 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gold-500">
                     @error('foto') <p class="text-rose-600 text-sm mt-1">{{ $message }}</p> @enderror
                 </div>
+                <div>
+                    <label class="block text-sm font-medium text-navy-700 mb-1">Foto Galeri (opsional)</label>
+                    @if ($gadget->galeri->isNotEmpty())
+                        <div class="mb-3 flex flex-wrap gap-2">
+                            @foreach ($gadget->galeri as $foto)
+                                <figure class="text-center">
+                                    <img src="{{ $foto->url_public }}" alt="{{ $foto->label }}" loading="lazy"
+                                         class="h-20 w-20 rounded-lg border border-navy-100 object-cover">
+                                    <figcaption class="text-[10px] text-navy-400 mt-0.5">{{ $foto->label }}</figcaption>
+                                </figure>
+                            @endforeach
+                        </div>
+                    @endif
+                    <input type="file" name="galeri[]" accept="image/*" multiple
+                           class="w-full rounded-lg border border-navy-100 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gold-500">
+                    <p class="text-[11px] text-navy-400 mt-1">Upload ulang untuk mengganti seluruh galeri. Label otomatis: Depan, Belakang, Sisi Samping, Layar Menyala (maks 6 foto, 2 MB/foto).</p>
+                    @error('galeri') <p class="text-rose-600 text-sm mt-1">{{ $message }}</p> @enderror
+                    @error('galeri.*') <p class="text-rose-600 text-sm mt-1">{{ $message }}</p> @enderror
+                </div>
             </div>
 
             <div class="bg-gold-50 border border-gold-200 rounded-xl p-5 space-y-4">

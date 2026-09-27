@@ -45,7 +45,7 @@
             {{-- Galeri --}}
             <div class="bg-white rounded-2xl border border-navy-100 p-4">
                 <div class="relative aspect-square rounded-xl overflow-hidden bg-navy-50">
-                    <img src="{{ $product->foto_url }}" alt="{{ $product->nama_produk }}" loading="lazy"
+                    <img id="galeriMain" src="{{ $product->foto_url }}" alt="{{ $product->nama_produk }}" loading="lazy"
                          class="w-full h-full object-cover">
                     <span class="absolute top-3 left-3 text-[11px] font-bold bg-navy-900/80 text-white px-2.5 py-1 rounded-full">{{ $product->kondisi_label }}</span>
                     <div class="absolute top-3 right-3 flex flex-col items-end gap-1.5">
@@ -59,6 +59,25 @@
                         @endif
                     </div>
                 </div>
+                @if ($product->galeri->isNotEmpty())
+                    <div class="mt-3 grid grid-cols-4 gap-2" id="galeriThumbs" role="tablist" aria-label="Galeri foto produk">
+                        <button type="button" data-gal data-url="{{ $product->foto_url }}"
+                                class="gal-thumb relative aspect-square rounded-lg overflow-hidden border-2 ring-2 ring-gold-500 outline-none"
+                                aria-label="Foto utama" aria-selected="true">
+                            <img src="{{ $product->foto_url }}" alt="Foto utama {{ $product->nama_produk }}" loading="lazy"
+                                 class="w-full h-full object-cover">
+                        </button>
+                        @foreach ($product->galeri as $foto)
+                            <button type="button" data-gal data-url="{{ $foto->url_public }}"
+                                    class="gal-thumb relative aspect-square rounded-lg overflow-hidden border-2 border-navy-100 hover:border-gold-400 focus:border-gold-400 outline-none"
+                                    aria-label="{{ $foto->label }}" aria-selected="false">
+                                <img src="{{ $foto->url_public }}" alt="{{ $foto->label }} {{ $product->nama_produk }}" loading="lazy"
+                                     class="w-full h-full object-cover">
+                                <span class="absolute bottom-0 inset-x-0 bg-navy-900/70 text-white text-[9px] font-bold text-center py-0.5">{{ $foto->label }}</span>
+                            </button>
+                        @endforeach
+                    </div>
+                @endif
             </div>
 
             {{-- Info --}}
@@ -267,6 +286,20 @@
 
 @push('page_scripts')
     <script>
+        document.querySelectorAll('#galeriThumbs .gal-thumb').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const main = document.getElementById('galeriMain');
+                main.src = btn.dataset.url;
+                main.alt = btn.getAttribute('aria-label') + ' — ' + main.alt.split(' — ')[1];
+                document.querySelectorAll('#galeriThumbs .gal-thumb').forEach(b => {
+                    b.classList.toggle('ring-2', b === btn);
+                    b.classList.toggle('ring-gold-500', b === btn);
+                    b.classList.toggle('border-gold-400', b === btn);
+                    b.classList.toggle('border-navy-100', b !== btn);
+                    b.setAttribute('aria-selected', b === btn ? 'true' : 'false');
+                });
+            });
+        });
         function copyProductLink() {
             const url = window.location.href;
             const done = () => showToast('Link berhasil disalin!');

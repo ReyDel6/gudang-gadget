@@ -103,6 +103,11 @@ class Gadget extends Model
         return $this->hasOne(GadgetFoto::class, 'id', 'id');
     }
 
+    public function galeri()
+    {
+        return $this->hasMany(GadgetGaleri::class, 'gadget_id', 'id')->orderBy('sort_order');
+    }
+
     public function stokLogs()
     {
         return $this->hasMany(StokLog::class, 'gadget_id', 'id');

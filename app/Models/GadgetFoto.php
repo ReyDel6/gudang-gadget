@@ -14,6 +14,6 @@ class GadgetFoto extends Model
 
     public function gadget()
     {
-        return $this->belongsTo(Gadget::class);
+        return $this->belongsTo(Gadget::class, 'id', 'id');
     }
 }

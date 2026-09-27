@@ -39,6 +39,8 @@ class StoreGadgetRequest extends FormRequest
             'tier_partai_min_qty' => ['nullable', 'integer', 'min:4'],
             'tier_partai_price' => ['nullable', 'numeric', 'min:0'],
             'foto' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+            'galeri' => ['nullable', 'array', 'max:6'],
+            'galeri.*' => ['image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
         ];
     }
 
@@ -55,6 +57,10 @@ class StoreGadgetRequest extends FormRequest
             'foto.image' => 'File harus berupa gambar.',
             'foto.mimes' => 'Format foto harus jpeg, png, jpg, atau webp.',
             'foto.max' => 'Ukuran foto maksimal 2 MB.',
+            'galeri.max' => 'Maksimal 6 foto galeri.',
+            'galeri.*.image' => 'File galeri harus berupa gambar.',
+            'galeri.*.mimes' => 'Format foto galeri harus jpeg, png, jpg, atau webp.',
+            'galeri.*.max' => 'Ukuran foto galeri maksimal 2 MB.',
         ];
     }
 }
