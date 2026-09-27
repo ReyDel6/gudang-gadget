@@ -17,6 +17,7 @@ use App\Http\Controllers\StoreAdminController;
 use App\Http\Controllers\StorefrontController;
 use App\Http\Controllers\StoreOrderController;
 use App\Http\Controllers\ServisController;
+use App\Http\Controllers\ServisIntakeController;
 use App\Http\Controllers\ServisTrackingController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -30,6 +31,11 @@ Route::get('/shop', [StorefrontController::class, 'index'])->name('shop.home');
 Route::get('/shop/katalog', [StorefrontController::class, 'katalog'])->name('shop.katalog');
 Route::get('/shop/produk/{id}', [StorefrontController::class, 'produk'])->name('shop.produk');
 Route::get('/shop/tracking-service', [ServisTrackingController::class, 'index'])->name('shop.tracking');
+
+// Ajukan servis dari storefront (publik).
+Route::get('/shop/ajukan-servis', [ServisIntakeController::class, 'create'])->name('shop.intake');
+Route::post('/shop/ajukan-servis', [ServisIntakeController::class, 'store'])->name('shop.intake.store')->middleware('throttle:5,1');
+Route::get('/shop/ajukan-servis/sukses', [ServisIntakeController::class, 'sukses'])->name('shop.intake.sukses');
 
 // Keranjang & checkout publik.
 Route::get('/shop/keranjang', [StoreOrderController::class, 'keranjang'])->name('shop.keranjang');

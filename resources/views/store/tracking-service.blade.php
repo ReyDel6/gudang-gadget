@@ -32,6 +32,11 @@
             </div>
         </form>
 
+        <p class="text-center text-xs text-navy-400 mt-3 mb-8">
+            Belum pernah servis di {{ $settings['store_name'] }}?
+            <a href="{{ route('shop.intake') }}" class="font-bold text-gold-600 hover:text-gold-700">Ajukan servis di sini →</a>
+        </p>
+
         @if ($error)
             <div class="rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-rose-700 text-sm text-center">
                 ⚠️ {{ $error }}
