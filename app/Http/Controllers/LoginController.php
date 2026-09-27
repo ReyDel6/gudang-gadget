@@ -27,7 +27,10 @@ class LoginController extends Controller
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
 
-            return redirect()->intended(route('landing'))
+            $user = Auth::user();
+            $tujuan = $user && $user->isReseller() ? route('shop.mitra.beranda') : 'landing';
+
+            return redirect()->intended($tujuan)
                 ->with('success', 'Selamat datang kembali!');
         }
 
@@ -101,7 +104,9 @@ class LoginController extends Controller
         Auth::login($user);
         $request->session()->regenerate();
 
-        return redirect()->route('landing')->with('success', 'Sandi berhasil diubah. Selamat datang kembali!');
+        $tujuan = $user->isReseller() ? route('shop.mitra.beranda') : 'landing';
+
+        return redirect()->route($tujuan)->with('success', 'Sandi berhasil diubah. Selamat datang kembali!');
     }
 
     public function logout(Request $request)

@@ -23,6 +23,12 @@
                    class="bg-navy-700 hover:bg-navy-800 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors">
                     Cetak Struk
                 </a>
+                @if ($penjualan->is_dropship)
+                    <a href="{{ route('penjualan.label', $penjualan->id) }}" target="_blank"
+                       class="bg-gold-500 hover:bg-gold-600 text-navy-900 text-sm font-semibold px-4 py-2 rounded-lg transition-colors">
+                        📦 Cetak Label Kirim
+                    </a>
+                @endif
                 @if ($penjualan->customer_phone)
                     @php
                         $wa = 'https://wa.me/' . preg_replace('/[^0-9]/', '', $penjualan->customer_phone)
@@ -74,6 +80,11 @@
                 @if ($penjualan->customer_phone)
                     <div class="text-xs text-navy-500 mt-0.5">{{ $penjualan->customer_phone }}</div>
                 @endif
+                <div class="mt-1.5">
+                    <span class="text-[10px] font-bold rounded-full px-2 py-0.5 {{ $penjualan->customer_type === 'reseller' ? 'bg-gold-100 text-gold-700' : 'bg-navy-50 text-navy-500' }}">
+                        {{ $penjualan->customer_type_label }}
+                    </span>
+                </div>
             </div>
             <div>
                 <div class="text-xs font-medium text-navy-400 uppercase tracking-wide">Metode Bayar</div>
@@ -95,6 +106,26 @@
                 <div class="text-xs text-navy-500 mt-0.5">{{ $penjualan->keterangan ?: '' }}</div>
             </div>
         </div>
+
+        @if ($penjualan->is_dropship)
+            <div class="mt-5 rounded-xl border border-gold-200 bg-gold-50/70 p-4 text-sm">
+                <p class="font-black text-navy-800 text-xs uppercase tracking-wide mb-2">📦 Pengiriman Dropship</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                        <span class="text-xs font-medium text-navy-400 uppercase">Pengirim</span>
+                        <p class="font-semibold text-navy-800">{{ $penjualan->sender_name ?: '—' }}</p>
+                        @if ($penjualan->sender_phone)
+                            <p class="text-xs text-navy-500">{{ $penjualan->sender_phone }}</p>
+                        @endif
+                    </div>
+                    <div>
+                        <span class="text-xs font-medium text-navy-400 uppercase">Penerima</span>
+                        <p class="font-semibold text-navy-800">{{ $penjualan->recipient_name ?: '—' }}</p>
+                        <p class="text-xs text-navy-500 whitespace-pre-line">{{ $penjualan->recipient_address ?: '' }}</p>
+                    </div>
+                </div>
+            </div>
+        @endif
     </div>
 
     <div class="bg-white rounded-2xl border border-navy-100 overflow-hidden">

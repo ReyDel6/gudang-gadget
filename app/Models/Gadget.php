@@ -224,6 +224,17 @@ class Gadget extends Model
         return round($this->harga_promo_aktif ? (float) $this->harga_promo : (float) $this->harga_jual, 2);
     }
 
+    public function getHargaMitraAttribute(): float
+    {
+        $tier = $this->tierPrices->sortByDesc('min_qty')->first();
+
+        if ($tier && (float) $tier->price > 0) {
+            return round((float) $tier->price, 2);
+        }
+
+        return $this->harga_aktif;
+    }
+
     public function getDiskonPersenAttribute(): ?int
     {
         if (! $this->harga_promo_aktif) {

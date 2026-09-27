@@ -6,6 +6,20 @@
 
 @section('content')
 
+    @if ($resellerMode)
+        <div class="bg-gold-500/15 border-b border-gold-500/30">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
+                <p class="text-sm font-bold text-navy-800">
+                    Mode Reseller aktif — harga menampilkan <span class="text-gold-700">tarif khusus mitra</span>.
+                </p>
+                <a href="{{ route('shop.mitra.beranda') }}"
+                   class="shrink-0 text-xs font-black bg-navy-900 text-white px-4 py-2 rounded-full hover:bg-navy-800 transition-colors">
+                    Portal Mitra →
+                </a>
+            </div>
+        </div>
+    @endif
+
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8">
         <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
             <div>

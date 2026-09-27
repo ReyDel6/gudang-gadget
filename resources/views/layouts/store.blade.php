@@ -38,9 +38,21 @@
                     <a href="{{ route('shop.katalog') }}" class="text-navy-600 hover:text-gold-600 transition-colors">Katalog</a>
                     <a href="{{ route('shop.home') }}#unggulan" class="text-navy-600 hover:text-gold-600 transition-colors">Unggulan</a>
                     <a href="{{ route('shop.home') }}#lokasi" class="text-navy-600 hover:text-gold-600 transition-colors">Lokasi Toko</a>
+                    <a href="{{ \Illuminate\Support\Facades\Auth::user()?->isReseller() ? route('shop.mitra.beranda') : route('shop.mitra.masuk') }}"
+                       class="text-navy-600 hover:text-gold-600 transition-colors">Portal Mitra</a>
                 </nav>
 
                 <div class="flex items-center gap-3">
+                    @auth
+                        @if (Auth::user()->isReseller())
+                            <div class="hidden sm:flex flex-col items-end">
+                                <a href="{{ route('shop.mitra.beranda') }}" class="text-xs font-black text-gold-600 hover:text-gold-700">
+                                    {{ Auth::user()->name }}
+                                </a>
+                                <span class="text-[10px] font-semibold text-navy-400">{{ Auth::user()->reseller?->status_label }}</span>
+                            </div>
+                        @endif
+                    @endauth
                     <a href="{{ 'https://wa.me/' . preg_replace('/[^0-9]/', '', $settings['whatsapp_number']) }}"
                        target="_blank" rel="noopener"
                        class="hidden sm:flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2.5 rounded-full transition-colors">
@@ -74,6 +86,11 @@
                     </a>
                     <a href="{{ route('shop.home') }}#lokasi" onclick="toggleMobileMenu(false)" class="flex items-center justify-between w-full px-3 py-3 rounded-xl font-semibold text-navy-800 hover:bg-navy-50 transition-colors">
                         Info Lokasi & Jam Buka
+                    </a>
+                    <a href="{{ \Illuminate\Support\Facades\Auth::user()?->isReseller() ? route('shop.mitra.beranda') : route('shop.mitra.masuk') }}" onclick="toggleMobileMenu(false)"
+                       class="flex items-center justify-between w-full px-3 py-3 rounded-xl font-semibold bg-navy-900 text-white hover:bg-navy-800 transition-colors">
+                        Portal Mitra Reseller
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
                     </a>
                 </nav>
                 <div class="px-4 pb-5">

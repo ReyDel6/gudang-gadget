@@ -11,15 +11,22 @@
         <form action="{{ route('penjualan.store') }}" method="POST" id="formPenjualan" class="space-y-5">
             @csrf
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-navy-700 mb-1">Tanggal</label>
                     <input type="date" name="tanggal" value="{{ old('tanggal', date('Y-m-d')) }}"
                            class="w-full rounded-lg border border-navy-100 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gold-500">
+                    <label class="block text-sm font-medium text-navy-700 mb-1 mt-3">Tipe Pelanggan</label>
+                    <select name="customer_type" id="tipePelanggan"
+                            class="w-full rounded-lg border border-navy-100 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gold-500">
+                        <option value="retail" @selected(old('customer_type', 'retail') === 'retail')>Pelanggan Umum (Retail)</option>
+                        <option value="reseller" @selected(old('customer_type') === 'reseller')>Mitra Reseller / Toko Grosir</option>
+                    </select>
+                    <p class="text-[11px] text-navy-400 mt-1">Tipe Reseller mengunci harga khusus mitra.</p>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-navy-700 mb-1">Customer</label>
-                    <input type="text" name="customer" value="{{ old('customer') }}" placeholder="Nama pembeli"
+                    <input type="text" name="customer" value="{{ old('customer') }}" placeholder="Nama pembeli / konter"
                            class="w-full rounded-lg border border-navy-100 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gold-500 mb-2">
                     <input type="text" name="customer_phone" value="{{ old('customer_phone') }}" placeholder="No. HP (untuk struk WA)"
                            class="w-full rounded-lg border border-navy-100 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gold-500">
@@ -28,6 +35,34 @@
                     <label class="block text-sm font-medium text-navy-700 mb-1">Keterangan</label>
                     <input type="text" name="keterangan" value="{{ old('keterangan') }}" placeholder="Opsional"
                            class="w-full rounded-lg border border-navy-100 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gold-500">
+                    <label class="flex items-center gap-2 mt-3 text-sm font-medium text-navy-700 cursor-pointer select-none">
+                        <input type="checkbox" name="is_dropship" value="1" id="dropshipCheck"
+                               class="rounded border-navy-200 text-gold-500 focus:ring-gold-500" @checked(old('is_dropship'))>
+                        📦 Kirim sebagai Dropship
+                    </label>
+                </div>
+            </div>
+
+            <div id="dropshipFields" class="hidden grid grid-cols-1 md:grid-cols-3 gap-4 rounded-xl border border-gold-200 bg-gold-50 p-4">
+                <div>
+                    <label class="block text-sm font-medium text-navy-700 mb-1">Nama Pengirim (Toko Mitra) *</label>
+                    <input type="text" name="sender_name" value="{{ old('sender_name') }}" placeholder="Nama toko reseller"
+                           class="w-full rounded-lg border border-navy-100 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gold-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-navy-700 mb-1">No. HP Pengirim</label>
+                    <input type="text" name="sender_phone" value="{{ old('sender_phone') }}" placeholder="08xxxx"
+                           class="w-full rounded-lg border border-navy-100 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gold-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-navy-700 mb-1">Nama Penerima *</label>
+                    <input type="text" name="recipient_name" value="{{ old('recipient_name') }}" placeholder="Nama penerima"
+                           class="w-full rounded-lg border border-navy-100 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gold-500">
+                </div>
+                <div class="md:col-span-3">
+                    <label class="block text-sm font-medium text-navy-700 mb-1">Alamat Pengiriman *</label>
+                    <textarea name="recipient_address" rows="2" placeholder="Alamat lengkap + kode pos"
+                              class="w-full rounded-lg border border-navy-100 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gold-500">{{ old('recipient_address') }}</textarea>
                 </div>
             </div>
 
@@ -224,6 +259,13 @@
         document.getElementById('diskonInput').addEventListener('input', hitung);
         document.getElementById('pajakInput').addEventListener('input', hitung);
         document.getElementById('scanSku').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); scanProduk(e); } });
+
+        const dropshipCheck = document.getElementById('dropshipCheck');
+        const dropshipFields = document.getElementById('dropshipFields');
+        const syncDropship = () => dropshipFields.classList.toggle('hidden', !dropshipCheck.checked);
+        dropshipCheck.addEventListener('change', syncDropship);
+        syncDropship();
+
         tambahBaris();
     </script>
 @endpush

@@ -16,6 +16,20 @@
 
 @section('content')
 
+    @if ($resellerMode)
+        <div class="bg-gold-500/15 border-b border-gold-500/30">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
+                <p class="text-sm font-bold text-navy-800">
+                    Mode Reseller aktif — harga menampilkan <span class="text-gold-700">tarif khusus mitra</span>.
+                </p>
+                <a href="{{ route('shop.mitra.beranda') }}"
+                   class="shrink-0 text-xs font-black bg-navy-900 text-white px-4 py-2 rounded-full hover:bg-navy-800 transition-colors">
+                    Portal Mitra →
+                </a>
+            </div>
+        </div>
+    @endif
+
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8 pb-28 md:pb-8">
         <nav class="text-sm text-navy-400 mb-6">
             <a href="{{ route('shop.home') }}" class="hover:text-gold-600">Beranda</a>
@@ -68,11 +82,16 @@
                 </div>
 
                 <div class="mt-4 flex items-end gap-3">
-                    <p class="text-3xl font-black {{ $product->harga_promo_aktif ? 'text-rose-600' : 'text-gold-600' }}">Rp {{ number_format($product->harga_aktif, 0, ',', '.') }}</p>
-                    @if ($product->harga_promo_aktif)
+                    <p class="text-3xl font-black {{ !$resellerMode && $product->harga_promo_aktif ? 'text-rose-600' : 'text-gold-600' }}">Rp {{ number_format($resellerMode ? $product->harga_mitra : $product->harga_aktif, 0, ',', '.') }}</p>
+                    @if ($product->harga_promo_aktif && !$resellerMode)
                         <p class="text-lg text-navy-400 line-through mb-1">Rp {{ number_format((float) $product->harga_jual, 0, ',', '.') }}</p>
                     @endif
                 </div>
+                @if ($resellerMode)
+                    <p class="mt-1.5 text-xs font-black uppercase tracking-wide text-navy-500 inline-flex items-center gap-1.5 bg-navy-50 px-3 py-1.5 rounded-full">
+                        ✓ Tarif khusus Mitra Reseller terverifikasi
+                    </p>
+                @endif
 
                 @if ($product->deskripsi)
                     <div class="prose-sm text-navy-600 mt-5 leading-relaxed whitespace-pre-line">{{ $product->deskripsi }}</div>

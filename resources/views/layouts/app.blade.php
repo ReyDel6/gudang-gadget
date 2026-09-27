@@ -336,6 +336,16 @@
                             </svg>
                             Manajemen Pengguna
                         </a>
+                        <a href="{{ route('mitra.index') }}"
+                           class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-semibold text-sm transition-all
+                                  {{ str_starts_with($routeName, 'mitra.')
+                                      ? 'bg-gold-500 text-white shadow-lg shadow-gold-500/30'
+                                      : 'hover:bg-white/10 text-slate-400 hover:text-white' }}">
+                            <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6M9 10h.01M15 10h.01"/>
+                            </svg>
+                            Mitra Reseller
+                        </a>
                     @endif
 
                 {{-- Dropdown: Master Data (admin) --}}

@@ -142,14 +142,56 @@
                 <button onclick="tutupModal()" class="text-slate-400 hover:text-white text-xl leading-none">&times;</button>
             </div>
             <div class="p-5 space-y-4 max-h-[70vh] overflow-y-auto">
+                <div>
+                    <label class="text-xs font-bold text-navy-400 uppercase block mb-1.5">Tipe Pelanggan</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button type="button" data-tipe="retail" class="tipe-btn grid place-items-center gap-1 rounded-xl border-2 border-gold-500 bg-gold-50 text-navy-900 font-bold text-sm px-3 py-3">
+                            🛍 Pelanggan Umum
+                            <span class="text-[10px] font-semibold text-navy-500">harga eceran / grosir otomatis</span>
+                        </button>
+                        <button type="button" data-tipe="reseller" class="tipe-btn grid place-items-center gap-1 rounded-xl border-2 border-navy-200 text-navy-600 font-bold text-sm px-3 py-3">
+                            🏬 Mitra Reseller
+                            <span class="text-[10px] font-semibold text-navy-400">kunci harga khusus mitra</span>
+                        </button>
+                    </div>
+                </div>
+
                 <div class="grid grid-cols-2 gap-2">
                     <div>
                         <label class="text-xs font-bold text-navy-400 uppercase">Nama Pembeli</label>
-                        <input id="custName" type="text" class="w-full rounded-lg border border-navy-200 px-3 py-2 text-sm" placeholder="Umum">
+                        <input id="custName" type="text" class="w-full rounded-lg border border-navy-200 px-3 py-2 text-sm" placeholder="Umum / Nama Konter">
                     </div>
                     <div>
                         <label class="text-xs font-bold text-navy-400 uppercase">No. HP</label>
                         <input id="custPhone" type="text" class="w-full rounded-lg border border-navy-200 px-3 py-2 text-sm" placeholder="08xxxx">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="flex items-center gap-2.5 cursor-pointer select-none">
+                        <input id="dropshipCheck" type="checkbox"
+                               class="w-4.5 h-4.5 rounded border-navy-200 text-gold-500 focus:ring-gold-500">
+                        <span class="text-sm font-bold text-navy-800">📦 Kirim sebagai Dropship</span>
+                        <span class="text-[10px] text-navy-400 font-semibold">label tanpa nama toko utama</span>
+                    </label>
+                </div>
+
+                <div id="dropshipFields" class="hidden space-y-3 rounded-xl border border-gold-200 bg-gold-50/60 p-3.5">
+                    <div>
+                        <label class="text-xs font-bold text-navy-500 uppercase">Nama Pengirim (Toko Mitra) *</label>
+                        <input id="senderName" type="text" class="w-full rounded-lg border border-navy-200 px-3 py-2 text-sm" placeholder="Nama toko reseller">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-navy-500 uppercase">No. HP Pengirim</label>
+                        <input id="senderPhone" type="text" class="w-full rounded-lg border border-navy-200 px-3 py-2 text-sm" placeholder="08xxxx">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-navy-500 uppercase">Nama Penerima (Pelanggan Akhir) *</label>
+                        <input id="recipientName" type="text" class="w-full rounded-lg border border-navy-200 px-3 py-2 text-sm" placeholder="Nama penerima">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-navy-500 uppercase">Alamat Pengiriman *</label>
+                        <textarea id="recipientAddress" rows="2" class="w-full rounded-lg border border-navy-200 px-3 py-2 text-sm" placeholder="Alamat lengkap + kode pos"></textarea>
                     </div>
                 </div>
 
@@ -217,6 +259,7 @@
         let bayarTunai = '';
         let refBayar = '';
         let splitTunai = '';
+        let tipePelanggan = 'retail';
 
         const $ = sel => document.querySelector(sel);
         const byId = id => document.getElementById(id);
@@ -403,6 +446,10 @@
             if (cart.length === 0) return;
             const { total } = hitung();
             metode = 'cash'; bayarTunai = String(Math.ceil(total)); refBayar = ''; splitTunai = '';
+            tipePelanggan = 'retail';
+            byId('dropshipCheck').checked = false;
+            byId('dropshipFields').classList.add('hidden');
+            aturTipe();
             byId('modalTotal').textContent = fmt(total);
             document.querySelectorAll('.metrode').forEach(b => {
                 const aktif = b.dataset.metode === 'cash';
@@ -430,6 +477,25 @@
             renderBayar();
         }
         document.querySelectorAll('.metrode').forEach(b => b.addEventListener('click', () => pilihMetode(b.dataset.metode)));
+
+        function aturTipe() {
+            const aktif = b => {
+                b.classList.toggle('border-gold-500', tipePelanggan === b.dataset.tipe);
+                b.classList.toggle('bg-gold-50', tipePelanggan === b.dataset.tipe);
+                b.classList.toggle('text-navy-900', tipePelanggan === b.dataset.tipe);
+                b.classList.toggle('border-navy-200', tipePelanggan !== b.dataset.tipe);
+                b.classList.toggle('text-navy-600', tipePelanggan !== b.dataset.tipe);
+            };
+            document.querySelectorAll('.tipe-btn').forEach(aktif);
+        }
+        document.querySelectorAll('.tipe-btn').forEach(b => b.addEventListener('click', () => {
+            tipePelanggan = b.dataset.tipe;
+            aturTipe();
+        }));
+
+        byId('dropshipCheck').addEventListener('change', e => {
+            byId('dropshipFields').classList.toggle('hidden', !e.target.checked);
+        });
         byId('bayarPanel').addEventListener('input', e => {
             if (e.target.id === 'bayarTunai') bayarTunai = e.target.value;
             if (e.target.id === 'refBayar') refBayar = e.target.value;
@@ -494,6 +560,12 @@
                  <input type="hidden" name="pajak" value="${pajak}">
                  <input type="hidden" name="customer" value="${esc(byId('custName').value.trim())}">
                  <input type="hidden" name="customer_phone" value="${esc(byId('custPhone').value.trim())}">
+                 <input type="hidden" name="customer_type" value="${tipePelanggan}">
+                 <input type="hidden" name="is_dropship" value="${byId('dropshipCheck').checked ? '1' : '0'}">
+                 <input type="hidden" name="sender_name" value="${byId('dropshipCheck').checked ? esc(byId('senderName').value.trim()) : ''}">
+                 <input type="hidden" name="sender_phone" value="${byId('dropshipCheck').checked ? esc(byId('senderPhone').value.trim()) : ''}">
+                 <input type="hidden" name="recipient_name" value="${byId('dropshipCheck').checked ? esc(byId('recipientName').value.trim()) : ''}">
+                 <input type="hidden" name="recipient_address" value="${byId('dropshipCheck').checked ? esc(byId('recipientAddress').value.trim()) : ''}">
                  <input type="hidden" name="payment_method" value="${metode}">
                  <input type="hidden" name="paid_amount" value="${dibayar}">
                  <input type="hidden" name="payment_ref" value="${refEd ? esc(refEd.value.trim()) : ''}">`);

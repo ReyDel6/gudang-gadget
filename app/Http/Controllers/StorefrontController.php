@@ -8,6 +8,7 @@ use App\Models\StoreSetting;
 use App\Support\WhatsApp;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 
 class StorefrontController extends Controller
 {
@@ -23,8 +24,9 @@ class StorefrontController extends Controller
         $featured = Gadget::unggulan()->with(['thumbnail', 'tierPrices'])->limit(8)->get($this->publicColumns);
         $categories = $this->categories();
         $settings = $this->settings();
+        $resellerMode = $this->resellerMode();
 
-        return view('store.index', compact('banners', 'featured', 'categories', 'settings'));
+        return view('store.index', compact('banners', 'featured', 'categories', 'settings', 'resellerMode'));
     }
 
     public function katalog(Request $request)
@@ -80,14 +82,16 @@ class StorefrontController extends Controller
         $categories = $this->categories();
         $brands = $this->brands();
         $settings = $this->settings();
+        $resellerMode = $this->resellerMode();
 
-        return view('store.katalog', compact('products', 'categories', 'brands', 'settings'));
+        return view('store.katalog', compact('products', 'categories', 'brands', 'settings', 'resellerMode'));
     }
 
     public function produk($id)
     {
         $product = Gadget::publik()->with(['thumbnail', 'tierPrices'])->findOrFail($id);
         $settings = $this->settings();
+        $resellerMode = $this->resellerMode();
 
         $related = Gadget::publik()->with(['thumbnail', 'tierPrices'])
             ->where('kategori', $product->kategori)
@@ -95,7 +99,7 @@ class StorefrontController extends Controller
             ->limit(4)
             ->get($this->publicColumns);
 
-        return view('store.produk', compact('product', 'related', 'settings'));
+        return view('store.produk', compact('product', 'related', 'settings', 'resellerMode'));
     }
 
     public function waLink(Gadget $product): string
@@ -113,7 +117,7 @@ class StorefrontController extends Controller
         return Gadget::publik()->get(['nama_produk'])->map->brand->unique()->sort()->values();
     }
 
-    protected function settings(): array
+    public function settings(): array
     {
         return [
             'store_name' => StoreSetting::get('store_name', 'Gudang Gadget'),
@@ -127,5 +131,12 @@ class StorefrontController extends Controller
             'facebook_url' => StoreSetting::get('facebook_url', '#'),
             'tiktok_url' => StoreSetting::get('tiktok_url', '#'),
         ];
+    }
+
+    protected function resellerMode(): bool
+    {
+        $user = Auth::user();
+
+        return $user && $user->isReseller() && $user->reseller?->isApproved();
     }
 }

@@ -5,6 +5,8 @@ use App\Http\Controllers\GadgetController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\MasterController;
+use App\Http\Controllers\MitraAdminController;
+use App\Http\Controllers\MitraController;
 use App\Http\Controllers\MutasiController;
 use App\Http\Controllers\PembelianController;
 use App\Http\Controllers\PenjualanController;
@@ -25,6 +27,22 @@ Route::get('/shop', [StorefrontController::class, 'index'])->name('shop.home');
 Route::get('/shop/katalog', [StorefrontController::class, 'katalog'])->name('shop.katalog');
 Route::get('/shop/produk/{id}', [StorefrontController::class, 'produk'])->name('shop.produk');
 
+// Portal mitra reseller (B2B).
+Route::middleware('guest')->group(function () {
+    Route::get('/shop/mitra/daftar', [MitraController::class, 'daftar'])->name('shop.mitra.daftar');
+    Route::post('/shop/mitra/daftar', [MitraController::class, 'daftarStore'])->name('shop.mitra.daftar.store')->middleware('throttle:5,10');
+    Route::get('/shop/mitra/masuk', [MitraController::class, 'masuk'])->name('shop.mitra.masuk');
+    Route::post('/shop/mitra/masuk', [MitraController::class, 'masukStore'])->name('shop.mitra.masuk.store')->middleware('throttle:5,10');
+});
+Route::post('/shop/mitra/keluar', [MitraController::class, 'keluar'])->name('shop.mitra.keluar')->middleware('auth');
+
+Route::middleware(['auth', 'role:reseller'])->group(function () {
+    Route::get('/shop/mitra/beranda', [MitraController::class, 'beranda'])->name('shop.mitra.beranda');
+    Route::get('/shop/mitra/price-list', [MitraController::class, 'priceList'])->name('shop.mitra.price-list');
+    Route::get('/shop/mitra/price-list/csv', [MitraController::class, 'priceListCsv'])->name('shop.mitra.price-list.csv');
+    Route::get('/shop/mitra/price-list/cetak', [MitraController::class, 'priceListPrint'])->name('shop.mitra.price-list.cetak');
+});
+
 Route::middleware('guest')->group(function () {
     Route::get('/forgot-password', [LoginController::class, 'showForgot'])->name('password.request');
     Route::post('/forgot-password', [LoginController::class, 'sendReset'])->name('password.email')->middleware('throttle:3,1');
@@ -32,7 +50,7 @@ Route::middleware('guest')->group(function () {
     Route::post('/reset-password', [LoginController::class, 'storeReset'])->name('password.store')->middleware('throttle:5,1');
 });
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'role:admin,staff'])->group(function () {
     Route::get('/', [GadgetController::class, 'landing'])->name('landing');
 
     Route::get('/profil', [ProfilController::class, 'show'])->name('profil.show');
@@ -67,6 +85,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/penjualan', [PenjualanController::class, 'store'])->name('penjualan.store');
     Route::get('/penjualan/{id}', [PenjualanController::class, 'show'])->name('penjualan.show');
     Route::get('/penjualan/{id}/cetak', [PenjualanController::class, 'cetak'])->name('penjualan.cetak');
+    Route::get('/penjualan/{id}/label', [PenjualanController::class, 'label'])->name('penjualan.label');
     Route::delete('/penjualan/{id}', [PenjualanController::class, 'destroy'])->name('penjualan.destroy')->middleware('role:admin');
 
     Route::get('/pembelian', [PembelianController::class, 'index'])->name('pembelian.index');
@@ -110,6 +129,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/master/supplier', [MasterController::class, 'supplier'])->name('master.supplier');
         Route::post('/master/supplier', [MasterController::class, 'storeSupplier'])->name('master.supplier.store');
         Route::delete('/master/supplier/{id}', [MasterController::class, 'destroySupplier'])->name('master.supplier.destroy');
+
+        Route::get('/mitra', [MitraAdminController::class, 'index'])->name('mitra.index');
+        Route::post('/mitra/{id}/status', [MitraAdminController::class, 'setStatus'])->name('mitra.status');
 
 Route::get('/audit', [AuditLogController::class, 'index'])->name('audit.index');
     });

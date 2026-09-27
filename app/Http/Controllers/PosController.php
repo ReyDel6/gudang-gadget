@@ -25,7 +25,8 @@ class PosController extends Controller
 
     public function store(Request $request)
     {
-        $data = $request->validate(PenjualanService::aturan(), PenjualanService::pesan());
+        $rules = array_merge(PenjualanService::aturan(), PenjualanService::aturanTambahan($request->all()));
+        $data = $request->validate($rules, PenjualanService::pesan());
 
         $user = Auth::user();
         $shiftAktif = CashierShift::aktif()->where('user_id', $user->id)->first();

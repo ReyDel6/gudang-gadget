@@ -20,6 +20,12 @@ class PenjualanService
             'tanggal' => ['nullable', 'date'],
             'customer' => ['nullable', 'string', 'max:150'],
             'customer_phone' => ['nullable', 'string', 'max:30'],
+            'customer_type' => ['nullable', 'string', Rule::in(['retail', 'reseller'])],
+            'is_dropship' => ['nullable', 'boolean'],
+            'sender_name' => ['nullable', 'string', 'max:150'],
+            'sender_phone' => ['nullable', 'string', 'max:30'],
+            'recipient_name' => ['nullable', 'string', 'max:150'],
+            'recipient_address' => ['nullable', 'string', 'max:500'],
             'keterangan' => ['nullable', 'string', 'max:255'],
             'items' => ['required', 'array', 'min:1'],
             'items.*.gadget_id' => ['required', 'integer', 'exists:products,id'],
@@ -40,6 +46,32 @@ class PenjualanService
             'items.*.qty.min' => 'Jumlah item harus minimal 1.',
             'items.*.gadget_id.exists' => 'Produk yang dipilih tidak valid.',
             'payment_method.in' => 'Metode pembayaran tidak valid.',
+            'customer_type.in' => 'Tipe pelanggan tidak valid.',
+            'is_dropship.boolean' => 'Nilai pengiriman dropship tidak valid.',
+        ];
+    }
+
+    public static function aturanTambahan(array $data): array
+    {
+        $tipe = $data['customer_type'] ?? 'retail';
+        $dropship = ! empty($data['is_dropship']) && filter_var($data['is_dropship'], FILTER_VALIDATE_BOOL);
+
+        return [
+            'customer' => array_filter([
+                $tipe === 'reseller' ? 'required' : 'nullable',
+                'string',
+                'max:150',
+            ]),
+            'recipient_name' => array_filter([
+                $dropship ? 'required' : 'nullable',
+                'string',
+                'max:150',
+            ]),
+            'recipient_address' => array_filter([
+                $dropship ? 'required' : 'nullable',
+                'string',
+                'max:500',
+            ]),
         ];
     }
 
@@ -53,8 +85,10 @@ class PenjualanService
         $pajakPersen = (float) ($data['pajak'] ?? 0);
         $metode = $data['payment_method'] ?? Pembayaran::CASH;
         $tanggal = $data['tanggal'] ?? now()->toDateString();
+        $tipe = $data['customer_type'] ?? 'retail';
+        $isDropship = ! empty($data['is_dropship']) && filter_var($data['is_dropship'], FILTER_VALIDATE_BOOL);
 
-        return DB::transaction(function () use ($data, $user, $ip, $shiftId, $diskon, $pajakPersen, $metode, $tanggal) {
+        return DB::transaction(function () use ($data, $user, $ip, $shiftId, $diskon, $pajakPersen, $metode, $tanggal, $tipe, $isDropship) {
             $no = InvoiceService::buat('PJ', 'penjualans');
 
             $penjualan = Penjualan::create([
@@ -64,6 +98,12 @@ class PenjualanService
                 'user_name' => $user?->name,
                 'customer' => $data['customer'] ?? null,
                 'customer_phone' => $data['customer_phone'] ?? null,
+                'customer_type' => $tipe,
+                'is_dropship' => $isDropship,
+                'sender_name' => $data['sender_name'] ?? null,
+                'sender_phone' => $data['sender_phone'] ?? null,
+                'recipient_name' => $data['recipient_name'] ?? null,
+                'recipient_address' => $data['recipient_address'] ?? null,
                 'keterangan' => $data['keterangan'] ?? null,
                 'total' => 0,
                 'diskon' => $diskon,
@@ -87,17 +127,23 @@ class PenjualanService
                 $retail = (float) $gadget->harga_jual ?: (float) $gadget->harga_beli;
                 $hargaJual = (float) ($item['harga_jual'] ?? $retail);
 
-                // Auto-tier harga grosir/partai: hanya saat kasir mengirimkan
-                // harga standar (retail/tier), bukan harga manual/kustom.
-                $tiers = $gadget->tierPrices()->orderByDesc('min_qty')->get();
-                if ($tiers->isNotEmpty() && $hargaJual > 0) {
-                    $dikenal = collect([$retail])->merge($tiers->map(fn ($t) => (float) $t->price))
-                        ->map(fn ($v) => round($v, 2))->unique()->all();
-                    if (in_array(round($hargaJual, 2), $dikenal, true)) {
-                        foreach ($tiers as $tier) {
-                            if ($qty >= (int) $tier->min_qty && (float) $tier->price > 0) {
-                                $hargaJual = round((float) $tier->price, 2);
-                                break;
+                // FR-3.2: tipe transaksi Mitra Reseller mengunci harga khusus mitra
+                // (tarif partai terendah) tanpa autotier lanjutan.
+                if ($tipe === 'reseller') {
+                    $hargaJual = $gadget->harga_mitra;
+                } else {
+                    // Auto-tier harga grosir/partai: hanya saat kasir mengirimkan
+                    // harga standar (retail/tier), bukan harga manual/kustom.
+                    $tiers = $gadget->tierPrices()->orderByDesc('min_qty')->get();
+                    if ($tiers->isNotEmpty() && $hargaJual > 0) {
+                        $dikenal = collect([$retail])->merge($tiers->map(fn ($t) => (float) $t->price))
+                            ->map(fn ($v) => round($v, 2))->unique()->all();
+                        if (in_array(round($hargaJual, 2), $dikenal, true)) {
+                            foreach ($tiers as $tier) {
+                                if ($qty >= (int) $tier->min_qty && (float) $tier->price > 0) {
+                                    $hargaJual = round((float) $tier->price, 2);
+                                    break;
+                                }
                             }
                         }
                     }
@@ -145,6 +191,8 @@ class PenjualanService
                 'metode_bayar' => $metode,
                 'dibayar' => $dibayar,
                 'jumlah_item' => count($data['items']),
+                'tipe_pelanggan' => $tipe,
+                'dropship' => $isDropship,
             ], $ip);
 
             return $penjualan->fresh();

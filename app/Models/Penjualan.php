@@ -15,6 +15,12 @@ class Penjualan extends Model
         'user_name',
         'customer',
         'customer_phone',
+        'customer_type',
+        'is_dropship',
+        'sender_name',
+        'sender_phone',
+        'recipient_name',
+        'recipient_address',
         'keterangan',
         'total',
         'diskon',
@@ -40,6 +46,7 @@ class Penjualan extends Model
             'paid_amount' => 'decimal:2',
             'change_amount' => 'decimal:2',
             'voided_at' => 'datetime',
+            'is_dropship' => 'boolean',
         ];
     }
 
@@ -68,6 +75,11 @@ class Penjualan extends Model
     public function scopeAktif(Builder $q): Builder
     {
         return $q->where('payment_status', '!=', 'void');
+    }
+
+    public function getCustomerTypeLabelAttribute(): string
+    {
+        return $this->customer_type === 'reseller' ? 'Mitra Reseller / Toko Grosir' : 'Pelanggan Umum (Retail)';
     }
 
     public function getLabaAttribute(): float
