@@ -13,7 +13,7 @@ class StorefrontController extends Controller
 {
     protected array $publicColumns = [
         'id', 'nama_produk', 'sku', 'kategori', 'deskripsi', 'harga_jual',
-        'stock', 'satuan', 'status', 'is_published', 'is_featured',
+        'harga_promo', 'stock', 'satuan', 'status', 'is_published', 'is_featured',
         'condition', 'specifications', 'warranty_info', 'created_at', 'updated_at',
     ];
 
@@ -43,10 +43,10 @@ class StorefrontController extends Controller
             $query->where('nama_produk', 'like', $brand . '%');
         }
         if ($min = $request->input('min')) {
-            $query->where('harga_jual', '>=', (float) $min);
+            $query->whereRaw('COALESCE(NULLIF(harga_promo, 0), harga_jual) >= ?', [(float) $min]);
         }
         if ($max = $request->input('max')) {
-            $query->where('harga_jual', '<=', (float) $max);
+            $query->whereRaw('COALESCE(NULLIF(harga_promo, 0), harga_jual) <= ?', [(float) $max]);
         }
         if ($request->boolean('ready')) {
             $query->where('stock', '>', 0);
@@ -57,10 +57,10 @@ class StorefrontController extends Controller
 
         switch ($request->input('sort')) {
             case 'termurah':
-                $query->orderBy('harga_jual');
+                $query->orderByRaw('COALESCE(NULLIF(harga_promo, 0), harga_jual) ASC');
                 break;
             case 'termahal':
-                $query->orderByDesc('harga_jual');
+                $query->orderByRaw('COALESCE(NULLIF(harga_promo, 0), harga_jual) DESC');
                 break;
             case 'populer':
                 $query->withCount('terjual')->orderByDesc('terjual_count');
@@ -118,6 +118,7 @@ class StorefrontController extends Controller
             'store_address' => StoreSetting::get('store_address', ''),
             'jam_operasional' => StoreSetting::get('jam_operasional', ''),
             'maps_embed' => StoreSetting::get('maps_embed', ''),
+            'store_photo' => StoreSetting::get('store_photo', ''),
             'tags_line' => StoreSetting::get('tags_line', ''),
             'instagram_url' => StoreSetting::get('instagram_url', '#'),
             'facebook_url' => StoreSetting::get('facebook_url', '#'),

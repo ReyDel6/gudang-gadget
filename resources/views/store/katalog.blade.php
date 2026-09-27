@@ -19,93 +19,104 @@
             </form>
         </div>
 
-        @if (request()->hasAny(['q', 'kategori', 'brand', 'min', 'max', 'ready', 'condition', 'sort']))
-            <a href="{{ route('shop.katalog') }}" class="inline-block text-xs font-semibold text-navy-500 hover:text-gold-600 mb-4">✕ Reset semua filter</a>
+        @php
+            $chips = [];
+            $base = route('shop.katalog');
+            $remove = fn (string $except) => $base . (function () use ($except) {
+                $q = collect(request()->query())->except([$except, 'page'])->filter(fn ($v) => $v !== '' && $v !== null)->toArray();
+                return $q ? '?' . http_build_query($q) : '';
+            })();
+
+            if (request('q')) {
+                $chips[] = ['label' => 'Cari: ' . request('q'), 'url' => $remove('q')];
+            }
+            if (request('kategori')) {
+                $chips[] = ['label' => 'Kategori: ' . request('kategori'), 'url' => $remove('kategori')];
+            }
+            if (request('brand')) {
+                $chips[] = ['label' => 'Brand: ' . request('brand'), 'url' => $remove('brand')];
+            }
+            if (request('condition')) {
+                $kondisiLabel = match (request('condition')) {
+                    'like-new' => 'Bekas Mulus',
+                    'used' => 'Second',
+                    default => 'Baru / Segel',
+                };
+                $chips[] = ['label' => 'Kondisi: ' . $kondisiLabel, 'url' => $remove('condition')];
+            }
+            if (request('ready')) {
+                $chips[] = ['label' => 'Ready Stock', 'url' => $remove('ready')];
+            }
+            if (request('min') || request('max')) {
+                $chips[] = ['label' => 'Harga: Rp ' . (request('min') ?: '0') . ' – ' . (request('max') ?: '∞'), 'url' => $remove('min') . (request('max') ? '' : '')];
+                $q2 = collect(request()->query())->except(['min', 'page'])->filter(fn ($v) => $v !== '' && $v !== null)->toArray();
+                $chips[count($chips) - 1]['url'] = $base . ($q2 ? '?' . http_build_query($q2) : '');
+            }
+            if (request('sort')) {
+                $sortLabel = match (request('sort')) {
+                    'termurah' => 'Harga Terendah',
+                    'termahal' => 'Harga Tertinggi',
+                    'terbaru' => 'Produk Terbaru',
+                    'populer' => 'Paling Populer',
+                    default => request('sort'),
+                };
+                $chips[] = ['label' => 'Urut: ' . $sortLabel, 'url' => $remove('sort')];
+            }
+        @endphp
+
+        @if ($chips)
+            <div class="flex flex-wrap items-center gap-2 mb-5">
+                <span class="text-xs font-semibold text-navy-400">Filter aktif:</span>
+                @foreach ($chips as $chip)
+                    <a href="{{ $chip['url'] }}" title="Hapus filter ini"
+                       class="inline-flex items-center gap-1.5 text-xs font-bold bg-navy-900 text-white px-3 py-1.5 rounded-full hover:bg-rose-600 transition-colors">
+                        {{ $chip['label'] }}
+                        <span class="text-white/80" aria-hidden="true">✕</span>
+                    </a>
+                @endforeach
+                <a href="{{ route('shop.katalog') }}" class="text-xs font-semibold text-navy-500 hover:text-gold-600 underline transition-colors">Reset semua</a>
+            </div>
         @endif
 
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            {{-- Filter sidebar --}}
-            <aside class="lg:col-span-1">
-                <form method="GET" action="{{ route('shop.katalog') }}" class="space-y-4 bg-white rounded-2xl border border-navy-100 p-5 sticky top-20">
-                    @if (request('q'))
-                        <input type="hidden" name="q" value="{{ request('q') }}">
-                    @endif
-                    @if (request('sort'))
-                        <input type="hidden" name="sort" value="{{ request('sort') }}">
-                    @endif
-
-                    <div>
-                        <label class="text-xs font-bold uppercase tracking-wide text-navy-500">Kategori</label>
-                        <select name="kategori" onchange="this.form.submit()"
-                                class="mt-1.5 w-full rounded-lg border border-navy-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold-500">
-                            <option value="">Semua Kategori</option>
-                            @foreach ($categories as $kategori)
-                                <option value="{{ $kategori }}" @selected(request('kategori') === $kategori)>{{ $kategori }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="text-xs font-bold uppercase tracking-wide text-navy-500">Brand</label>
-                        <select name="brand" onchange="this.form.submit()"
-                                class="mt-1.5 w-full rounded-lg border border-navy-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold-500">
-                            <option value="">Semua Brand</option>
-                            @foreach ($brands as $brand)
-                                <option value="{{ $brand }}" @selected(request('brand') === $brand)>{{ $brand }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="text-xs font-bold uppercase tracking-wide text-navy-500">Rentang Harga (Rp)</label>
-                        <div class="mt-1.5 flex items-center gap-2">
-                            <input type="number" name="min" value="{{ request('min') }}" placeholder="Min"
-                                   class="w-full rounded-lg border border-navy-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold-500">
-                            <input type="number" name="max" value="{{ request('max') }}" placeholder="Maks"
-                                   class="w-full rounded-lg border border-navy-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold-500">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="text-xs font-bold uppercase tracking-wide text-navy-500">Kondisi</label>
-                        <select name="condition" onchange="this.form.submit()"
-                                class="mt-1.5 w-full rounded-lg border border-navy-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold-500">
-                            <option value="">Semua Kondisi</option>
-                            <option value="new" @selected(request('condition') === 'new')>Baru / Segel</option>
-                            <option value="like-new" @selected(request('condition') === 'like-new')>Bekas Mulus</option>
-                            <option value="used" @selected(request('condition') === 'used')>Second</option>
-                        </select>
-                    </div>
-
-                    <label class="flex items-center gap-2 text-sm text-navy-700 cursor-pointer">
-                        <input type="checkbox" name="ready" value="1" @checked(request('ready'))
-                               onchange="this.form.submit()" class="h-4 w-4 rounded border-navy-200 text-gold-500 focus:ring-gold-500">
-                        Hanya Ready Stock
-                    </label>
-
-                    <button type="submit" class="w-full bg-navy-900 hover:bg-navy-800 text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors">Terapkan Filter</button>
-                </form>
+            {{-- Filter sidebar (desktop) --}}
+            <aside class="hidden lg:block lg:col-span-1">
+                <div class="bg-white rounded-2xl border border-navy-100 p-5 sticky top-20">
+                    @include('store.partials.filter-form', ['categories' => $categories, 'brands' => $brands, 'includeSort' => false])
+                </div>
             </aside>
 
             {{-- Grid produk --}}
             <div class="lg:col-span-3">
-                <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center justify-between gap-3 mb-4">
                     <p class="text-sm text-navy-500">Urutkan:</p>
-                    <form method="GET" action="{{ route('shop.katalog') }}" class="flex gap-2 flex-wrap">
-                        @foreach (['q', 'kategori', 'brand', 'min', 'max', 'ready', 'condition'] as $f)
-                            @if (request($f))
-                                <input type="hidden" name="{{ $f }}" value="{{ request($f) }}">
-                            @endif
-                        @endforeach
-                        <select name="sort" onchange="this.form.submit()"
-                                class="rounded-lg border border-navy-100 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold-500">
-                            <option value="">Rekomendasi</option>
-                            <option value="termurah" @selected(request('sort') === 'termurah')>Harga Terendah</option>
-                            <option value="termahal" @selected(request('sort') === 'termahal')>Harga Tertinggi</option>
-                            <option value="terbaru" @selected(request('sort') === 'terbaru')>Produk Terbaru</option>
-                            <option value="populer" @selected(request('sort') === 'populer')>Paling Populer</option>
-                        </select>
-                    </form>
+                    <div class="flex items-center gap-2">
+                        <div class="md:hidden">
+                            <button type="button" onclick="toggleFilterSheet(true)"
+                                    class="flex items-center gap-2 bg-navy-900 hover:bg-navy-800 text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 3H2l8 9.5V19l4 2v-8.5L22 3z"/></svg>
+                                Filter & Urutkan
+                                @if ($chips)
+                                    <span class="grid place-items-center w-5 h-5 rounded-full bg-gold-500 text-navy-900 text-[10px] font-black">{{ count($chips) }}</span>
+                                @endif
+                            </button>
+                        </div>
+                        <form method="GET" action="{{ route('shop.katalog') }}" class="hidden md:block">
+                            @foreach (['q', 'kategori', 'brand', 'min', 'max', 'ready', 'condition'] as $f)
+                                @if (request($f))
+                                    <input type="hidden" name="{{ $f }}" value="{{ request($f) }}">
+                                @endif
+                            @endforeach
+                            <select name="sort" onchange="this.form.submit()" aria-label="Urutkan produk"
+                                    class="rounded-lg border border-navy-100 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold-500">
+                                <option value="">Rekomendasi</option>
+                                <option value="termurah" @selected(request('sort') === 'termurah')>Harga Terendah</option>
+                                <option value="termahal" @selected(request('sort') === 'termahal')>Harga Tertinggi</option>
+                                <option value="terbaru" @selected(request('sort') === 'terbaru')>Produk Terbaru</option>
+                                <option value="populer" @selected(request('sort') === 'populer')>Paling Populer</option>
+                            </select>
+                        </form>
+                    </div>
                 </div>
 
                 @if ($products->isEmpty())
@@ -116,28 +127,7 @@
 
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-5">
                     @foreach ($products as $p)
-                        <div class="group bg-white rounded-2xl border border-navy-100 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all">
-                            <a href="{{ route('shop.produk', $p->id) }}" class="block relative aspect-square bg-navy-50">
-                                <img src="{{ $p->foto_url }}" alt="{{ $p->nama_produk }}" loading="lazy" class="w-full h-full object-cover">
-                                <span class="absolute top-3 left-3 text-[10px] font-bold bg-navy-900/80 text-white px-2 py-1 rounded-full">{{ $p->kondisi_label }}</span>
-                                @if (!$p->tersedia)
-                                    <span class="absolute top-3 right-3 text-[10px] font-bold bg-rose-600 text-white px-2 py-1 rounded-full">Stok Habis</span>
-                                @endif
-                            </a>
-                            <div class="p-4">
-                                <p class="text-xs text-navy-400 font-medium">{{ $p->kategori }}</p>
-                                <a href="{{ route('shop.produk', $p->id) }}" class="block font-bold text-navy-900 mt-0.5 leading-snug group-hover:text-gold-600 transition-colors">{{ $p->nama_produk }}</a>
-                                <p class="text-lg font-black text-gold-600 mt-2">Rp {{ number_format((float) $p->harga_jual, 0, ',', '.') }}</p>
-                                <div class="mt-3 flex items-center gap-2">
-                                    <a href="{{ \App\Support\WhatsApp::link($p) }}" target="_blank" rel="noopener"
-                                       class="flex-1 flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-2.5 rounded-lg transition-colors">
-                                        Pesan via WA
-                                    </a>
-                                    <a href="{{ route('shop.produk', $p->id) }}"
-                                       class="flex-1 text-center border border-navy-100 hover:border-gold-500 text-navy-700 hover:text-gold-600 font-bold px-3 py-2.5 rounded-lg transition-colors">Detail</a>
-                                </div>
-                            </div>
-                        </div>
+                        @include('store.partials.produk-card', ['produk' => $p])
                     @endforeach
                 </div>
 
@@ -148,4 +138,53 @@
         </div>
     </div>
 
+    {{-- Mobile Filter Bottom Sheet --}}
+    <div id="filterSheet" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true" aria-label="Filter dan urutkan produk">
+        <div class="absolute inset-0 bg-navy-900/60 backdrop-blur-sm opacity-0 transition-opacity duration-300" onclick="toggleFilterSheet(false)"></div>
+        <div class="absolute inset-x-0 bottom-0 bg-white rounded-t-3xl translate-y-full transition-transform duration-300 flex flex-col max-h-[85vh]">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-navy-100">
+                <p class="font-black text-navy-900">Filter & Urutkan</p>
+                <button type="button" onclick="toggleFilterSheet(false)" class="grid place-items-center w-9 h-9 rounded-xl text-navy-500 hover:bg-navy-50 transition-colors" aria-label="Tutup filter">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+                </button>
+            </div>
+            <div class="p-5 overflow-y-auto">
+                @include('store.partials.filter-form', ['categories' => $categories, 'brands' => $brands, 'includeSort' => true])
+                @if ($chips)
+                    <div class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-navy-100">
+                        @foreach ($chips as $chip)
+                            <a href="{{ $chip['url'] }}" class="inline-flex items-center gap-1.5 text-xs font-bold bg-navy-900 text-white px-3 py-1.5 rounded-full hover:bg-rose-600 transition-colors">
+                                {{ $chip['label'] }} <span aria-hidden="true">✕</span>
+                            </a>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
+        </div>
+    </div>
+
 @endsection
+
+@push('page_scripts')
+    <script>
+        function toggleFilterSheet(open) {
+            const sheet = document.getElementById('filterSheet');
+            if (!sheet) return;
+            const panel = sheet.querySelector('.translate-y-full');
+            const overlay = sheet.querySelector('.bg-navy-900\\/60');
+            if (open) {
+                sheet.classList.remove('hidden');
+                requestAnimationFrame(() => {
+                    panel.classList.remove('translate-y-full');
+                    overlay.classList.add('opacity-100');
+                });
+                document.body.classList.add('overflow-hidden');
+            } else {
+                panel.classList.add('translate-y-full');
+                overlay.classList.remove('opacity-100');
+                document.body.classList.remove('overflow-hidden');
+                setTimeout(() => sheet.classList.add('hidden'), 300);
+            }
+        }
+    </script>
+@endpush

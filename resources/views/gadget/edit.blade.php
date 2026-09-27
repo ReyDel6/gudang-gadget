@@ -86,6 +86,12 @@
                     <input type="number" name="harga_jual" min="0" step="0.01" value="{{ old('harga_jual', $gadget->harga_jual) }}"
                            class="w-full rounded-lg border border-navy-100 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gold-500">
                 </div>
+                <div>
+                    <label class="block text-sm font-medium text-navy-700 mb-1">Harga Promo / Coret (Rp)</label>
+                    <input type="number" name="harga_promo" min="0" step="0.01" value="{{ old('harga_promo', $gadget->harga_promo) }}" placeholder="cth: 10000000"
+                           class="w-full rounded-lg border border-navy-100 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gold-500">
+                    <p class="text-xs text-navy-400 mt-1">Kosongkan jika tanpa promo. Ditampilkan coret + badge diskon di toko.</p>
+                </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">

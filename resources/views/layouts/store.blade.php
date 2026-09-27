@@ -14,21 +14,30 @@
         {{-- Navbar --}}
         <header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-navy-100">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
-                <a href="{{ route('shop.home') }}" class="flex items-center gap-2.5">
-                    <div class="grid place-items-center w-9 h-9 rounded-xl bg-gold-500 text-navy-900">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="2" y="7" width="20" height="14" rx="2"/>
-                            <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
-                            <path d="M12 12v3M9 13.5h6"/>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="toggleMobileMenu(true)" class="md:hidden grid place-items-center w-10 h-10 rounded-xl text-navy-700 hover:bg-navy-50 transition-colors -ml-2"
+                            aria-label="Buka menu navigasi" aria-controls="mobileMenu" aria-expanded="false">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                            <path d="M4 7h16M4 12h16M4 17h16"/>
                         </svg>
-                    </div>
-                    <span class="font-bold text-lg tracking-tight text-navy-900">{{ $settings['store_name'] }}</span>
-                </a>
+                    </button>
+                    <a href="{{ route('shop.home') }}" class="flex items-center gap-2.5">
+                        <div class="grid place-items-center w-9 h-9 rounded-xl bg-gold-500 text-navy-900">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="7" width="20" height="14" rx="2"/>
+                                <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+                                <path d="M12 12v3M9 13.5h6"/>
+                            </svg>
+                        </div>
+                        <span class="font-bold text-lg tracking-tight text-navy-900">{{ $settings['store_name'] }}</span>
+                    </a>
+                </div>
 
                 <nav class="hidden md:flex items-center gap-6 text-sm font-semibold">
                     <a href="{{ route('shop.home') }}" class="text-navy-600 hover:text-gold-600 transition-colors">Beranda</a>
                     <a href="{{ route('shop.katalog') }}" class="text-navy-600 hover:text-gold-600 transition-colors">Katalog</a>
                     <a href="{{ route('shop.home') }}#unggulan" class="text-navy-600 hover:text-gold-600 transition-colors">Unggulan</a>
+                    <a href="{{ route('shop.home') }}#lokasi" class="text-navy-600 hover:text-gold-600 transition-colors">Lokasi Toko</a>
                 </nav>
 
                 <div class="flex items-center gap-3">
@@ -42,6 +51,42 @@
             </div>
         </header>
 
+        {{-- Mobile Drawer Menu --}}
+        <div id="mobileMenu" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true" aria-label="Menu navigasi">
+            <div id="mobileOverlay" class="absolute inset-0 bg-navy-900/60 backdrop-blur-sm opacity-0 transition-opacity duration-300" onclick="toggleMobileMenu(false)"></div>
+            <aside class="absolute left-0 top-0 h-full w-72 max-w-[85vw] bg-white shadow-2xl -translate-x-full transition-transform duration-300 flex flex-col"
+                   aria-label="Tautan menu">
+                <div class="flex items-center justify-between px-5 h-16 border-b border-navy-100">
+                    <span class="font-bold text-navy-900">{{ $settings['store_name'] }}</span>
+                    <button type="button" onclick="toggleMobileMenu(false)" class="grid place-items-center w-9 h-9 rounded-xl text-navy-500 hover:bg-navy-50 transition-colors" aria-label="Tutup menu">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+                    </button>
+                </div>
+                <nav class="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
+                    <a href="{{ route('shop.home') }}" onclick="toggleMobileMenu(false)" class="flex items-center justify-between w-full px-3 py-3 rounded-xl font-semibold text-navy-800 hover:bg-navy-50 transition-colors">
+                        Beranda
+                    </a>
+                    <a href="{{ route('shop.katalog') }}" onclick="toggleMobileMenu(false)" class="flex items-center justify-between w-full px-3 py-3 rounded-xl font-semibold text-navy-800 hover:bg-navy-50 transition-colors">
+                        Katalog Lengkap
+                    </a>
+                    <a href="{{ route('shop.home') }}#unggulan" onclick="toggleMobileMenu(false)" class="flex items-center justify-between w-full px-3 py-3 rounded-xl font-semibold text-navy-800 hover:bg-navy-50 transition-colors">
+                        Produk Unggulan
+                    </a>
+                    <a href="{{ route('shop.home') }}#lokasi" onclick="toggleMobileMenu(false)" class="flex items-center justify-between w-full px-3 py-3 rounded-xl font-semibold text-navy-800 hover:bg-navy-50 transition-colors">
+                        Info Lokasi & Jam Buka
+                    </a>
+                </nav>
+                <div class="px-4 pb-5">
+                    <a href="{{ 'https://wa.me/' . preg_replace('/[^0-9]/', '', $settings['whatsapp_number']) . '/?text=' . rawurlencode('Halo, saya ingin bertanya tentang produk di toko Anda.') }}"
+                       target="_blank" rel="noopener"
+                       class="flex items-center justify-center gap-2 w-full bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold px-4 py-3 rounded-xl transition-colors">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.57 15.07L2 22l5.06-1.37A10 10 0 1 0 12 2zm5.5 14.1c-.23.65-1.34 1.24-1.86 1.29-.5.05-1.09.22-3.64-.76-3.06-1.17-5-4.27-5.16-4.47-.15-.2-1.24-1.65-1.24-3.14 0-1.5.79-2.24 1.07-2.54.28-.3.6-.38.8-.38h.58c.18 0 .44-.07.68.52.25.6.84 2.06.91 2.21.08.15.13.33.02.53-.1.2-.15.32-.3.5-.15.17-.32.38-.45.5-.15.13-.31.27-.13.54.17.27.78 1.28 1.67 2.08 1.15 1.02 2.12 1.34 2.42 1.49.3.15.47.13.65-.08.17-.2.75-.88.95-1.18.2-.3.4-.25.67-.15.28.1 1.76.83 2.06.98.3.15.5.23.58.35.07.13.07.73-.17 1.43z"/></svg>
+                        Chat CS WhatsApp
+                    </a>
+                </div>
+            </aside>
+        </div>
+
         <main>
             @yield('content')
         </main>
@@ -54,8 +99,12 @@
             <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.57 15.07L2 22l5.06-1.37A10 10 0 1 0 12 2zm5.5 14.1c-.23.65-1.34 1.24-1.86 1.29-.5.05-1.09.22-3.64-.76-3.06-1.17-5-4.27-5.16-4.47-.15-.2-1.24-1.65-1.24-3.14 0-1.5.79-2.24 1.07-2.54.28-.3.6-.38.8-.38h.58c.18 0 .44-.07.68.52.25.6.84 2.06.91 2.21.08.15.13.33.02.53-.1.2-.15.32-.3.5-.15.17-.32.38-.45.5-.15.13-.31.27-.13.54.17.27.78 1.28 1.67 2.08 1.15 1.02 2.12 1.34 2.42 1.49.3.15.47.13.65-.08.17-.2.75-.88.95-1.18.2-.3.4-.25.67-.15.28.1 1.76.83 2.06.98.3.15.5.23.58.35.07.13.07.73-.17 1.43z"/></svg>
         </a>
 
+        {{-- Toast notifikasi --}}
+        <div id="toast" role="status" aria-live="polite"
+             class="fixed left-1/2 -translate-x-1/2 top-4 z-[60] px-4 py-2.5 rounded-xl bg-navy-900 text-white text-sm font-semibold shadow-xl opacity-0 pointer-events-none transition-all duration-300 -translate-y-3"></div>
+
         {{-- Footer --}}
-        <footer class="bg-navy-900 text-navy-100">
+        <footer id="lokasi-footer" class="bg-navy-900 text-navy-100">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 py-12 grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div>
                     <p class="font-bold text-white text-lg mb-3">{{ $settings['store_name'] }}</p>
@@ -100,21 +149,80 @@
         </footer>
 
         <script>
-            function heroNext() {
-                const slider = document.querySelector('.hero-slider');
-                if (!slider) return;
-                const track = slider.querySelector('.hero-track');
-                const active = slider.querySelector('.hero-slide:not(.hidden)');
-                if (!track || !active) return;
-                const next = active.nextElementSibling || track.firstElementChild;
-                active.classList.add('hidden');
-                next.classList.remove('hidden');
-                slider.querySelectorAll('.hero-dot').forEach((d, i) => {
-                    d.classList.toggle('bg-gold-500', d.getAttribute('data-hero-dot') == next.getAttribute('data-hero-index'));
-                    d.classList.toggle('bg-navy-200', d.getAttribute('data-hero-dot') != next.getAttribute('data-hero-index'));
+            function toggleMobileMenu(open) {
+                const menu = document.getElementById('mobileMenu');
+                const overlay = document.getElementById('mobileOverlay');
+                const panel = menu.querySelector('aside');
+                const trigger = document.querySelector('button[aria-controls="mobileMenu"]');
+                if (open) {
+                    menu.classList.remove('hidden');
+                    requestAnimationFrame(() => {
+                        panel.classList.remove('-translate-x-full');
+                        overlay.classList.add('opacity-100');
+                    });
+                    document.body.classList.add('overflow-hidden');
+                    if (trigger) trigger.setAttribute('aria-expanded', 'true');
+                } else {
+                    panel.classList.add('-translate-x-full');
+                    overlay.classList.remove('opacity-100');
+                    document.body.classList.remove('overflow-hidden');
+                    if (trigger) trigger.setAttribute('aria-expanded', 'false');
+                    setTimeout(() => menu.classList.add('hidden'), 300);
+                }
+            }
+
+            function showToast(message) {
+                const toast = document.getElementById('toast');
+                if (!toast) return;
+                toast.textContent = message;
+                toast.classList.remove('opacity-0', '-translate-y-3');
+                toast.classList.add('opacity-100');
+                clearTimeout(toast._t);
+                toast._t = setTimeout(() => {
+                    toast.classList.add('opacity-0', '-translate-y-3');
+                    toast.classList.remove('opacity-100');
+                }, 2200);
+            }
+
+            function initHeroSlider() {
+                const sliders = document.querySelectorAll('.hero-slider');
+                sliders.forEach(slider => {
+                    const slides = [...slider.querySelectorAll('.hero-slide')];
+                    const dots = [...slider.querySelectorAll('.hero-dot')];
+                    const prev = slider.querySelector('.hero-prev');
+                    const next = slider.querySelector('.hero-next');
+                    if (!slides.length) return;
+                    let current = 0;
+                    let timer = null;
+
+                    const goto = (i) => {
+                        const n = (i + slides.length) % slides.length;
+                        slides.forEach((s, j) => s.classList.toggle('hidden', j !== n));
+                        dots.forEach(d => {
+                            const on = String(d.dataset.heroDot) === String(slides[n].dataset.heroIndex);
+                            d.classList.toggle('bg-gold-500', on);
+                            d.classList.toggle('bg-navy-200', !on);
+                        });
+                        current = n;
+                    };
+                    const play = () => { if (timer) return; timer = setInterval(() => goto(current + 1), 6000); };
+                    const stop = () => { if (timer) { clearInterval(timer); timer = null; } };
+
+                    if (prev) prev.addEventListener('click', () => { stop(); goto(current - 1); play(); });
+                    if (next) next.addEventListener('click', () => { stop(); goto(current + 1); play(); });
+                    dots.forEach((d, i) => d.addEventListener('click', () => { stop(); goto(i); play(); }));
+
+                    slider.addEventListener('mouseenter', stop);
+                    slider.addEventListener('mouseleave', play);
+                    slider.addEventListener('touchstart', stop, { passive: true });
+                    slider.addEventListener('touchend', play);
+
+                    if (slides.length > 1) play();
                 });
             }
-            setInterval(heroNext, 6000);
+            document.addEventListener('DOMContentLoaded', initHeroSlider);
         </script>
+
+        @stack('page_scripts')
     </body>
 </html>

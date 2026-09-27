@@ -548,6 +548,7 @@ class GadgetController extends Controller
             'deskripsi' => $data['deskripsi'] ?? null,
             'harga_beli' => $data['harga_beli'] ?? 0,
             'harga_jual' => $data['harga_jual'] ?? 0,
+            'harga_promo' => $data['harga_promo'] ?? null,
             'satuan' => $data['satuan'] ?? 'pcs',
             'tanggal_pembelian' => $data['tanggal_pembelian'] ?? null,
             'stock' => $stock,

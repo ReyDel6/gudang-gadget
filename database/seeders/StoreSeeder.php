@@ -17,6 +17,7 @@ class StoreSeeder extends Seeder
             'store_address' => 'Jl. Melati No. 12, Kelapa Gading, Jakarta Utara',
             'jam_operasional' => 'Senin – Sabtu 09.00–21.00 WIB, Minggu 10.00–18.00 WIB',
             'maps_embed' => 'https://maps.google.com/maps?q=Kelapa%20Gading%20Jakarta&t=&z=13&ie=UTF8&iwloc=&output=embed',
+            'store_photo' => '',
             'tags_line' => 'Gadget Original, Ready Stock, Garansi Toko & Resmi',
             'instagram_url' => '#',
             'facebook_url' => '#',
@@ -70,6 +71,12 @@ class StoreSeeder extends Seeder
             ]);
             $gadget->forceFill(['is_published' => true])->saveQuietly();
             $gadget->forceFill(['is_featured' => in_array($nama, $featured, true)])->saveQuietly();
+        }
+
+        // Contoh harga promo / harga coret untuk demo vitrin.
+        $gadgetPromo = Gadget::publik()->where('nama_produk', 'Iphone 14')->first();
+        if ($gadgetPromo) {
+            $gadgetPromo->forceFill(['harga_promo' => 10200000])->saveQuietly();
         }
     }
 }

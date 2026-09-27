@@ -22,6 +22,7 @@ class Gadget extends Model
         'deskripsi',
         'harga_beli',
         'harga_jual',
+        'harga_promo',
         'satuan',
         'tanggal_pembelian',
         'stock',
@@ -42,6 +43,7 @@ class Gadget extends Model
         return [
             'harga_beli' => 'decimal:2',
             'harga_jual' => 'decimal:2',
+            'harga_promo' => 'decimal:2',
             'tanggal_pembelian' => 'date',
             'stock' => 'integer',
             'stok_minimum' => 'integer',
@@ -196,5 +198,46 @@ class Gadget extends Model
     public function getBrandAttribute(): string
     {
         return (string) preg_replace('/[^A-Za-z0-9 ]/', '', ucfirst(explode(' ', trim($this->nama_produk))[0] ?? ''));
+    }
+
+    public function getHargaPromoAktifAttribute(): bool
+    {
+        $promo = (float) ($this->harga_promo ?? 0);
+        $jual = (float) ($this->harga_jual ?? 0);
+
+        return $promo > 0 && $jual > 0 && $promo < $jual;
+    }
+
+    public function getHargaAktifAttribute(): float
+    {
+        return round($this->harga_promo_aktif ? (float) $this->harga_promo : (float) $this->harga_jual, 2);
+    }
+
+    public function getDiskonPersenAttribute(): ?int
+    {
+        if (! $this->harga_promo_aktif) {
+            return null;
+        }
+        $jual = (float) $this->harga_jual;
+        $promo = (float) $this->harga_promo;
+        $persen = (($jual - $promo) / $jual) * 100;
+
+        return max(1, (int) round($persen));
+    }
+
+    public function getUrlWaShareAttribute(): string
+    {
+        $url = route('shop.produk', $this->id);
+        $text = "{$this->nama_produk} — Rp " . number_format($this->harga_aktif, 0, ',', '.') . "\n{$url}";
+
+        return 'https://wa.me/?text=' . rawurlencode($text);
+    }
+
+    public function getUrlTelegShareAttribute(): string
+    {
+        $url = route('shop.produk', $this->id);
+        $text = "{$this->nama_produk} — Rp " . number_format($this->harga_aktif, 0, ',', '.') . "\n{$url}";
+
+        return 'https://t.me/share/url?url=' . rawurlencode($url) . '&text=' . rawurlencode($text);
     }
 }

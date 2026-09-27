@@ -96,6 +96,7 @@ class StoreAdminController extends Controller
             'store_address' => ['nullable', 'string', 'max:255'],
             'jam_operasional' => ['nullable', 'string', 'max:255'],
             'maps_embed' => ['nullable', 'string', 'max:1000'],
+            'store_photo' => ['nullable', 'string', 'max:255'],
             'tags_line' => ['nullable', 'string', 'max:255'],
             'instagram_url' => ['nullable', 'url', 'max:255'],
             'facebook_url' => ['nullable', 'url', 'max:255'],
@@ -114,13 +115,15 @@ class StoreAdminController extends Controller
     {
         $data = $request->validate([
             'field' => ['required', 'in:is_published,is_featured'],
-            'value' => ['required', 'boolean'],
         ]);
 
         $gadget = Gadget::findOrFail($id);
-        $gadget->update([$data['field'] => (bool) $data['value']]);
+        $current = (bool) $gadget->{$data['field']};
+        $gadget->update([$data['field'] => ! $current]);
 
-        return back()->with('success', 'Status produk diperbarui.');
+        $label = $data['field'] === 'is_published' ? 'publikasi produk' : 'status unggulan produk';
+
+        return back()->with('success', "Status {$label} diperbarui.");
     }
 
     public static function defaultSettings(): array
@@ -131,6 +134,7 @@ class StoreAdminController extends Controller
             'store_address' => ['label' => 'Alamat Toko', 'type' => 'text', 'hint' => 'Ditampilkan di footer & halaman kontak.'],
             'jam_operasional' => ['label' => 'Jam Operasional', 'type' => 'text', 'hint' => 'Contoh: Senin–Sabtu 09.00–21.00.'],
             'maps_embed' => ['label' => 'Embed Google Maps', 'type' => 'textarea', 'hint' => 'URL iframe embed maps (share → embed).'],
+            'store_photo' => ['label' => 'Foto Etalase Toko', 'type' => 'text', 'hint' => 'Path/URL gambar, contoh: storage/foto-toko.jpg. Kosongkan jika belum ada.'],
             'tags_line' => ['label' => 'Tagline Etalase', 'type' => 'text', 'hint' => 'Contoh: Original, Garansi Resmi.'],
             'instagram_url' => ['label' => 'Instagram', 'type' => 'url', 'hint' => 'Tautan profil (kosongkan jika tidak ada).'],
             'facebook_url' => ['label' => 'Facebook', 'type' => 'url', 'hint' => 'Tautan profil (kosongkan jika tidak ada).'],

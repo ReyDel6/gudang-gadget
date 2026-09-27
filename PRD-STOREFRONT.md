@@ -1,170 +1,129 @@
-# Product Requirement Document (PRD): Katalog Publik & Storefront (Opsi 3)
+# Product Requirement Document (PRD): Peningkatan Katalog Publik & Storefront (Storefront Revamp)
 
-**Nama Proyek:** Katalog Publik & Toko Online (Storefront / E-Commerce Module)  
+**Nama Proyek:** Peningkatan Tampilan & Konversi Storefront Publik (Storefront UI/UX Enhancement)  
 **Aplikasi Induk:** Sistem Manajemen Inventaris Gudang Gadget  
-**Status:** Draft / Proposed  
-**Versi:** 1.0  
-**Tanggal:** 27 September 2026  
+**Status:** Approved / In Progress  
+**Versi:** 2.0  
+**Tanggal Terakhir Diperbarui:** 27 September 2026  
 
 ---
 
-## 1. Ringkasan Eksekutif (Executive Summary)
+## 1. Ringkasan Eksekutif & Sasaran Bisnis
 
 ### 1.1 Latar Belakang
-Aplikasi gudang saat ini dirancang untuk operasional internal dan kasir fisik (POS). Untuk menjangkau calon pembeli di luar toko fisik serta memberikan akses informasi katalog produk secara transparan 24/7, diperlukan **Halaman Katalog Publik & Storefront (Toko Online)** yang terhubung langsung ke inventaris stok gudang.
+Storefront publik telah memiliki fondasi katalog, filter multi-kriteria, sinkronisasi stok gudang secara *real-time*, dan integrasi pesan WhatsApp. Namun, berdasarkan audit tampilan dan pengalaman pengguna (UX), masih terdapat celah pada aksesibilitas perangkat mobile, elemen pembangun kepercayaan (*trust badges*), kontrol navigasi, dan kemudahan interaksi di halaman detail produk.
 
-### 1.2 Tujuan & Sasaran (Objectives)
-- **Brosur Digital 24/7:** Menyediakan etalase online modern bagi calon pembeli untuk melihat daftar produk, foto detail, spesifikasi, dan status ketersediaan barang.
-- **Drive-to-Store & Fast Order WhatsApp:** Memudahkan pelanggan untuk memesan langsung melalui tombol WhatsApp otomatis (*Instant Chat Order*) atau datang langsung ke toko fisik.
-- **Sinkronisasi Stok Real-Time:** Menampilkan status barang *Ready Stock* atau *Habis* secara akurat berdasarkan data di gudang tanpa perlu update manual dua kali.
-- **Privasi Data Internal:** Memastikan data rahasia gudang (seperti harga beli/modal, data supplier, dan histori stok) tetap terlindungi dan hanya harga jual publik serta info produk yang ditampilkan ke pengunjung.
+### 1.2 Sasaran Utama (Key Objectives)
+- **Mobile-First Experience:** Menjamin navigasi lancar pada smartphone dengan menyediakan *Mobile Drawer Menu* dan *Bottom Sheet Filter*.
+- **Meningkatkan Konversi Penjualan (*Trust & Conversion*):** Menampilkan *Trust Badges* (garansi, keaslian unit, toko fisik/COD, tukar tambah) dan opsi pertanyaan cepat WhatsApp.
+- **Interaktivitas Detail Produk:** Menyediakan fitur salin/bagikan link (*Share Button*), kartu informasi metode pembayaran, dan harga promo (harga coret).
+- **Kontrol UI yang Fleksibel:** Menambahkan tombol navigasi manual (Prev/Next) pada hero banner slider.
 
 ---
 
-## 2. Pengguna & Persona (User Personas)
+## 2. Pengguna & Skenario Penggunaan (User Personas)
 
-| Persona | Perilaku & Kebutuhan | Fitur Utama yang Digunakan |
+| Persona | Perangkat Utama | Kebutuhan & Ekspektasi |
 | :--- | :--- | :--- |
-| **Calon Pembeli / Pengunjung Web** | Mencari gadget tertentu, membandingkan harga/spesifikasi, mengecek apakah barang tersedia di toko. | - Beranda & Banner Promo<br>- Pencarian & Filter Produk (Kategori, Brand, Range Harga)<br>- Halaman Detail Produk & Galeri Foto<br>- Tombol Pesan via WhatsApp / Keranjang Belanja |
-| **Admin Web / Marketing** | Mengelola tampilan depan toko, mengatur produk unggulan, dan membalas pesanan masuk. | - Pengaturan Banner & Headline Promo<br>- Toggle Tampilkan/Sembunyikan Produk di Web Publik<br>- Pengaturan Jam Buka Toko, Alamat & Nomor Kontak WhatsApp |
+| **Calon Pembeli Mobile (80% Traffic)** | Smartphone (Android/iOS) | Navigasi menu yang mudah dibuka, filter produk tanpa harus scroll terlalu panjang, serta tombol chat WA yang langsung terhubung. |
+| **Calon Pembeli Desktop/Laptop** | Laptop / PC | Tampilan katalog yang leluasa, galeri foto detail, perbandingan spesifikasi, dan kejelasan lokasi toko fisik. |
+| **Admin / Pengelola Toko** | Admin Dashboard | Kemudahan mengatur banner, mengunggah multi-foto produk, menentukan status promo/harga coret, dan menerima lead WA yang terstruktur. |
 
 ---
 
-## 3. Alur Kerja Pengguna (User Journey)
+## 3. Rincian Kebutuhan Fitur (Detailed Requirements)
 
-```mermaid
-flowchart TD
-    A([Pengunjung Buka Website]) --> B[Lihat Banner Promo & Produk Unggulan]
-    B --> C[Gunakan Filter: Kategori, Merk, Harga]
-    C --> D[Buka Halaman Detail Produk]
-    D --> E{Cek Ketersediaan Stok}
-    E -- Stok Habis --> F[Tampilkan Badge 'Stok Habis' & Opsi Pre-Order / Hubungi Admin]
-    E -- Stok Ready --> G[Klik 'Beli via WhatsApp' / 'Tambah ke Keranjang']
-    G --> H[Generate Pesan WhatsApp Otomatis Berisi Nama Barang, Harga & Link]
-    H --> I([Terhubung ke WhatsApp Admin Toko])
-```
+### FR-1: Navigasi & Tata Letak Responsif (Layout & Mobile Nav)
+- **FR-1.1 (Hamburger Menu):** Di layar mobile (< 768px), navbar menampilkan tombol hamburger yang membuka *slide-over drawer* berisi tautan:
+  - Beranda (`/shop`)
+  - Katalog Lengkap (`/shop/katalog`)
+  - Produk Unggulan (`/shop#unggulan`)
+  - Info Lokasi & Jam Buka Toko
+  - Tombol Cepat Chat CS WhatsApp
+- **FR-1.2 (Sticky Quick Action Bar di Mobile):** Bar bawah fleksibel pada halaman detail produk yang selalu menampilkan tombol **"Pesan via WhatsApp"** saat pengguna menggulir layar (*sticky bottom CTA*).
 
----
+### FR-2: Beranda & Pembangun Kepercayaan (Homepage & Trust Section)
+- **FR-2.1 (Hero Slider Navigasi Manual):**
+  - Tombol panah **Prev** dan **Next** melayang di sisi kiri & kanan banner.
+  - Indikator pagination dots yang responsif.
+  - Fitur auto-play (6 detik) yang otomatis jeda (*pause on hover/touch*).
+- **FR-2.2 (Section Keunggulan Toko / Value Proposition):**
+  Grid 4 pilar kepercayaan yang diletakkan tepat di bawah Hero Slider:
+  1. 🛡️ **100% Original & Bergaransi** (Garansi toko & resmi terjamin).
+  2. 🏬 **Toko Fisik Jelas** (Bisa cek unit langsung & bayar di tempat / COD).
+  3. 🔄 **Layanan Tukar Tambah** (Terima trade-in gadget lama ke baru).
+  4. ⚡ **Pengiriman Cepat & Aman** (Packing kayu, bubble wrap tebal, asuransi penuh).
+- **FR-2.3 (Section Kunjungi Toko Kami):**
+  Menampilkan peta lokasi interaktif (Google Maps embed), foto etalase toko, alamat lengkap, dan jam operasional.
 
-## 4. Kebutuhan Fungsional (Functional Requirements)
+### FR-3: Katalog & Filter Cerdas Mobile-Friendly (`/shop/katalog`)
+- **FR-3.1 (Mobile Filter Trigger):**
+  - Pada layar mobile, sembunyikan sidebar filter panjang dan gantikan dengan tombol ringkas **"🔘 Filter & Urutkan"**.
+  - Saat diklik, membuka pop-up / *drawer modal* untuk memilih Kategori, Brand, Rentang Harga, Kondisi, dan opsi *Ready Stock*.
+- **FR-3.2 (Visual Badge Diskon / Harga Coret):**
+  - Jika terdapat diskon promo, tampilkan harga coret (misal: ~~Rp 12.000.000~~) bersanding dengan harga jual aktif (**Rp 10.999.000**) dan badge persentase hemat (misal: `-8%`).
+- **FR-3.3 (Indikator Filter Aktif):**
+  - Menampilkan *badge chip* filter yang sedang aktif dengan tombol silang (x) untuk hapus filter secara parsial.
 
-### FR-1: Antarmuka Beranda Publik (Homepage & Storefront UI)
-- **FR-1.1:** Tampilan desain modern, *clean*, estetik, dan *mobile-first* (responsif di smartphone & desktop).
-- **FR-1.2:** **Hero Section:** Banner slider promosi / info promo potongan harga / trade-in gadget.
-- **FR-1.3:** **Section Produk Unggulan (*Featured Gadgets*):** Menampilkan produk terbaru atau produk terlaris.
-- **FR-1.4:** **Kategori Cepat:** Ikon pintasan kategori (misal: *Smartphone, Laptop, Tablet, Aksesoris, Audio*).
-- **FR-1.5:** **Footer Informasi:** Alamat toko fisik (embed Google Maps), jam operasional, link media sosial, dan kontak customer service.
-
-### FR-2: Katalog & Filter Pencarian Cerdas
-- **FR-2.1:** Kolom pencarian instan berdasarkan nama produk, tipe, merk, atau kata kunci spesifikasi.
-- **FR-2.2:** Filter Multi-Kriteria:
-  - Berdasarkan Merk / Brand (Apple, Samsung, Xiaomi, Asus, dll.)
-  - Berdasarkan Rentang Harga (Slider min - max harga)
-  - Berdasarkan Kondisi (Baru / Segel vs Bekas / Second Mulus)
-  - Berdasarkan Status Ketersediaan (Hanya tampilkan yang *Ready Stock*)
-- **FR-2.3:** Pengurutan (*Sorting*): Harga Terendah, Harga Tertinggi, Produk Terbaru, dan Paling Populer.
-
-### FR-3: Halaman Detail Produk (Product Details Page)
-- **FR-3.1:** Galeri foto produk interaktif dengan fitur *zoom* / thumbnail preview.
-- **FR-3.2:** Tampilan Badge Ketersediaan:
-  - 🟢 **Ready Stock** (jika stok > 0)
-  - 🔴 **Stok Habis** (jika stok = 0)
-- **FR-3.3:** Rincian Spesifikasi Teknis (Tabel spesifikasi: Layar, Chipset, RAM/Storage, Kamera, Baterai, Kelengkapan Unit, Garansi Toko/Resmi).
-- **FR-3.4:** Tab Deskripsi Produk & Catatan Kondisi (khusus gadget second: minus/kemulusan bodi).
-- **FR-3.5:** Rekomendasi Produk Terkait (*Related Products*).
-
-### FR-4: Integrasi Pemesanan Fleksibel (Order Channel)
-
-#### Model A: Instant WhatsApp Checkout (Fase Awal - Cepat & Ringan)
-- Tombol aksi utama: **"Tanya Stok / Pesan via WhatsApp"**.
-- Saat diklik, sistem membuka link WhatsApp (`https://wa.me/...`) dengan pesan yang telah diformat otomatis:
-  > *"Halo Admin [Nama Toko], saya tertarik membeli produk ini:*  
-  > *• Produk: [Nama Gadget]*  
-  > *• Varian/Kapasitas: [256GB / Warna Hitam]*  
-  > *• Harga: Rp [Harga Jual]*  
-  > *• Link: [URL Produk]*  
-  > *Apakah unit ini masih tersedia?"*
-
-#### Model B: Keranjang Belanja & Form Pengiriman (Fase Lanjutan)
-- Pengunjung dapat mengumpulkan beberapa barang ke keranjang (*Shopping Cart*).
-- Form input alamat pengiriman & pilihan kurir pengiriman (JNE, J&T, SiCepat, Grab/Gojek Instant).
-- Integrasi Payment Gateway (Midtrans / Xendit) untuk pembayaran instan via QRIS, Virtual Account, atau Kartu Kredit.
-
-### FR-5: Pengaturan Storefront di Dashboard Admin
-- **FR-5.1:** Toggle visibilitas produk: Admin dapat mengatur apakah produk tertentu ditampilkan di katalog publik atau hanya ada di gudang internal.
-- **FR-5.2:** Pengaturan Banner Slider (Upload gambar banner promo, judul, deskripsi, dan URL tujuan).
-- **FR-5.3:** Pengaturan Profil Toko (Nama toko, nomor WhatsApp CS, jam operasional, alamat lengkap, dan logo).
+### FR-4: Halaman Detail Produk & Konversi (`/shop/produk/{id}`)
+- **FR-4.1 (Galeri Foto):**
+  - Foto utama ukuran besar dengan rasio aspek persegi (*1:1*).
+  - *(Opsional/Pengembangan lanjutan)* Dukungan thumbnail galeri multi-sudut (Depan, Belakang, Sisi Samping, Layar Menyala).
+- **FR-4.2 (Tombol Bagikan / Share):**
+  - Tombol **"Bagikan Produk"** yang menyediakan aksi:
+    - Salin tautan ke clipboard (*Copy Link*) dengan toast notifikasi `"Link berhasil disalin!"`.
+    - Bagikan langsung ke WhatsApp / Telegram.
+- **FR-4.3 (Kartu Metode Pembayaran yang Diterima):**
+  - Menampilkan logo/ikon metode pembayaran: Tunai di Toko, Transfer Bank (BCA, Mandiri, BRI, BNI), QRIS (GoPay, OVO, Dana), Mesin EDC Kartu Debit/Kredit, dan Opsi Cicilan/PayLater.
+- **FR-4.4 (Opsi Pertanyaan Cepat WhatsApp):**
+  Selain tombol utama pesan barang, sediakan tombol opsi tanya spesifik:
+  - 💬 *"Tanya Kondisi Bodi & Battery Health"*
+  - 💬 *"Tanya Estimasi Tukar Tambah"*
+  - 💬 *"Tanya Jadwal Kunjungan ke Toko"*
 
 ---
 
-## 5. Kebutuhan Non-Fungsional (Non-Functional Requirements)
+## 4. Kebutuhan Non-Fungsional (NFR)
 
-| Aspek | Spesifikasi Kebutuhan |
+| Kategori | Parameter Kebutuhan |
 | :--- | :--- |
-| **Kecepatan Muat (Page Load Speed)** | < 1.5 detik pada koneksi 4G mobile. Optimalisasi gambar menggunakan format WebP dan lazy loading. |
-| **Search Engine Optimization (SEO)** | Meta title, meta description dinamis per produk, Open Graph tags untuk preview gambar saat link dibagikan di WhatsApp/Facebook/Instagram. |
-| **Keamanan & Isolasi Data** | Akses katalog publik adalah *read-only*. API endpoint publik dilarang mengekspos field sensitif (seperti `purchase_price`, `supplier_id`, `created_by`). |
-| **Tampilan Responsif** | 100% responsif pada perangkat mobile (iOS & Android) dan desktop browser utama. |
+| **Responsivitas & Fluiditas** | Seluruh animasi modal, drawer, dan slider menggunakan CSS transition halus tanpa *layout shift* (CLS < 0.1). |
+| **Mobile Performance** | Ukuran script JS minimal (menggunakan Vanilla JavaScript / Alpine.js ringan). |
+| **Aksesibilitas (A11y)** | Kontras warna teks memenuhi standar WCAG AA, tombol memiliki label `aria-label` yang jelas. |
+| **Keamanan & Data Leak Prevention** | Halaman publik bebas dari kebocoran data HPP (harga beli modal), data supplier, atau log pergerakan stok internal. |
 
 ---
 
-## 6. Penyesuaian Skema Database (Database Extensions)
-
-Untuk mendukung katalog publik tanpa merusak struktur inventaris gudang yang sudah ada, ditambahkan beberapa kolom pada tabel `gadgets` dan 2 tabel baru:
-
-### 6.1 Tambahan Kolom pada Tabel `gadgets`
-```sql
-ALTER TABLE gadgets ADD COLUMN is_published BOOLEAN DEFAULT TRUE;
-ALTER TABLE gadgets ADD COLUMN is_featured BOOLEAN DEFAULT FALSE;
-ALTER TABLE gadgets ADD COLUMN condition VARCHAR(20) DEFAULT 'new'; -- 'new', 'like-new', 'used'
-ALTER TABLE gadgets ADD COLUMN specifications JSON NULL;           -- detail RAM, Layar, Baterai, dll
-ALTER TABLE gadgets ADD COLUMN warranty_info VARCHAR(255) NULL;    -- info garansi resmi / toko
-```
-
-### 6.2 Tabel Baru: `store_banners`
-- `id` (PK, BigInt)
-- `title` (String)
-- `subtitle` (String, Nullable)
-- `image_path` (String)
-- `cta_link` (String, Nullable)
-- `order_position` (Integer, Default: 0)
-- `is_active` (Boolean, Default: true)
-- `created_at`, `updated_at`
-
-### 6.3 Tabel Baru: `store_settings`
-- `id` (PK, BigInt)
-- `key` (String, Unique - contoh: `store_name`, `whatsapp_number`, `store_address`, `instagram_url`)
-- `value` (Text)
-- `created_at`, `updated_at`
-
----
-
-## 7. Rencana Tahapan Pelaksanaan (Phased Implementation Roadmap)
+## 5. Rencana Tahapan Implementasi (Action Plan)
 
 ```
-[ Fase 1: Katalog Publik Ringan (Katalog + WA Order) ]
-├── Setup Layout Publik (Navbar Publik, Footer Info, Desain Tema)
-├── Halaman Beranda (Hero Slider, Grid Produk Unggulan)
-├── Halaman Katalog & Filter (Pencarian, Filter Kategori/Brand, Sort Harga)
-├── Halaman Detail Produk + Generator Link WhatsApp Otomatis
-└── Menu Admin: Pengaturan Banner & Toggle Produk Publik
+[ Tahap 1: Header, Navbar & Mobile Drawer ]
+├── Update layouts/store.blade.php
+├── Tambahkan Hamburger Button & Drawer Mobile Menu
+└── Perbaiki styling navigasi & tombol kontak
 
-[ Fase 2: Peningkatan SEO & Branding ]
-├── Setup Dynamic Meta Tags & OpenGraph Share Preview
-├── Integrasi Google Maps Toko & Jam Operasional
-└── Optimasi Kompresi Gambar WebP & Caching
+[ Tahap 2: Peningkatan Beranda (Homepage) ]
+├── Tambahkan kontrol panah Prev/Next pada Hero Slider
+├── Tambahkan Section "4 Keunggulan Toko" (Trust Badges)
+└── Integrasi Section Lokasi Toko & Google Maps yang lebih estetik
 
-[ Fase 3 (Opsional Nanti): Full Checkout & Online Payment ]
-├── Modul Keranjang Belanja (Online Cart Session)
-├── Integrasi RajaOngkir (Cek Ongkos Kirim Otomatis)
-└── Integrasi Midtrans / Xendit (Payment Gateway Otomatis)
+[ Tahap 3: Peningkatan Katalog & Filter Mobile ]
+├── Implementasi Mobile Filter Bottom Sheet/Modal di store/katalog.blade.php
+├── Tambahkan Badges Diskon / Harga Coret
+└── Rapikan grid kartu produk & tombol aksi cepat
+
+[ Tahap 4: Halaman Detail Produk & Fitur Interaksi ]
+├── Tambahkan Tombol Share Link (Salin URL ke Clipboard)
+├── Tambahkan Card Informasi Metode Pembayaran
+├── Tambahkan Opsi Pertanyaan Cepat WhatsApp (Trade-in / Kondisi)
+└── Testing menyeluruh di berbagai resolusi layar (Mobile, Tablet, Desktop)
 ```
 
 ---
 
-## 8. Kriteria Keberhasilan (Definition of Done)
-1. Pengunjung dapat membuka website tanpa login dan melihat daftar barang yang berstatus `is_published = true`.
-2. Status ketersediaan barang (Stok Tersedia / Habis) selalu sinkron dengan data fisik di gudang.
-3. Tombol **"Pesan via WhatsApp"** berhasil membuka WhatsApp dengan template teks yang memuat detail produk secara akurat.
-4. Field harga beli / HPP dan data supplier **tidak pernah bocor** ke halaman publik atau response API publik.
-5. Halaman web memiliki nilai performa dan mobile-friendliness yang baik saat diakses dari smartphone.
+## 6. Kriteria Keberhasilan (Definition of Done)
+1. Pengunjung melalui smartphone dapat mengakses menu navigasi dengan mulus melalui tombol hamburger.
+2. Pengunjung mobile dapat memfilter produk tanpa harus menggulir halaman yang terlalu panjang.
+3. Bagian *Trust Badges* muncul rapi di beranda dan memperkuat citra profesional toko.
+4. Tombol *Share* di halaman detail produk dapat menyalin URL dengan feedback visual instan.
+5. Pesan WhatsApp yang dihasilkan mencantumkan link produk dan konteks pertanyaan secara akurat.
